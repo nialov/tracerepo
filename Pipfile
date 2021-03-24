@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+nox = "*"
+invoke = "*"
+jupyterlab = "*"
+ipython = "*"
+pytest = "*"
+pandas = "*"
+pandera = "*"
+organize-tool = "*"
+
+[packages]
+
+[requires]
+python_version = "3.8"
+
+[pipenv]
