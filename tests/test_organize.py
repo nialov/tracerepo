@@ -3,6 +3,7 @@ Tests for organize.py.
 """
 from tracerepo.organize import Organizer
 import pytest
+from pandas.testing import assert_frame_equal
 import tracerepo.repo as repo
 import tracerepo.rules as rules
 import os
@@ -266,3 +267,27 @@ def test_organizer_query_organized(
 
     if isinstance(assumed_result, int):
         assert len(query_results) == assumed_result
+
+
+def test_organizer_update_organized(organizer_unorganized: Organizer):
+    """
+    Test Organizer update.
+    """
+    _, area_name, _, _, *_ = df_data()
+    current_db = organizer_unorganized.database.copy()
+    assert organizer_unorganized.columns[rules.ColumnNames.EMPTY.value][0] == "false"
+    organizer_unorganized.update(
+        area_name=area_name, update_values={rules.ColumnNames.EMPTY: "true"}
+    )
+    assert organizer_unorganized.columns[rules.ColumnNames.EMPTY.value][0] == "true"
+    try:
+        assert_frame_equal(current_db, organizer_unorganized.database)
+    except AssertionError:
+        pass
+
+    try:
+        organizer_unorganized.check()
+    except FileNotFoundError:
+        pass
+
+    assert len(organizer_unorganized.unorganized) == 2

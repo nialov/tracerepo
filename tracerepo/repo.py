@@ -2,13 +2,11 @@
 Main repo handlers.
 """
 import tracerepo.rules as rules
-import tracerepo.utils as utils
 from pathlib import Path
-from typing import List, Dict
 import pandas as pd
 
 
-def scaffold():
+def scaffold() -> pd.DataFrame:
     """
     Make scaffold start for a repo.
     """

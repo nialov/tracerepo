@@ -29,7 +29,7 @@ class Organizer:
         self.database = rules.database_schema().validate(self.database)
         self.unorganized_folder = Path(rules.FolderNames.UNORGANIZED.value)
 
-    @cached_property
+    @property
     def unorganized(self) -> List[Path]:
         """
         Find unorganized files in unorganized_folder.
@@ -165,7 +165,10 @@ class Organizer:
         """
         Query for trace and area data.
         """
+        # default value, all accepted
         query_bools = [True] * len(self.columns[rules.ColumnNames.AREA.value])
+
+        # Check area, traces, thematic and scale filters
         query_bools = self._filter_strings(
             area_values=self.columns[rules.ColumnNames.AREA.value],
             traces_values=self.columns[rules.ColumnNames.TRACES.value],
@@ -178,9 +181,11 @@ class Organizer:
             scale=scale,
         )
 
+        # Return empty if none accepted already
         if not any(query_bools):
             return []
 
+        # Check area_shape, empty and validated filters
         query_bools = self._filter_enums(
             query_bools=query_bools,
             area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
@@ -191,34 +196,48 @@ class Organizer:
             validated=validated,
         )
 
+        # Return if no accepted
         if not any(query_bools):
             return []
 
+        # Solve which geometries are wanted based on input
         geometries = (
             [rules.ColumnNames.TRACES.value, rules.ColumnNames.AREA.value]
             if geometry is None
             else [geometry.value]
         )
 
+        # Collect the columns that are needed for path solving
         columns_needed = [
             rules.ColumnNames.THEMATIC.value,
             rules.ColumnNames.SCALE.value,
         ] + geometries
 
+        # Compress the values corresponding to columns_needed based on
+        # query_bools boolean list
         all_value_lists: List[Sequence[str]] = [
             list(compress(data=self.columns[col], selectors=query_bools))
             for col in columns_needed
         ]
 
+        # Collect the accepted paths
         paths = []
+
+        # Iterate over the values of columns_needed
         for vals in zip(*all_value_lists):
 
+            assert len(vals) >= 3
+
+            # Unpack values based on the order in columns_needed
             thematic_val = vals[0]
             scale_val = vals[1]
             geom_vals = vals[2:]
 
+            # We might want traces, areas or both so geom_vals is a list
+            # Iterate over the geom types and collect paths
             for geom_val, geom_type in zip(geom_vals, geometries):
 
+                # Compile the path to the wanted traces or area dataset
                 path = utils.compiled_path(
                     thematic=thematic_val,
                     geometry=geom_type,
@@ -227,4 +246,36 @@ class Organizer:
                 )
                 paths.append(path)
 
+        # Return the wanted paths that pass all filters
         return paths
+
+    def update(self, area_name: str, update_values: Dict[rules.ColumnNames, str]):
+        """
+        Change a value in the database.
+        """
+        # Get index for area_name
+        index_for_area = self.columns[rules.ColumnNames.AREA.value].index(area_name)
+
+        # Iterate over keys in update_values dict
+        for key in update_values:
+
+            # Get the current values
+            column_values = self.columns[key.value]
+
+            # Update value at index
+            column_values[index_for_area] = update_values[key]
+
+            # Make copy of instance dataframe
+            database = self.database.copy()
+
+            # Update column in dataframe with updated value
+            database[key.value] = column_values
+
+            # Validate
+            database = rules.database_schema().validate(database)
+
+            # Set new database
+            self.database = database
+
+            # Reset columns cached property
+            del self.__dict__["columns"]

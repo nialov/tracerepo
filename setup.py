@@ -27,9 +27,7 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as readme:
     long_description = readme.read()
 
 package_name = "tracerepo"
-project_url = (
-    f"https://github.com/nialov/{package_name.replace('_', '-')}"
-)
+project_url = f"https://github.com/nialov/{package_name.replace('_', '-')}"
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -126,8 +124,7 @@ setup(
     #   py_modules=["my_module"],
     #
     packages=find_packages(
-        exclude=["contrib", "docs", "tests"],
-        include=[package_name],
+        exclude=["contrib", "docs", "tests"], include=[package_name],
     ),  # Required
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -141,7 +138,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=[],  # Optional
+    install_requires=["attrs"],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -151,7 +148,17 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={
-        "dev": [],
+        "dev": [
+            "nox",
+            "invoke",
+            "jupyterlab",
+            "ipython",
+            "pytest",
+            "pandas",
+            "pandera",
+            "organize-tool",
+            "hypothesis",
+        ],
         "docs": ["sphinx", "sphinx-rtd-theme", "nbsphinx"],
         "coverage": ["coverage", "coverage-badge"],
     },  # Optional
