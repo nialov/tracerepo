@@ -1,9 +1,11 @@
 """
 Main repo handlers.
 """
-import tracerepo.rules as rules
 from pathlib import Path
+
 import pandas as pd
+
+import tracerepo.rules as rules
 
 
 def scaffold() -> pd.DataFrame:

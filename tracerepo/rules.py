@@ -2,10 +2,11 @@
 trace-repository rules.
 """
 from enum import Enum, unique
-import pandera as pa
-from typing import Dict, Any, Type, List
 from functools import lru_cache
 from pathlib import Path
+from typing import Any, Dict, List, Type
+
+import pandera as pa
 
 FILETYPE = "geojson"
 DATABASE_CSV = "database.csv"

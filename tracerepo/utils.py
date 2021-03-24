@@ -1,10 +1,12 @@
 """
 General utilities.
 """
-import pandas as pd
-import tracerepo.rules as rules
 from pathlib import Path
-from typing import List, Type, Any, Sequence
+from typing import Any, List, Sequence, Type
+
+import pandas as pd
+
+import tracerepo.rules as rules
 
 
 def dataframe_column_to_python(

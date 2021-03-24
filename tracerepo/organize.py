@@ -2,15 +2,17 @@
 Organize trace data.
 """
 
-from pathlib import Path
-from typing import List, Dict, Sequence, Literal, Optional, Tuple
-import pandas as pd
-from shutil import move
 from dataclasses import dataclass
+from functools import cached_property
 from itertools import compress
+from pathlib import Path
+from shutil import move
+from typing import Dict, List, Optional, Sequence
+
+import pandas as pd
+
 import tracerepo.rules as rules
 import tracerepo.utils as utils
-from functools import cached_property
 
 
 @dataclass

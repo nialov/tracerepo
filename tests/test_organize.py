@@ -1,21 +1,20 @@
 """
 Tests for organize.py.
 """
-from tracerepo.organize import Organizer
+import os
+from contextlib import contextmanager
+from pathlib import Path
+
+import pandas as pd
 import pytest
+from hypothesis import example, given
+from hypothesis.strategies import lists, none, sampled_from
 from pandas.testing import assert_frame_equal
+from pytest import TempPathFactory
+
 import tracerepo.repo as repo
 import tracerepo.rules as rules
-import os
-from pathlib import Path
-from typing import List, Any
-import pandas as pd
-from itertools import combinations
-from hypothesis import given, example
-from hypothesis.strategies import sampled_from, lists, none
-from tempfile import tempdir
-from contextlib import contextmanager
-from pytest import TempPathFactory
+from tracerepo.organize import Organizer
 
 
 @contextmanager

@@ -3,8 +3,7 @@ Invoke tasks.
 
 Most tasks employ nox to create a virtual session for testing.
 """
-from invoke import task
-from invoke import UnexpectedExit
+from invoke import UnexpectedExit, task
 
 nox_parallel_sessions = (
     "tests_pipenv",
