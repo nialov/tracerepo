@@ -3,8 +3,12 @@ trace-repository rules.
 """
 from enum import Enum, unique
 import pandera as pa
-from typing import Dict, Any, Type
+from typing import Dict, Any, Type, List
 from functools import lru_cache
+from pathlib import Path
+
+FILETYPE = "geojson"
+DATABASE_CSV = "database.csv"
 
 
 @unique
@@ -45,6 +49,31 @@ class AreaShapes(Enum):
     OTHER = "other"
 
 
+@unique
+class FolderNames(Enum):
+
+    """
+    Folder names.
+    """
+
+    DATA = "data"
+    TRACES = "traces"
+    AREA = "area"
+    UNORGANIZED = "unorganized"
+
+
+@unique
+class Geometry(Enum):
+
+    """
+    Folder names.
+    """
+
+    TRACES = ColumnNames.TRACES.value
+    AREAS = ColumnNames.AREA.value
+    BOTH = "both"
+
+
 @lru_cache(maxsize=None)
 def name_column_kwargs() -> Dict[str, Any]:
     """
@@ -53,7 +82,7 @@ def name_column_kwargs() -> Dict[str, Any]:
     return dict(
         pandas_dtype=pa.String,
         checks=[
-            pa.Check.str_length(cls=pa.Check, min_value=5, max_value=30),
+            pa.Check.str_length(min_value=3, max_value=30),
         ],
         allow_duplicates=False,
     )
@@ -98,3 +127,12 @@ def database_schema() -> pa.DataFrameSchema:
             ),
         },
     )
+
+
+def folder_structure() -> List[Path]:
+    """
+    Get the default data folder structure.
+    """
+    root = FolderNames.DATA.value
+    geometry = [FolderNames.TRACES.value, FolderNames.AREA.value]
+    return [Path(root) / geom for geom in geometry]

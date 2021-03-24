@@ -12,8 +12,10 @@ pytest = "*"
 pandas = "*"
 pandera = "*"
 organize-tool = "*"
+hypothesis = "*"
 
 [packages]
+attrs = "*"
 
 [requires]
 python_version = "3.8"

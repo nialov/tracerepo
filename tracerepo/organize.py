@@ -1,0 +1,230 @@
+"""
+Organize trace data.
+"""
+
+from pathlib import Path
+from typing import List, Dict, Sequence, Literal, Optional, Tuple
+import pandas as pd
+from shutil import move
+from dataclasses import dataclass
+from itertools import compress
+import tracerepo.rules as rules
+import tracerepo.utils as utils
+from functools import cached_property
+
+
+@dataclass
+class Organizer:
+
+    """
+    Organize trace data files with Organizer.
+    """
+
+    database: pd.DataFrame
+
+    def __post_init__(self):
+        """
+        Post initialization steps.
+        """
+        self.database = rules.database_schema().validate(self.database)
+        self.unorganized_folder = Path(rules.FolderNames.UNORGANIZED.value)
+
+    @cached_property
+    def unorganized(self) -> List[Path]:
+        """
+        Find unorganized files in unorganized_folder.
+        """
+        return list(self.unorganized_folder.glob(f"*.{rules.FILETYPE}"))
+
+    def organize(self, simulate=False) -> List[str]:
+        """
+        Organize files from unorganized_folder.
+        """
+        move_descriptions = []
+
+        for filepath in self.unorganized:
+            filename_stem = filepath.stem
+            geometry = utils.identify_geom_type(filename_stem).value
+            idx_in_database = self.columns[geometry].index(filename_stem)
+            thematic = self.columns[rules.ColumnNames.THEMATIC.value][idx_in_database]
+            scale = self.columns[rules.ColumnNames.SCALE.value][idx_in_database]
+            destination = utils.compiled_path(
+                thematic=thematic, geometry=geometry, scale=scale, name=filename_stem
+            )
+            if not simulate:
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                move(filepath, destination)
+            move_descriptions.append(
+                f"Moving {filepath} to {destination}."
+                + (" --SIMULATION--" if simulate else "")
+            )
+        return move_descriptions
+
+    @cached_property
+    def columns(self) -> Dict[str, List[str]]:
+        """
+        Get database columns and index as Python typed values.
+
+        Accesible as a dict with column names as keys. Includes the area name
+        values that were originally the dataframe index.
+        """
+        cols: Dict[str, List[str]] = dict()
+        for column in rules.ColumnNames:
+            cols[column.value] = utils.dataframe_column_to_python(
+                dataframe=self.database, column=column.value, python_type=str
+            )
+        return cols
+
+    def check(self):
+        """
+        Check if all rows in database correspond to files.
+        """
+        for area, traces, thematic, scale in zip(
+            self.columns[rules.ColumnNames.AREA.value],
+            self.columns[rules.ColumnNames.TRACES.value],
+            self.columns[rules.ColumnNames.THEMATIC.value],
+            self.columns[rules.ColumnNames.SCALE.value],
+        ):
+            for geom_filename, geometry in zip(
+                (area, traces),
+                (rules.ColumnNames.AREA.value, rules.ColumnNames.TRACES.value),
+            ):
+                utils.check_database_row_files(
+                    thematic=thematic,
+                    geometry=geometry,
+                    scale=scale,
+                    name=geom_filename,
+                )
+
+    @staticmethod
+    def _filter_strings(
+        area_values: Sequence[str],
+        traces_values: Sequence[str],
+        thematic_values: Sequence[str],
+        scale_values: Sequence[str],
+        query_bools: Sequence[bool],
+        area: Sequence[str] = [],
+        traces: Sequence[str] = [],
+        thematic: Sequence[str] = [],
+        scale: Sequence[str] = [],
+    ) -> Sequence[bool]:
+        """
+        Filter database traces and areas based on given strings.
+        """
+        for filterer, list_to_filter in zip(
+            (area, traces, thematic, scale),
+            (area_values, traces_values, thematic_values, scale_values),
+        ):
+            filtered = utils.multi_string_filter(
+                strings=filterer, list_to_filter=list_to_filter
+            )
+
+            query_bools = utils.join_bools(filtered, query_bools)
+        return query_bools
+
+    @staticmethod
+    def _filter_enums(
+        area_shape_values: Sequence[str],
+        empty_values: Sequence[str],
+        validated_values: Sequence[str],
+        query_bools: Sequence[bool],
+        area_shape: Optional[rules.AreaShapes] = None,
+        empty: Optional[rules.BooleanChoices] = rules.BooleanChoices.FALSE,
+        validated: Optional[rules.BooleanChoices] = rules.BooleanChoices.TRUE,
+    ) -> Sequence[bool]:
+        """
+        Filter database traces and areas based on given enum choices.
+        """
+        for filterer, list_to_filter in zip(
+            (area_shape, empty, validated),
+            (
+                area_shape_values,
+                empty_values,
+                validated_values,
+            ),
+        ):
+            if filterer is None:
+                continue
+            query_bools = [
+                all((val == filterer.value, query_bool_val))
+                for val, query_bool_val in zip(list_to_filter, query_bools)
+            ]
+        return query_bools
+
+    def query(
+        self,
+        area: Sequence[str] = [],
+        traces: Sequence[str] = [],
+        thematic: Sequence[str] = [],
+        scale: Sequence[str] = [],
+        area_shape: Optional[rules.AreaShapes] = None,
+        empty: Optional[rules.BooleanChoices] = rules.BooleanChoices.FALSE,
+        validated: Optional[rules.BooleanChoices] = rules.BooleanChoices.TRUE,
+        geometry: Optional[rules.ColumnNames] = None,
+    ) -> Sequence[Path]:
+        """
+        Query for trace and area data.
+        """
+        query_bools = [True] * len(self.columns[rules.ColumnNames.AREA.value])
+        query_bools = self._filter_strings(
+            area_values=self.columns[rules.ColumnNames.AREA.value],
+            traces_values=self.columns[rules.ColumnNames.TRACES.value],
+            thematic_values=self.columns[rules.ColumnNames.THEMATIC.value],
+            scale_values=self.columns[rules.ColumnNames.SCALE.value],
+            query_bools=query_bools,
+            area=area,
+            traces=traces,
+            thematic=thematic,
+            scale=scale,
+        )
+
+        if not any(query_bools):
+            return []
+
+        query_bools = self._filter_enums(
+            query_bools=query_bools,
+            area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
+            empty_values=self.columns[rules.ColumnNames.EMPTY.value],
+            validated_values=self.columns[rules.ColumnNames.VALIDATED.value],
+            area_shape=area_shape,
+            empty=empty,
+            validated=validated,
+        )
+
+        if not any(query_bools):
+            return []
+
+        geometries = (
+            [rules.ColumnNames.TRACES.value, rules.ColumnNames.AREA.value]
+            if geometry is None
+            else [geometry.value]
+        )
+
+        columns_needed = [
+            rules.ColumnNames.THEMATIC.value,
+            rules.ColumnNames.SCALE.value,
+        ] + geometries
+
+        all_value_lists: List[Sequence[str]] = [
+            list(compress(data=self.columns[col], selectors=query_bools))
+            for col in columns_needed
+        ]
+
+        paths = []
+        for vals in zip(*all_value_lists):
+
+            thematic_val = vals[0]
+            scale_val = vals[1]
+            geom_vals = vals[2:]
+
+            for geom_val, geom_type in zip(geom_vals, geometries):
+
+                path = utils.compiled_path(
+                    thematic=thematic_val,
+                    geometry=geom_type,
+                    scale=scale_val,
+                    name=geom_val,
+                )
+                paths.append(path)
+
+        return paths
