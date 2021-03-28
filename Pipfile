@@ -16,6 +16,7 @@ hypothesis = "*"
 
 [packages]
 attrs = "*"
+fractopo = "*"
 
 [requires]
 python_version = "3.8"

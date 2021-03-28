@@ -75,6 +75,18 @@ class Geometry(Enum):
     BOTH = "both"
 
 
+@unique
+class ValidationResults(Enum):
+
+    """
+    Validation result description enums.
+    """
+
+    EMPTY = "empty"
+    VALID = "valid"
+    INVALID = "invalid"
+
+
 @lru_cache(maxsize=None)
 def name_column_kwargs() -> Dict[str, Any]:
     """
