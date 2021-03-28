@@ -2,17 +2,18 @@
 Spatial data validation.
 """
 
+from typing import List, Tuple, Type, Union
+
+import geopandas as gpd
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (
-    EmptyTargetAreaValidator,
     ALL_VALIDATORS,
     BaseValidator,
+    EmptyTargetAreaValidator,
     SharpCornerValidator,
 )
-import geopandas as gpd
+
 from tracerepo.rules import ValidationResults
-from enum import Enum, unique
-from typing import Tuple, List, Type, Union
 
 ANY_VALIDATOR = Union[Type[BaseValidator], Type[EmptyTargetAreaValidator]]
 

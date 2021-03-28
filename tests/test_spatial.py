@@ -2,12 +2,11 @@
 Tests for spatial.py.
 """
 
-import tracerepo.spatial as spatial
-import tests
-
+import geopandas as gpd
 import pytest
 
-import geopandas as gpd
+import tests
+import tracerepo.spatial as spatial
 
 
 @pytest.mark.parametrize(

@@ -1,14 +1,15 @@
 """
 Parameters for tests.
 """
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
+from pickle import loads
+from typing import Callable, Iterator
+
+import geopandas as gpd
 from fractopo.general import read_geofile
 
 import tracerepo.rules as rules
-from typing import Iterator, Optional, Callable
-import geopandas as gpd
-from pickle import loads
 
 
 def cut(
