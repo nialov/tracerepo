@@ -41,8 +41,18 @@ def df_data():
     area_shape = "circle"
     empty = "false"
     validated = "false"
+    snap_threshold = 0.001
 
-    return traces_name, area_name, thematic, scale, area_shape, empty, validated
+    return (
+        traces_name,
+        area_name,
+        thematic,
+        scale,
+        area_shape,
+        empty,
+        validated,
+        snap_threshold,
+    )
 
 
 def df_with_row(
@@ -51,7 +61,16 @@ def df_with_row(
     """
     Set up a database df with a row of data.
     """
-    traces_name, area_name, thematic, scale, area_shape, empty, validated = df_data()
+    (
+        traces_name,
+        area_name,
+        thematic,
+        scale,
+        area_shape,
+        empty,
+        validated,
+        snap_threshold,
+    ) = df_data()
 
     row = {
         # rules.ColumnNames.AREA.value: area_name,
@@ -61,6 +80,7 @@ def df_with_row(
         rules.ColumnNames.AREA_SHAPE.value: area_shape,
         rules.ColumnNames.EMPTY.value: empty,
         rules.ColumnNames.VALIDATED.value: validated,
+        rules.ColumnNames.SNAP_THRESHOLD.value: snap_threshold,
     }
 
     srs = pd.Series(data=row.values(), index=row.keys(), name=area_name)
@@ -212,7 +232,7 @@ def query_example(geometry, assumed_result: int):
     """
     Create query example.
     """
-    traces_name, area_name, thematic, scale, area_shape, empty, validated = df_data()
+    traces_name, area_name, thematic, scale, area_shape, empty, validated, _ = df_data()
 
     assert area_shape == rules.AreaShapes.CIRCLE.value
     assert empty == rules.BooleanChoices.FALSE.value

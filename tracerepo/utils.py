@@ -10,7 +10,7 @@ import tracerepo.rules as rules
 
 
 def dataframe_column_to_python(
-    dataframe: pd.DataFrame, column: str, python_type: Type
+    dataframe: pd.DataFrame, column: str, python_type: Type[Any]
 ) -> List[Any]:
     """
     Get dataframe column as Python typed list.
@@ -41,7 +41,9 @@ def dataframe_column_to_python(
         val for val in python_list_pythoned if isinstance(val, python_type)
     ]
     if len(python_list) != len(python_list_checked):
-        raise TypeError("Expected database to contain types convertable to Python.")
+        raise TypeError(
+            f"Expected database to contain types convertable to Python {python_type}."
+        )
 
     return python_list_checked
 

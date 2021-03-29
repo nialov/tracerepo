@@ -73,7 +73,9 @@ class Organizer:
         cols: Dict[str, List[str]] = dict()
         for column in rules.ColumnNames:
             cols[column.value] = utils.dataframe_column_to_python(
-                dataframe=self.database, column=column.value, python_type=str
+                dataframe=self.database,
+                column=column.value,
+                python_type=rules.ColumnNames.column_type()[column],
             )
         return cols
 

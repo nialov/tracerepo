@@ -1,10 +1,11 @@
 """
 trace-repository rules.
 """
+from __future__ import annotations
 from enum import Enum, unique
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Union
 
 import pandera as pa
 
@@ -26,6 +27,23 @@ class ColumnNames(Enum):
     AREA_SHAPE = "area-shape"
     EMPTY = "empty"
     VALIDATED = "validated"
+    SNAP_THRESHOLD = "snap-threshold"
+
+    @classmethod
+    def column_type(cls) -> Dict[ColumnNames, Union[Type[str], Type[float]]]:
+        """
+        Get python type for each column.
+        """
+        return {
+            cls.AREA: str,
+            cls.TRACES: str,
+            cls.THEMATIC: str,
+            cls.SCALE: str,
+            cls.AREA_SHAPE: str,
+            cls.EMPTY: str,
+            cls.VALIDATED: str,
+            cls.SNAP_THRESHOLD: float,
+        }
 
 
 @unique
@@ -137,6 +155,15 @@ def database_schema() -> pa.DataFrameSchema:
             # validated must be one of the boolean enum values
             ColumnNames.VALIDATED.value: pa.Column(
                 **enum_column_kwargs(enum_class=BooleanChoices)
+            ),
+            ColumnNames.SNAP_THRESHOLD.value: pa.Column(
+                pa.Float,
+                checks=[
+                    pa.Check.greater_than_or_equal_to(1e-8),
+                    pa.Check.less_than_or_equal_to(1e8),
+                ],
+                coerce=True,
+                nullable=False,
             ),
         },
     )
