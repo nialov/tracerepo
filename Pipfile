@@ -17,6 +17,7 @@ hypothesis = "*"
 [packages]
 attrs = "*"
 fractopo = "*"
+typer = "*"
 
 [requires]
 python_version = "3.8"
