@@ -2,10 +2,11 @@
 trace-repository rules.
 """
 from __future__ import annotations
+
 from enum import Enum, unique
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, List, Type, Union, Optional
+from typing import Any, Dict, List, Optional, Type, Union
 
 import pandera as pa
 

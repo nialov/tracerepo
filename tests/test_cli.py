@@ -1,29 +1,21 @@
 """
 Tests for cli.py.
 """
-import pytest
-from tracerepo.organize import Organizer
-import tests
-from pytest import TempPathFactory
 from pathlib import Path
-import geopandas as gpd
 from typing import Optional
+
+import geopandas as gpd
 import pandas as pd
-from hypothesis import example, given, settings, HealthCheck
-from hypothesis.strategies import (
-    sampled_from,
-    composite,
-    integers,
-    text,
-    lists,
-    characters,
-    from_regex,
-    floats,
-)
-import pandera as pa
+import pytest
+from hypothesis import given, settings
+from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
+from pytest import TempPathFactory
+
+import tests
+import tracerepo.cli as cli
 import tracerepo.rules as rules
 import tracerepo.utils as utils
-import tracerepo.cli as cli
+from tracerepo.organize import Organizer
 
 
 def name_regex(geom_type: Optional[rules.ColumnNames]):

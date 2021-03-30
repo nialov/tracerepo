@@ -2,19 +2,20 @@
 Command line api for tracerepo.
 """
 
-import typer
 import logging
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from itertools import groupby
 from pathlib import Path
-from tracerepo.organize import Organizer
+from typing import List, Sequence
+
+import typer
 from fractopo.general import read_geofile
-import tracerepo.rules as rules
+
 import tracerepo.repo as repo
+import tracerepo.rules as rules
 import tracerepo.spatial as spatial
 import tracerepo.utils as utils
-from typing import List, Sequence
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
+from tracerepo.organize import Organizer
 
 app = typer.Typer()
 
@@ -102,12 +103,11 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                 update_tuple = future.result()
                 update_tuples.append(update_tuple)
             except Exception as exc:
-                raise
-                # logging.error(
-                #     f"Validation exception with {futures[future]}."
-                #     f"\n\nException: {exc}"
-                # )
-                # update_tuples.append(dict())
+                logging.error(
+                    f"Validation exception with {futures[future]}."
+                    f"\n\nException: {exc}"
+                )
+                update_tuples.append(dict())
     assert len(invalids) == len(update_tuples)
     return update_tuples
 

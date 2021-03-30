@@ -2,9 +2,9 @@
 Spatial data validation.
 """
 
+import logging
 from typing import List, Tuple, Type, Union
 
-import logging
 import geopandas as gpd
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (

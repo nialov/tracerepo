@@ -50,5 +50,3 @@ def scaffold() -> pd.DataFrame:
     assert df is not None
     df = rules.database_schema().validate(df)
     return df
-
-

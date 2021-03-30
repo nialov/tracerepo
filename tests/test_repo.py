@@ -1,12 +1,14 @@
 """
 Tests for repo.py.
 """
-import tests
+from pathlib import Path
+
+import pandas as pd
 import pytest
+
+import tests
 import tracerepo.repo as repo
 import tracerepo.rules as rules
-from pathlib import Path
-import pandas as pd
 
 
 @pytest.fixture

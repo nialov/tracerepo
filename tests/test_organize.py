@@ -2,8 +2,6 @@
 Tests for organize.py.
 """
 from pathlib import Path
-import tests
-import tracerepo.utils as utils
 
 import pytest
 from hypothesis import example, given
@@ -11,7 +9,9 @@ from hypothesis.strategies import lists, none, sampled_from
 from pandas.testing import assert_frame_equal
 from pytest import TempPathFactory
 
+import tests
 import tracerepo.rules as rules
+import tracerepo.utils as utils
 from tracerepo.organize import Organizer
 
 

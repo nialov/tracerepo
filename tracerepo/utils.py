@@ -2,7 +2,7 @@
 General utilities.
 """
 from pathlib import Path
-from typing import Any, List, Sequence, Type, Optional, NamedTuple, Dict
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Type
 
 import geopandas as gpd
 import pandas as pd

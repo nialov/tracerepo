@@ -1,18 +1,18 @@
 """
 Parameters for tests.
 """
+import os
+from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
 from pickle import loads
 from typing import Callable, Iterator
-import pandas as pd
-from contextlib import contextmanager
-import os
 
 import geopandas as gpd
+import pandas as pd
 from fractopo.general import read_geofile
-import tracerepo.repo as repo
 
+import tracerepo.repo as repo
 import tracerepo.rules as rules
 
 
