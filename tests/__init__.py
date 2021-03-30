@@ -5,9 +5,13 @@ from functools import lru_cache
 from pathlib import Path
 from pickle import loads
 from typing import Callable, Iterator
+import pandas as pd
+from contextlib import contextmanager
+import os
 
 import geopandas as gpd
 from fractopo.general import read_geofile
+import tracerepo.repo as repo
 
 import tracerepo.rules as rules
 
@@ -48,6 +52,82 @@ def cached_sample(
         loaded = create_dataset()
         loaded.to_pickle(path=path)
     return loaded
+
+
+def df_data():
+    """
+    Set up a row of some database df data.
+    """
+    traces_name = "some_traces"
+    area_name = "some_area"
+    thematic = "some"
+    scale = "wide"
+    area_shape = "circle"
+    validity = "invalid"
+    snap_threshold = 0.001
+
+    return (
+        traces_name,
+        area_name,
+        thematic,
+        scale,
+        area_shape,
+        validity,
+        snap_threshold,
+    )
+
+
+def df_with_row(
+    df,
+):
+    """
+    Set up a database df with a row of data.
+    """
+    (
+        traces_name,
+        area_name,
+        thematic,
+        scale,
+        area_shape,
+        validity,
+        snap_threshold,
+    ) = df_data()
+
+    row = {
+        # rules.ColumnNames.AREA.value: area_name,
+        rules.ColumnNames.TRACES.value: traces_name,
+        rules.ColumnNames.THEMATIC.value: thematic,
+        rules.ColumnNames.SCALE.value: scale,
+        rules.ColumnNames.AREA_SHAPE.value: area_shape,
+        rules.ColumnNames.VALIDITY.value: validity,
+        rules.ColumnNames.SNAP_THRESHOLD.value: snap_threshold,
+    }
+
+    srs = pd.Series(data=row.values(), index=row.keys(), name=area_name)
+
+    df = df.append(srs)
+
+    traces_path = (
+        Path(rules.FolderNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
+    )
+    area_path = (
+        Path(rules.FolderNames.UNORGANIZED.value) / f"{area_name}.{rules.FILETYPE}"
+    )
+
+    return df, traces_path, area_path
+
+
+@contextmanager
+def setup_scaffold_context(tmp_path: Path):
+    """
+    Set up a repo scaffold at a temporary directory.
+    """
+    current_dir = Path(".").resolve()
+    os.chdir(tmp_path)
+    try:
+        yield repo.scaffold()
+    finally:
+        os.chdir(current_dir)
 
 
 kb11_traces_path = Path("tests/sample_data/KB11/KB11_traces.geojson")

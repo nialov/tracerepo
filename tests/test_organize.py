@@ -1,107 +1,25 @@
 """
 Tests for organize.py.
 """
-import os
-from contextlib import contextmanager
 from pathlib import Path
+import tests
+import tracerepo.utils as utils
 
-import pandas as pd
 import pytest
 from hypothesis import example, given
 from hypothesis.strategies import lists, none, sampled_from
 from pandas.testing import assert_frame_equal
 from pytest import TempPathFactory
 
-import tracerepo.repo as repo
 import tracerepo.rules as rules
 from tracerepo.organize import Organizer
-
-
-@contextmanager
-def setup_scaffold_context(tmp_path: Path):
-    """
-    Set up a repo scaffold at a temporary directory.
-    """
-    current_dir = Path(".").resolve()
-    os.chdir(tmp_path)
-    try:
-        yield repo.scaffold()
-    finally:
-        os.chdir(current_dir)
-
-
-def df_data():
-    """
-    Set up a row of some database df data.
-    """
-    traces_name = "some_traces"
-    area_name = "some_area"
-    thematic = "some"
-    scale = "wide"
-    area_shape = "circle"
-    empty = "false"
-    validated = "false"
-    snap_threshold = 0.001
-
-    return (
-        traces_name,
-        area_name,
-        thematic,
-        scale,
-        area_shape,
-        empty,
-        validated,
-        snap_threshold,
-    )
-
-
-def df_with_row(
-    df,
-):
-    """
-    Set up a database df with a row of data.
-    """
-    (
-        traces_name,
-        area_name,
-        thematic,
-        scale,
-        area_shape,
-        empty,
-        validated,
-        snap_threshold,
-    ) = df_data()
-
-    row = {
-        # rules.ColumnNames.AREA.value: area_name,
-        rules.ColumnNames.TRACES.value: traces_name,
-        rules.ColumnNames.THEMATIC.value: thematic,
-        rules.ColumnNames.SCALE.value: scale,
-        rules.ColumnNames.AREA_SHAPE.value: area_shape,
-        rules.ColumnNames.EMPTY.value: empty,
-        rules.ColumnNames.VALIDATED.value: validated,
-        rules.ColumnNames.SNAP_THRESHOLD.value: snap_threshold,
-    }
-
-    srs = pd.Series(data=row.values(), index=row.keys(), name=area_name)
-
-    df = df.append(srs)
-
-    traces_path = (
-        Path(rules.FolderNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
-    )
-    area_path = (
-        Path(rules.FolderNames.UNORGANIZED.value) / f"{area_name}.{rules.FILETYPE}"
-    )
-
-    return df, traces_path, area_path
 
 
 def setup_df_with_traces_and_area(df):
     """
     Set up df with associated data.
     """
-    df, traces_path, area_path = df_with_row(df=df)
+    df, traces_path, area_path = tests.df_with_row(df=df)
 
     traces_path.touch()
     area_path.touch()
@@ -116,7 +34,7 @@ def df_with_traces_and_area(tmp_path):
 
     traces and area file will be in unorganized.
     """
-    with setup_scaffold_context(tmp_path) as df:
+    with tests.setup_scaffold_context(tmp_path) as df:
 
         df = setup_df_with_traces_and_area(df=df)
 
@@ -138,7 +56,7 @@ def organizer_organized(tmp_path_factory: TempPathFactory):
     Fix up an Organizer with files organized.
     """
     tmp_path = tmp_path_factory.mktemp(basename="organizer_organized")
-    with setup_scaffold_context(tmp_path) as df:
+    with tests.setup_scaffold_context(tmp_path) as df:
 
         df = setup_df_with_traces_and_area(df=df)
         organizer = Organizer(database=df)
@@ -205,15 +123,14 @@ def query_strategy():
     """
     Create organizer query test strategy.
     """
-    traces_name, area_name, thematic, scale, *_ = df_data()
+    traces_name, area_name, thematic, scale, *_ = tests.df_data()
 
     possible_areas = [area_name]
     possible_traces = [traces_name]
     possible_thematic = [thematic]
     possible_scale = [scale]
     possible_area_shape = [enum for enum in rules.AreaShapes] + [None]
-    possible_empty = [enum for enum in rules.BooleanChoices] + [None]
-    possible_validated = [enum for enum in rules.BooleanChoices] + [None]
+    possible_validity = [enum for enum in rules.ValidationResults] + [None]
     possible_geometry = [rules.ColumnNames.AREA, rules.ColumnNames.TRACES] + [None]
 
     return dict(
@@ -222,8 +139,7 @@ def query_strategy():
         thematic=lists(sampled_from(possible_thematic), unique=True),
         scale=lists(sampled_from(possible_scale), unique=True),
         area_shape=sampled_from(possible_area_shape),
-        empty=sampled_from(possible_empty),
-        validated=sampled_from(possible_validated),
+        validity=sampled_from(possible_validity),
         geometry=sampled_from(possible_geometry),
     )
 
@@ -232,11 +148,20 @@ def query_example(geometry, assumed_result: int):
     """
     Create query example.
     """
-    traces_name, area_name, thematic, scale, area_shape, empty, validated, _ = df_data()
+    (
+        traces_name,
+        area_name,
+        thematic,
+        scale,
+        area_shape,
+        validity,
+        snap_threshold,
+    ) = tests.df_data()
+
+    assert isinstance(validity, str)
+    assert isinstance(snap_threshold, float)
 
     assert area_shape == rules.AreaShapes.CIRCLE.value
-    assert empty == rules.BooleanChoices.FALSE.value
-    assert validated == rules.BooleanChoices.FALSE.value
 
     return dict(
         area=[area_name],
@@ -244,14 +169,13 @@ def query_example(geometry, assumed_result: int):
         thematic=[thematic],
         scale=[scale],
         area_shape=rules.AreaShapes.CIRCLE,
-        empty=rules.BooleanChoices.FALSE,
-        validated=rules.BooleanChoices.FALSE,
+        validity=rules.ValidationResults.INVALID,
         assumed_result=assumed_result,
         geometry=geometry,
     )
 
 
-@example(**query_example(geometry=None, assumed_result=2))
+@example(**query_example(geometry=None, assumed_result=1))
 @example(**query_example(geometry=rules.Geometry.AREAS, assumed_result=1))
 @example(**query_example(geometry=rules.Geometry.TRACES, assumed_result=1))
 @given(**query_strategy(), assumed_result=none())
@@ -262,8 +186,7 @@ def test_organizer_query_organized(
     thematic,
     scale,
     area_shape,
-    empty,
-    validated,
+    validity,
     geometry,
     assumed_result,
 ):
@@ -276,29 +199,48 @@ def test_organizer_query_organized(
         thematic=thematic,
         scale=scale,
         area_shape=area_shape,
-        empty=empty,
-        validated=validated,
+        validity=validity,
         geometry=geometry,
     )
     assert isinstance(query_results, list)
-    assert all([isinstance(val, Path) for val in query_results])
-    assert all([val.exists() for val in query_results])
+
+    trace_tuple: utils.TraceTuple
+    for trace_tuple in query_results:
+        assert isinstance(trace_tuple.snap_threshold, float)
+        assert (
+            isinstance(trace_tuple.traces_path, Path) or trace_tuple.traces_path is None
+        )
+        assert isinstance(trace_tuple.area_path, Path) or trace_tuple.area_path is None
+
+    assert all([isinstance(val, utils.TraceTuple) for val in query_results])
 
     if isinstance(assumed_result, int):
         assert len(query_results) == assumed_result
+
+    if geometry is not None and len(query_results) != 0:
+        assert None in query_results[0]
 
 
 def test_organizer_update_organized(organizer_unorganized: Organizer):
     """
     Test Organizer update.
     """
-    _, area_name, _, _, *_ = df_data()
+    _, area_name, _, _, *_ = tests.df_data()
     current_db = organizer_unorganized.database.copy()
-    assert organizer_unorganized.columns[rules.ColumnNames.EMPTY.value][0] == "false"
-    organizer_unorganized.update(
-        area_name=area_name, update_values={rules.ColumnNames.EMPTY: "true"}
+    assert (
+        organizer_unorganized.columns[rules.ColumnNames.VALIDITY.value][0]
+        == rules.ValidationResults.INVALID.value
     )
-    assert organizer_unorganized.columns[rules.ColumnNames.EMPTY.value][0] == "true"
+    organizer_unorganized.update(
+        area_name=area_name,
+        update_values={
+            rules.ColumnNames.VALIDITY: rules.ValidationResults.CRITICAL.value
+        },
+    )
+    assert (
+        organizer_unorganized.columns[rules.ColumnNames.VALIDITY.value][0]
+        == rules.ValidationResults.CRITICAL.value
+    )
     try:
         assert_frame_equal(current_db, organizer_unorganized.database)
     except AssertionError:

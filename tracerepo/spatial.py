@@ -4,6 +4,7 @@ Spatial data validation.
 
 from typing import List, Tuple, Type, Union
 
+import logging
 import geopandas as gpd
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (
@@ -42,14 +43,20 @@ def validate(
         SNAP_THRESHOLD=snap_threshold,
     )
 
-    # Run validation
-    validated = validation.run_validation(allow_empty_area=False)
+    try:
+
+        # Run validation
+        validated = validation.run_validation(allow_empty_area=False)
+
+    except Exception:
+        logging.critical(f"Validation critically failed for dataset ({name}).")
+        return traces, ValidationResults.CRITICAL
 
     # Get the error column values
     validated_error_column_values = validated[validation.ERROR_COLUMN].values
 
     # Convert to list and make sure the error values are lists themselves
-    validated_error_lists = [
+    validated_error_lists: List[List[str]] = [
         errors for errors in validated_error_column_values if isinstance(errors, list)
     ]
 

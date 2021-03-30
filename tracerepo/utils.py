@@ -2,11 +2,33 @@
 General utilities.
 """
 from pathlib import Path
-from typing import Any, List, Sequence, Type
+from typing import Any, List, Sequence, Type, Optional, NamedTuple, Dict
 
+import geopandas as gpd
 import pandas as pd
 
 import tracerepo.rules as rules
+
+
+class TraceTuple(NamedTuple):
+
+    """
+    Named tuple of traces and area paths.
+    """
+
+    traces_path: Optional[Path]
+    area_path: Optional[Path]
+    snap_threshold: float = 0.001
+
+
+class UpdateTuple(NamedTuple):
+
+    """
+    Tuple with information of validity for trace-area-combo.
+    """
+
+    area_name: str
+    update_values: Dict[rules.ColumnNames, str]
 
 
 def dataframe_column_to_python(
@@ -98,7 +120,7 @@ def identify_geom_type(filename_stem: str) -> rules.ColumnNames:
     elif filename_stem.endswith("_traces"):
         return rules.ColumnNames.TRACES
     else:
-        raise ValueError("Expected filenames to end in _area or _traces.")
+        raise ValueError(f"Expected {filename_stem=} to end in _area or _traces.")
 
 
 def multi_string_filter(
@@ -106,6 +128,18 @@ def multi_string_filter(
 ) -> Sequence[bool]:
     """
     Filter list for any matching string in strings.
+
+    E.g.
+
+    >>> multi_string_filter(["geta"], ["geta", "heta"])
+    [True, False]
+
+    >>> multi_string_filter(["geta", "leta"], ["geta", "heta", "geta"])
+    [True, False, True]
+
+    >>> multi_string_filter([], ["geta", "heta", "geta"])
+    [True, True, True]
+
     """
     if len(strings) == 0:
         return [True] * len(list_to_filter)
@@ -133,3 +167,60 @@ def join_bools(*bool_sequences) -> Sequence[bool]:
     """
     joined = [all(vals) for vals in zip(*bool_sequences)]
     return joined
+
+
+def query_result_tuple(
+    thematic_val: str,
+    scale_val: str,
+    traces_val: str,
+    area_val: str,
+    snap_threshold: float,
+    geometry_filter: Optional[rules.ColumnNames] = None,
+) -> TraceTuple:
+    """
+    Compile TraceTuple with trace path, area path and snap_threshold.
+
+    Some of paths might be None based on geometry_filter.
+    """
+    traces_path = (
+        compiled_path(
+            thematic=thematic_val,
+            scale=scale_val,
+            name=traces_val,
+            geometry=rules.ColumnNames.TRACES.value,
+        )
+        if geometry_filter is None or rules.ColumnNames.TRACES == geometry_filter
+        else None
+    )
+    area_path = (
+        compiled_path(
+            thematic=thematic_val,
+            scale=scale_val,
+            name=area_val,
+            geometry=rules.ColumnNames.AREA.value,
+        )
+        if geometry_filter is None or rules.ColumnNames.AREA == geometry_filter
+        else None
+    )
+
+    return TraceTuple(
+        traces_path=traces_path, area_path=area_path, snap_threshold=snap_threshold
+    )
+
+
+def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Convert list type columns to string.
+    """
+    for column in gdf.columns.values:
+        if isinstance(gdf[column].values[0], list):
+            gdf[column] = gdf[column].astype(str)
+    return gdf
+
+
+def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = "GeoJSON"):
+    """
+    Write geodata as GeoJSON.
+    """
+    gdf = convert_list_columns(gdf)
+    gdf.to_file(path, driver=driver)

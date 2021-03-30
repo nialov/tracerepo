@@ -7,7 +7,7 @@ from functools import cached_property
 from itertools import compress
 from pathlib import Path
 from shutil import move
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Any, Tuple
 
 import pandas as pd
 
@@ -63,14 +63,14 @@ class Organizer:
         return move_descriptions
 
     @cached_property
-    def columns(self) -> Dict[str, List[str]]:
+    def columns(self) -> Dict[str, List[Any]]:
         """
         Get database columns and index as Python typed values.
 
         Accesible as a dict with column names as keys. Includes the area name
         values that were originally the dataframe index.
         """
-        cols: Dict[str, List[str]] = dict()
+        cols: Dict[str, List[Any]] = dict()
         for column in rules.ColumnNames:
             cols[column.value] = utils.dataframe_column_to_python(
                 dataframe=self.database,
@@ -129,22 +129,19 @@ class Organizer:
     @staticmethod
     def _filter_enums(
         area_shape_values: Sequence[str],
-        empty_values: Sequence[str],
-        validated_values: Sequence[str],
+        validity_values: Sequence[str],
         query_bools: Sequence[bool],
         area_shape: Optional[rules.AreaShapes] = None,
-        empty: Optional[rules.BooleanChoices] = rules.BooleanChoices.FALSE,
-        validated: Optional[rules.BooleanChoices] = rules.BooleanChoices.TRUE,
+        validity: Optional[rules.ValidationResults] = rules.ValidationResults.VALID,
     ) -> Sequence[bool]:
         """
         Filter database traces and areas based on given enum choices.
         """
         for filterer, list_to_filter in zip(
-            (area_shape, empty, validated),
+            (area_shape, validity),
             (
                 area_shape_values,
-                empty_values,
-                validated_values,
+                validity_values,
             ),
         ):
             if filterer is None:
@@ -162,10 +159,9 @@ class Organizer:
         thematic: Sequence[str] = [],
         scale: Sequence[str] = [],
         area_shape: Optional[rules.AreaShapes] = None,
-        empty: Optional[rules.BooleanChoices] = rules.BooleanChoices.FALSE,
-        validated: Optional[rules.BooleanChoices] = rules.BooleanChoices.TRUE,
+        validity: Optional[rules.ValidationResults] = rules.ValidationResults.VALID,
         geometry: Optional[rules.ColumnNames] = None,
-    ) -> Sequence[Path]:
+    ) -> Sequence[utils.TraceTuple]:
         """
         Query for trace and area data.
         """
@@ -193,64 +189,47 @@ class Organizer:
         query_bools = self._filter_enums(
             query_bools=query_bools,
             area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
-            empty_values=self.columns[rules.ColumnNames.EMPTY.value],
-            validated_values=self.columns[rules.ColumnNames.VALIDATED.value],
+            validity_values=self.columns[rules.ColumnNames.VALIDITY.value],
             area_shape=area_shape,
-            empty=empty,
-            validated=validated,
+            validity=validity,
         )
 
         # Return if no accepted
         if not any(query_bools):
             return []
 
-        # Solve which geometries are wanted based on input
-        geometries = (
-            [rules.ColumnNames.TRACES.value, rules.ColumnNames.AREA.value]
-            if geometry is None
-            else [geometry.value]
-        )
-
         # Collect the columns that are needed for path solving
         columns_needed = [
             rules.ColumnNames.THEMATIC.value,
             rules.ColumnNames.SCALE.value,
-        ] + geometries
+            rules.ColumnNames.TRACES.value,
+            rules.ColumnNames.AREA.value,
+            rules.ColumnNames.SNAP_THRESHOLD.value,
+        ]
 
         # Compress the values corresponding to columns_needed based on
         # query_bools boolean list
-        all_value_lists: List[Sequence[str]] = [
+        thematic_vals, scale_vals, trace_vals, area_vals, snap_vals = tuple(
             list(compress(data=self.columns[col], selectors=query_bools))
             for col in columns_needed
+        )
+
+        # Collect trace and area paths (both or one of depending on geometry
+        # filter) into named tuples.
+        paths: List[utils.TraceTuple] = [
+            utils.query_result_tuple(
+                thematic_val=thematic_val,
+                scale_val=scale_val,
+                traces_val=traces_val,
+                area_val=area_val,
+                geometry_filter=geometry,
+                snap_threshold=snap_val,
+            )
+            for thematic_val, scale_val, traces_val, area_val, snap_val in zip(
+                thematic_vals, scale_vals, trace_vals, area_vals, snap_vals
+            )
         ]
 
-        # Collect the accepted paths
-        paths = []
-
-        # Iterate over the values of columns_needed
-        for vals in zip(*all_value_lists):
-
-            assert len(vals) >= 3
-
-            # Unpack values based on the order in columns_needed
-            thematic_val = vals[0]
-            scale_val = vals[1]
-            geom_vals = vals[2:]
-
-            # We might want traces, areas or both so geom_vals is a list
-            # Iterate over the geom types and collect paths
-            for geom_val, geom_type in zip(geom_vals, geometries):
-
-                # Compile the path to the wanted traces or area dataset
-                path = utils.compiled_path(
-                    thematic=thematic_val,
-                    geometry=geom_type,
-                    scale=scale_val,
-                    name=geom_val,
-                )
-                paths.append(path)
-
-        # Return the wanted paths that pass all filters
         return paths
 
     def update(self, area_name: str, update_values: Dict[rules.ColumnNames, str]):
