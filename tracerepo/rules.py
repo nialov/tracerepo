@@ -138,6 +138,7 @@ def database_schema() -> pa.DataFrameSchema:
         index=pa.Index(
             **name_column_kwargs(allow_duplicates=False, geom_type=ColumnNames.AREA)
         ),
+        coerce=True,
         # Columns
         columns={
             # traces, thematic and scale columns are strings

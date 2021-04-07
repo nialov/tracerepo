@@ -12,6 +12,7 @@ def write_database_csv(path: Path, database: pd.DataFrame):
     """
     Write database.csv to disk.
     """
+    database = rules.database_schema().validate(database)
     database.to_csv(
         path_or_buf=path,
         sep=rules.DATABASE_CSV_SEP,
@@ -23,10 +24,9 @@ def read_database_csv(path: Path) -> pd.DataFrame:
     """
     Read database csv.
     """
-    csv = pd.read_csv(
-        path, index_col=rules.ColumnNames.AREA.value, sep=rules.DATABASE_CSV_SEP
-    )
+    csv = pd.read_csv(path, index_col=0, sep=rules.DATABASE_CSV_SEP, dtype=str)
     assert isinstance(csv, pd.DataFrame)
+    csv = rules.database_schema().validate(csv)
     return csv
 
 

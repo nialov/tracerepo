@@ -13,7 +13,7 @@ import tracerepo.rules as rules
 class TraceTuple(NamedTuple):
 
     """
-    Named tuple of traces and area paths.
+    Named tuple of traces and area paths and snap_threshold.
     """
 
     traces_path: Optional[Path]
@@ -24,11 +24,12 @@ class TraceTuple(NamedTuple):
 class UpdateTuple(NamedTuple):
 
     """
-    Tuple with information of validity for trace-area-combo.
+    Tuple with information of validity for trace-area-pair.
     """
 
     area_name: str
     update_values: Dict[rules.ColumnNames, str]
+    error: bool = False
 
 
 def dataframe_column_to_python(
