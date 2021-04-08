@@ -224,4 +224,7 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = "GeoJSON"):
     Write geodata as GeoJSON.
     """
     gdf = convert_list_columns(gdf)
+
+    rules.traces_schema().validate(gdf)
+
     gdf.to_file(path, driver=driver)
