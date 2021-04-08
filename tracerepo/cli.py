@@ -50,14 +50,20 @@ def validate(
         validity=rules.ValidationResults.INVALID,
     )
 
+    # Only validate a single trace dataset once
+    # Means you might have to validate for each area dataset
+    # that uses the traces.
+    unique_invalids_only = spatial.unique_invalids(invalids=invalids)
+
     # Validate the invalids
-    update_tuples = spatial.validate_invalids(invalids=invalids)
+    update_tuples = spatial.validate_invalids(invalids=unique_invalids_only)
 
     # Exit with error code 1 if there's errors in updating the database.csv
     database_error = False
 
+    assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
-    for update_tuple, invalid in zip(update_tuples, invalids):
+    for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
         try:
             # Update Organizer database.csv

@@ -14,6 +14,7 @@ import pandas as pd
 from click.testing import Result
 from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
+from shapely.geometry import LineString, MultiLineString, Point
 
 import tracerepo.repo as repo
 import tracerepo.rules as rules
@@ -283,3 +284,32 @@ def click_error_print(result: Result):
     print_tb(tb)
     print(result.output)
     raise Exception(result.exception)
+
+
+@lru_cache(maxsize=None)
+def test_write_geodata_params():
+    """
+    Params for test_write_geodata.
+    """
+    return [
+        (
+            gpd.GeoDataFrame(geometry=[LineString([(0, 0), (1, 1)])]),  # gdf
+            False,  # assume_error
+        ),
+        (
+            gpd.GeoDataFrame(
+                geometry=[MultiLineString([LineString([(0, 0), (1, 1)])])]
+            ),  # gdf
+            False,  # assume_error
+        ),
+        (
+            gpd.GeoDataFrame(geometry=[Point(1, 1)]),  # gdf
+            True,  # assume_error
+        ),
+        (
+            gpd.GeoDataFrame(
+                geometry=[LineString([(0, 0), (1, 1)])], index=["hello"]
+            ),  # gdf
+            True,  # assume_error
+        ),
+    ]

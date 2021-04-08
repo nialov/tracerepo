@@ -38,7 +38,7 @@ class Organizer:
         """
         return list(self.unorganized_folder.glob(f"*.{rules.FILETYPE}"))
 
-    def organize(self, simulate=False) -> List[str]:
+    def organize(self, simulate: bool = False) -> List[str]:
         """
         Organize files from unorganized_folder.
         """

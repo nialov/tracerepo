@@ -121,26 +121,80 @@ def unique_invalids(invalids: Sequence[utils.TraceTuple]) -> Sequence[utils.Trac
     return unique
 
 
+def sort_update_tuples_to_match_invalids(
+    update_tuples: List[utils.UpdateTuple], invalids: Sequence[utils.TraceTuple]
+) -> List[utils.UpdateTuple]:
+    """
+    Sort update_tuples to match the order in invalids based on area_name.
+
+    >>> from pprint import pprint
+    >>> update_tuples = [
+    ... utils.UpdateTuple(area_name="name_3", update_values=dict()),
+    ... utils.UpdateTuple(area_name="name_1", update_values=dict()),
+    ... utils.UpdateTuple(area_name="name_2", update_values=dict()),
+    ... ]
+    >>> invalids = [
+    ... utils.TraceTuple(traces_path=None, area_path=Path("name_1.file")),
+    ... utils.TraceTuple(traces_path=None, area_path=Path("name_2.file")),
+    ... utils.TraceTuple(traces_path=None, area_path=Path("name_3.file")),
+    ... ]
+    >>> pprint(sort_update_tuples_to_match_invalids(update_tuples, invalids))
+    [UpdateTuple(area_name='name_1', update_values={}, error=False),
+     UpdateTuple(area_name='name_2', update_values={}, error=False),
+     UpdateTuple(area_name='name_3', update_values={}, error=False)]
+
+    """
+    # Resolve the matching area name from area_path variable
+    invalids_area_names = [invalid.area_path.stem for invalid in invalids]
+
+    # Get the matching indexes for update_tuples
+    idxs = [
+        invalids_area_names.index(update_tuple.area_name)
+        for update_tuple in update_tuples
+    ]
+
+    # Sort update_tuples with the idxs
+    sorted_with_idx = sorted(zip(update_tuples, idxs), key=lambda vals: vals[1])
+
+    # Extract only the update_tuples that should now be ordered
+    sorted_update_tuples = [ut[0] for ut in sorted_with_idx]
+
+    return sorted_update_tuples
+
+
 def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.UpdateTuple]:
     """
     Validate a sequence of invalids with multiprocessing support.
 
     Will not validate the same trace dataset twice.
     """
+    # Collect validated
     update_tuples: List[utils.UpdateTuple] = []
 
+    # multiprocessing!
     with ProcessPoolExecutor(max_workers=8) as executor:
-        # Iterate over invalids
+        # Iterate over invalids. submit as tasks
         futures = {
-            executor.submit(validate_invalid, invalid): invalid
-            for invalid in unique_invalids(invalids=invalids)
+            executor.submit(validate_invalid, invalid): invalid for invalid in invalids
         }
 
+        # Collect all tasks as they complete
+        # Will not be in same order submitted!?
         for future in as_completed(futures):
+
+            # If validation critically fails for a dataset
+            # we can still proceed with other validations
             try:
+
+                # Get result from Future
+                # This will throw an error (if it happened in process)
                 update_tuple = future.result()
+
+                # Collect result
                 update_tuples.append(update_tuple)
             except Exception as exc:
+
+                # Catch and log critical failures
                 logging.error(
                     f"Validation exception with {futures[future]}."
                     f"\n\nException: {exc}"
@@ -148,8 +202,9 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                 update_tuples.append(
                     utils.UpdateTuple(area_name="", update_values=dict(), error=True)
                 )
-    assert len(invalids) == len(update_tuples)
-    return update_tuples
+    return sort_update_tuples_to_match_invalids(
+        update_tuples=update_tuples, invalids=invalids
+    )
 
 
 def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
