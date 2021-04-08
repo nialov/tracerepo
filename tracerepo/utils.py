@@ -2,7 +2,7 @@
 General utilities.
 """
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Type
+from typing import Any, Dict, List, NamedTuple, Sequence, Type
 
 import geopandas as gpd
 import pandas as pd
@@ -16,8 +16,8 @@ class TraceTuple(NamedTuple):
     Named tuple of traces and area paths and snap_threshold.
     """
 
-    traces_path: Optional[Path]
-    area_path: Optional[Path]
+    traces_path: Path
+    area_path: Path
     snap_threshold: float = 0.001
 
 
@@ -51,10 +51,11 @@ def dataframe_column_to_python(
 
     """
     # area name is used as index
+    python_list: List[Any]
     if column == rules.ColumnNames.AREA.value:
-        python_list: List[Any] = dataframe.index.to_list()
+        python_list = dataframe.index.to_list()
     else:
-        python_list: List[Any] = dataframe[column].to_list()
+        python_list = dataframe[column].to_list()
     if not isinstance(python_list, list):
         raise TypeError("Expected Python list.")
     python_list_pythoned = [
@@ -176,32 +177,23 @@ def query_result_tuple(
     traces_val: str,
     area_val: str,
     snap_threshold: float,
-    geometry_filter: Optional[rules.ColumnNames] = None,
 ) -> TraceTuple:
     """
     Compile TraceTuple with trace path, area path and snap_threshold.
 
     Some of paths might be None based on geometry_filter.
     """
-    traces_path = (
-        compiled_path(
-            thematic=thematic_val,
-            scale=scale_val,
-            name=traces_val,
-            geometry=rules.ColumnNames.TRACES.value,
-        )
-        if geometry_filter is None or rules.ColumnNames.TRACES == geometry_filter
-        else None
+    traces_path = compiled_path(
+        thematic=thematic_val,
+        scale=scale_val,
+        name=traces_val,
+        geometry=rules.ColumnNames.TRACES.value,
     )
-    area_path = (
-        compiled_path(
-            thematic=thematic_val,
-            scale=scale_val,
-            name=area_val,
-            geometry=rules.ColumnNames.AREA.value,
-        )
-        if geometry_filter is None or rules.ColumnNames.AREA == geometry_filter
-        else None
+    area_path = compiled_path(
+        thematic=thematic_val,
+        scale=scale_val,
+        name=area_val,
+        geometry=rules.ColumnNames.AREA.value,
     )
 
     return TraceTuple(

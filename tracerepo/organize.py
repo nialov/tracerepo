@@ -160,7 +160,6 @@ class Organizer:
         scale: Sequence[str] = [],
         area_shape: Optional[rules.AreaShapes] = None,
         validity: Optional[rules.ValidationResults] = rules.ValidationResults.VALID,
-        geometry: Optional[rules.ColumnNames] = None,
     ) -> Sequence[utils.TraceTuple]:
         """
         Query for trace and area data.
@@ -222,7 +221,6 @@ class Organizer:
                 scale_val=scale_val,
                 traces_val=traces_val,
                 area_val=area_val,
-                geometry_filter=geometry,
                 snap_threshold=snap_val,
             )
             for thematic_val, scale_val, traces_val, area_val, snap_val in zip(

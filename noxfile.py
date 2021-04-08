@@ -224,3 +224,15 @@ def docs(session):
         "-b",
         "html",
     )
+
+
+@nox.session(reuse_venv=True)
+def mypy(session):
+    """
+    Type check with mypy.
+    """
+    # Install mypy
+    session.install(".[dev]", "mypy")
+
+    # Run mypy
+    session.run("mypy", package_name)
