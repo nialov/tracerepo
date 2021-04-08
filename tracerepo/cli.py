@@ -80,6 +80,9 @@ def validate(
                 f"invalid: {invalid}\n"
             )
 
+        if report:
+            pprint(update_tuple)
+
     if database_error:
 
         # Exit with error code 1 (not successful)
@@ -111,3 +114,22 @@ def organize(
 
     if not simulate:
         organizer.check()
+
+
+@app.command()
+def check(
+    database: Path = typer.Option(
+        rules.DATABASE_CSV,
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=True,
+    ),
+):
+    """
+    Check repo.
+    """
+    organizer = Organizer(database=repo.read_database_csv(path=database))
+
+    organizer.check()

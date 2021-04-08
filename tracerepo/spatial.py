@@ -179,7 +179,6 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
 
     # Save the validated (overwrites old)
     utils.write_geodata(gdf=validated, path=traces_path)
-    # validated.to_file(traces_path, driver="GeoJSON")
 
     # Create dict with information on validity for trace-area-combo
     update_tuple = utils.UpdateTuple(
