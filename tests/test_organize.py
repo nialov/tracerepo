@@ -131,7 +131,6 @@ def query_strategy():
     possible_scale = [scale]
     possible_area_shape = [enum for enum in rules.AreaShapes] + [None]
     possible_validity = [enum for enum in rules.ValidationResults] + [None]
-    possible_geometry = [rules.ColumnNames.AREA, rules.ColumnNames.TRACES] + [None]
 
     return dict(
         area=lists(sampled_from(possible_areas), unique=True),
@@ -140,11 +139,10 @@ def query_strategy():
         scale=lists(sampled_from(possible_scale), unique=True),
         area_shape=sampled_from(possible_area_shape),
         validity=sampled_from(possible_validity),
-        geometry=sampled_from(possible_geometry),
     )
 
 
-def query_example(geometry, assumed_result: int):
+def query_example(assumed_result: int):
     """
     Create query example.
     """
@@ -171,13 +169,12 @@ def query_example(geometry, assumed_result: int):
         area_shape=rules.AreaShapes.CIRCLE,
         validity=rules.ValidationResults.INVALID,
         assumed_result=assumed_result,
-        geometry=geometry,
     )
 
 
-@example(**query_example(geometry=None, assumed_result=1))
-@example(**query_example(geometry=rules.Geometry.AREAS, assumed_result=1))
-@example(**query_example(geometry=rules.Geometry.TRACES, assumed_result=1))
+@example(**query_example(assumed_result=1))
+@example(**query_example(assumed_result=1))
+@example(**query_example(assumed_result=1))
 @given(**query_strategy(), assumed_result=none())
 def test_organizer_query_organized(
     organizer_organized: Organizer,
@@ -187,7 +184,6 @@ def test_organizer_query_organized(
     scale,
     area_shape,
     validity,
-    geometry,
     assumed_result,
 ):
     """
@@ -200,7 +196,6 @@ def test_organizer_query_organized(
         scale=scale,
         area_shape=area_shape,
         validity=validity,
-        geometry=geometry,
     )
     assert isinstance(query_results, list)
 
@@ -216,9 +211,6 @@ def test_organizer_query_organized(
 
     if isinstance(assumed_result, int):
         assert len(query_results) == assumed_result
-
-    if geometry is not None and len(query_results) != 0:
-        assert None in query_results[0]
 
 
 def test_organizer_update_organized(organizer_unorganized: Organizer):
