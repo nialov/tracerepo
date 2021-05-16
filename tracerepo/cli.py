@@ -139,3 +139,12 @@ def check(
     organizer = Organizer(database=repo.read_database_csv(path=database))
 
     organizer.check()
+
+
+@app.command()
+def init(path: Path = typer.Argument(rules.DATABASE_CSV)):
+    """
+    Initialize tracerepo in current directory.
+    """
+    df = repo.scaffold()
+    repo.write_database_csv(path=path, database=df)

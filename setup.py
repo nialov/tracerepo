@@ -138,7 +138,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=["attrs", "fractopo", "typer"],  # Optional
+    install_requires=["pandas", "pandera", "fractopo", "typer"],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"
     # syntax, for example:
@@ -148,17 +148,7 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={
-        "dev": [
-            "nox",
-            "invoke",
-            "jupyterlab",
-            "ipython",
-            "pytest",
-            "pandas",
-            "pandera",
-            "organize-tool",
-            "hypothesis",
-        ],
+        "dev": ["nox", "invoke", "jupyterlab", "ipython", "pytest", "hypothesis",],
         "docs": ["sphinx", "sphinx-rtd-theme", "nbsphinx"],
         "coverage": ["coverage", "coverage-badge"],
     },  # Optional

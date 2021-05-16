@@ -43,10 +43,17 @@ def scaffold() -> pd.DataFrame:
     """
     Make scaffold start for a repo.
     """
+    # Make unorganized folder
     Path(rules.FolderNames.UNORGANIZED.value).mkdir(exist_ok=True)
+
+    # Make other default folders
     for path in rules.folder_structure():
         path.mkdir(exist_ok=True, parents=True)
+
+    # Create dataframe for relations between datasets
     df = scaffold_database()
     assert df is not None
+
+    # Validate dataframe with pandera
     df = rules.database_schema().validate(df)
     return df

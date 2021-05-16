@@ -9,13 +9,11 @@ invoke = "*"
 jupyterlab = "*"
 ipython = "*"
 pytest = "*"
-pandas = "*"
-pandera = "*"
-organize-tool = "*"
 hypothesis = "*"
 
 [packages]
-attrs = "*"
+pandas = "*"
+pandera = "*"
 fractopo = "*"
 typer = "*"
 
