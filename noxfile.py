@@ -92,6 +92,9 @@ def tests_pip(session):
         coverage_svg_path.parent.mkdir(parents=True)
     session.run("coverage-badge", "-o", str(coverage_svg_path))
 
+    # Test that cli installation works
+    session.run("tracerepo", "--help")
+
 
 @nox.session(python="3.8")
 def notebooks(session):
