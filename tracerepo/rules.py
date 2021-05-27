@@ -194,16 +194,16 @@ def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
     E.g.
 
     >>> filename_regex()
-    '^[a-z0-9_]{3,23}$'
+    '^[a-z0-9_]{2,23}$'
 
     >>> filename_regex(ColumnNames.AREA)
-    '^[a-z0-9_]{3,23}_area$'
+    '^[a-z0-9_]{2,23}_area$'
 
     >>> filename_regex(ColumnNames.TRACES)
-    '^[a-z0-9_]{3,23}_traces$'
+    '^[a-z0-9_]{2,23}_traces$'
 
     """
-    base = r"^[a-z0-9_]{3,23}"
+    base = r"^[a-z0-9_]{2,23}"
 
     if geom_type is None:
         return base + r"$"

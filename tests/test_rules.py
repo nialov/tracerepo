@@ -13,4 +13,4 @@ def test_filename_regex(name: str):
     Test tests name_regex.
     """
     assert isinstance(name, str)
-    assert len(name) >= 3
+    assert len(name) >= 2
