@@ -1,9 +1,9 @@
 """
 General utilities.
 """
+import logging
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Sequence, Type
-import logging
 
 import geopandas as gpd
 import pandas as pd
