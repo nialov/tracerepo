@@ -1,6 +1,7 @@
 """
 General utilities.
 """
+import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Sequence, Type
@@ -233,6 +234,12 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
 
     rules.traces_schema().validate(gdf)
 
-    gdf.to_file(path, driver=driver) if driver != geojson_driver else write_geojson(
-        gdf, path
-    )
+    gdf.to_file(path, driver=driver)
+
+    if driver == geojson_driver:
+
+        # Format geojson with indent of 1
+        read_json = path.read_text()
+        loaded_json = json.loads(read_json)
+        dumped_json = json.dumps(loaded_json, indent=1)
+        path.write_text(dumped_json)
