@@ -3,11 +3,14 @@ General utilities.
 """
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Sequence, Type
+import logging
 
 import geopandas as gpd
 import pandas as pd
 
 import tracerepo.rules as rules
+
+geojson_driver = "GeoJSON"
 
 
 class TraceTuple(NamedTuple):
@@ -207,16 +210,29 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     for column in gdf.columns.values:
         if isinstance(gdf[column].values[0], list):
+            logging.info(f"Converting {column} from list to str.")
             gdf[column] = gdf[column].astype(str)
     return gdf
 
 
-def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = "GeoJSON"):
+def write_geojson(gdf: gpd.GeoDataFrame, path: Path):
     """
-    Write geodata as GeoJSON.
+    Write geodata as GeoJSON with 1 space delimition.
+    """
+    as_json = gdf.to_json(indent=1)
+    path.write_text(as_json)
+
+
+def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_driver):
+    """
+    Write geodata with driver.
+
+    Default is GeoJSON.
     """
     gdf = convert_list_columns(gdf)
 
     rules.traces_schema().validate(gdf)
 
-    gdf.to_file(path, driver=driver)
+    gdf.to_file(path, driver=driver) if driver != geojson_driver else write_geojson(
+        gdf, path
+    )
