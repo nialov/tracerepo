@@ -209,9 +209,11 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Convert list type columns to string.
     """
+    gdf = gdf.copy()
     for column in gdf.columns.values:
         if isinstance(gdf[column].values[0], list):
             logging.info(f"Converting {column} from list to str.")
+            gdf[column] = [tuple(item) for item in gdf[column].values]
             gdf[column] = gdf[column].astype(str)
     return gdf
 

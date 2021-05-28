@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Sequence, Tuple, Type, Union
 
 import geopandas as gpd
-from fractopo.general import read_geofile
+from fractopo.general import read_geofile, is_empty_area
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (
     ALL_VALIDATORS,
@@ -41,6 +41,10 @@ def validate(
     """
     Validate trace GeoDataFrame.
     """
+    # Check for empty target area
+    if is_empty_area(area=area, traces=traces):
+        return traces.copy(), ValidationResults.EMPTY
+
     # Create Validation instance
     validation = Validation(
         name=name,
@@ -51,12 +55,13 @@ def validate(
     )
 
     try:
-
         # Run validation
         validated = validation.run_validation(allow_empty_area=False)
 
-    except Exception:
-        logging.critical(f"Validation critically failed for dataset ({name}).")
+    except Exception as exc:
+        logging.critical(
+            f"Validation critically failed for dataset ({name}) with exception: {exc}"
+        )
         return traces, ValidationResults.CRITICAL
 
     # Get the error column values
@@ -70,17 +75,8 @@ def validate(
     # Make sure all were lists
     assert len(validated_error_column_values) == len(validated_error_lists)
 
-    # Check for empty target area
-    if any(
-        [
-            check_for_validator_error(errors, validators=(EmptyTargetAreaValidator,))
-            for errors in validated_error_lists
-        ]
-    ):
-        return validated, ValidationResults.EMPTY
-
     # Check for critical errors that require user fix
-    elif any(
+    if any(
         [
             check_for_validator_error(
                 errors,
