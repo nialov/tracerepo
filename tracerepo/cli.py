@@ -12,25 +12,30 @@ import typer
 import tracerepo.repo as repo
 import tracerepo.rules as rules
 import tracerepo.spatial as spatial
+import tracerepo.utils as utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()
 
+DATABASE_OPTION = typer.Option(
+    rules.DATABASE_CSV,
+    exists=True,
+    file_okay=True,
+    dir_okay=False,
+    writable=True,
+    readable=True,
+)
+
+DATA_FILTER = typer.Option(default=[])
+
 
 @app.command()
 def validate(
-    database: Path = typer.Option(
-        rules.DATABASE_CSV,
-        exists=True,
-        file_okay=True,
-        dir_okay=False,
-        writable=True,
-        readable=True,
-    ),
-    area_filter: List[str] = typer.Option(default=[]),
-    thematic_filter: List[str] = typer.Option(default=[]),
-    traces_filter: List[str] = typer.Option(default=[]),
-    scale_filter: List[str] = typer.Option(default=[]),
+    database: Path = DATABASE_OPTION,
+    area_filter: List[str] = DATA_FILTER,
+    thematic_filter: List[str] = DATA_FILTER,
+    traces_filter: List[str] = DATA_FILTER,
+    scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
 ):
     """
@@ -97,14 +102,7 @@ def validate(
 
 @app.command()
 def organize(
-    database: Path = typer.Option(
-        rules.DATABASE_CSV,
-        exists=True,
-        file_okay=True,
-        dir_okay=False,
-        writable=True,
-        readable=True,
-    ),
+    database: Path = DATABASE_OPTION,
     simulate: bool = typer.Option(False),
     report: bool = typer.Option(True),
 ):
@@ -124,14 +122,7 @@ def organize(
 
 @app.command()
 def check(
-    database: Path = typer.Option(
-        rules.DATABASE_CSV,
-        exists=True,
-        file_okay=True,
-        dir_okay=False,
-        writable=True,
-        readable=True,
-    ),
+    database: Path = DATABASE_OPTION,
 ):
     """
     Check repo.
@@ -148,3 +139,32 @@ def init(path: Path = typer.Argument(rules.DATABASE_CSV)):
     """
     df = repo.scaffold()
     repo.write_database_csv(path=path, database=df)
+
+
+def export_data(destination: Path, driver: str, database: Path):
+    """
+    Export datasets into another format.
+    """
+    # Initialize Organizer
+    organizer = Organizer(database=repo.read_database_csv(path=database))
+
+    # Query for all datasets
+    dataset_tuples = organizer.query()
+
+    # Compile the export destination folder
+    export_destination = f"data-exported-{driver}"
+
+
+
+
+
+@app.command()
+def export(
+    destination: Path = typer.Argument("."),
+    driver: str = typer.Option("Shapefile"),
+    database: Path = DATABASE_OPTION,
+):
+    """
+    Export datasets into another format from command line.
+    """
+    export_data(destination=destination, driver=driver, database=database)

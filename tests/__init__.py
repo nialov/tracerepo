@@ -313,3 +313,20 @@ def test_write_geodata_params():
             True,  # assume_error
         ),
     ]
+
+
+@lru_cache(maxsize=None)
+def test_rename_data_path_params():
+    """
+    Params for test_rename_data_path.
+    """
+    return [
+        (
+            Path("basedir/hello/somedir/anoterdir/yay.txt"),
+            "renamed",
+        ),
+        (
+            Path("basedir/hello/somedir/anoterdir/yay.txt"),
+            "sadfsdfsadfsadfsdafsadfsadf",
+        ),
+    ]

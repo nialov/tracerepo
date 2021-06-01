@@ -182,9 +182,7 @@ def folder_structure() -> List[Path]:
     """
     Get the default data folder structure.
     """
-    root = FolderNames.DATA.value
-    geometry = [FolderNames.TRACES.value, FolderNames.AREA.value]
-    return [Path(root) / geom for geom in geometry]
+    return [Path(FolderNames.DATA.value)]
 
 
 def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:

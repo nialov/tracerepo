@@ -105,3 +105,70 @@ def test_cli_organize(database, trace_gdf, other_args, tmp_path_factory):
             assert len(result.stdout) == 0
 
         tests.click_error_print(result)
+
+
+@settings(max_examples=5, deadline=5000)
+@given(
+    database=tests.database_schema_strategy(),
+)
+@pytest.mark.parametrize(
+    "trace_gdf,other_args",
+    [
+        (tests.kb11_traces_cut, []),
+    ],
+)
+def test_cli_export(database, trace_gdf, other_args, tmp_path_factory):
+    """
+    Test cli.export click entrypoint.
+    """
+    area_gdf: gpd.GeoDataFrame = tests.kb11_area
+    tmp_path = tmp_path_factory.mktemp(basename="test_cli_export", numbered=True)
+
+    args = ["export"] + other_args
+
+    with tests.setup_scaffold_context(tmp_path):
+
+        organizer = tests.set_up_repo_with_invalids_organized(
+            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf, organized=False
+        )
+
+        repo.write_database_csv(
+            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
+        )
+
+        result = runner.invoke(app=app, args=args)
+
+        tests.click_error_print(result)
+
+@settings(max_examples=5, deadline=5000)
+@given(
+    database=tests.database_schema_strategy(),
+)
+@pytest.mark.parametrize(
+    "trace_gdf,other_args",
+    [
+        (tests.kb11_traces_cut, []),
+    ],
+)
+def test_export_data(database, trace_gdf, other_args, tmp_path_factory):
+    """
+    Test cli.export click entrypoint.
+    """
+    area_gdf: gpd.GeoDataFrame = tests.kb11_area
+    tmp_path = tmp_path_factory.mktemp(basename="test_cli_export", numbered=True)
+
+    args = ["export"] + other_args
+
+    with tests.setup_scaffold_context(tmp_path):
+
+        organizer = tests.set_up_repo_with_invalids_organized(
+            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf, organized=False
+        )
+
+        repo.write_database_csv(
+            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
+        )
+
+        result = runner.invoke(app=app, args=args)
+
+        tests.click_error_print(result)

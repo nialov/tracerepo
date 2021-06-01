@@ -238,3 +238,16 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
     )
 
     return update_tuple
+
+def convert_trace_tuples():
+    """
+    Convert between geodata filetypes.
+    """
+    # Iterate over datasets and save
+    for dataset_tuple in dataset_tuples:
+        for path in (dataset_tuple.traces_path, dataset_tuple.area_path):
+
+            # Rename the base data directory to export_destination
+            renamed = utils.rename_data_path(path=path, rename_to=export_destination)
+
+

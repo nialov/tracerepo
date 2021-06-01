@@ -245,3 +245,32 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
         loaded_json = json.loads(read_json)
         dumped_json = json.dumps(loaded_json, indent=1)
         path.write_text(dumped_json)
+
+
+def rename_data_path(path: Path, rename_to: str) -> Path:
+    """
+    Rename the first directory of path to rename_to.
+    """
+    # Get all parent directories of file at path
+    parents = list(path.parents)
+
+    # Get the first parent (furthest)
+    first_parent = parents[-4]
+
+    # Get the other parents
+    other_parents = parents[-4:]
+
+    # Rename the first parent
+    changed_first_parent = first_parent.with_name(rename_to)
+
+    changed_path = changed_first_parent
+
+    # Add back the other parents
+    for parent in other_parents:
+        changed_path = changed_path / parent
+
+    # Add back the original filename
+    changed_path = changed_path / path.name
+    return changed_path
+
+
