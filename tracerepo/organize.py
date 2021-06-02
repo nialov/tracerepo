@@ -159,7 +159,7 @@ class Organizer:
         thematic: Sequence[str] = [],
         scale: Sequence[str] = [],
         area_shape: Optional[rules.AreaShapes] = None,
-        validity: Optional[rules.ValidationResults] = rules.ValidationResults.VALID,
+        validity: Optional[rules.ValidationResults] = None,
     ) -> Sequence[utils.TraceTuple]:
         """
         Query for trace and area data.
