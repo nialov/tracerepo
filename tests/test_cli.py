@@ -2,6 +2,9 @@
 Tests for cli.py.
 """
 
+import os
+from pathlib import Path
+
 import geopandas as gpd
 import pytest
 from click.testing import Result
@@ -11,7 +14,9 @@ from typer.testing import CliRunner
 import tests
 import tracerepo.repo as repo
 import tracerepo.rules as rules
-from tracerepo.cli import app
+import tracerepo.spatial as spatial
+import tracerepo.utils as utils
+from tracerepo.cli import app, export_data
 
 runner = CliRunner()
 
@@ -107,68 +112,54 @@ def test_cli_organize(database, trace_gdf, other_args, tmp_path_factory):
         tests.click_error_print(result)
 
 
-@settings(max_examples=5, deadline=5000)
-@given(
-    database=tests.database_schema_strategy(),
-)
-@pytest.mark.parametrize(
-    "trace_gdf,other_args",
-    [
-        (tests.kb11_traces_cut, []),
-    ],
-)
-def test_cli_export(database, trace_gdf, other_args, tmp_path_factory):
+@pytest.mark.parametrize("driver", ["ESRI Shapefile", "GPKG"])
+def test_export_data(tmp_path, driver):
     """
-    Test cli.export click entrypoint.
+    Test export_data.
     """
-    area_gdf: gpd.GeoDataFrame = tests.kb11_area
-    tmp_path = tmp_path_factory.mktemp(basename="test_cli_export", numbered=True)
+    cur_dir = Path(".").absolute()
+    os.chdir(tmp_path)
 
-    args = ["export"] + other_args
-
-    with tests.setup_scaffold_context(tmp_path):
-
-        organizer = tests.set_up_repo_with_invalids_organized(
-            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf, organized=False
+    try:
+        database_lines = (
+            "area,traces,thematic,scale,area-shape,validity,snap-threshold",
+            (
+                "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
+                "ahvenanmaa,20m,circle,valid,0.001"
+            ),
         )
 
-        repo.write_database_csv(
-            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
-        )
+        database_path = Path("database.csv")
+        database_path.write_text("\n".join(database_lines))
 
-        result = runner.invoke(app=app, args=args)
+        area_path = Path("data/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson")
+        traces_path = Path("data/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson")
 
-        tests.click_error_print(result)
+        assert not area_path.parent.exists()
+        assert not traces_path.parent.exists()
 
-@settings(max_examples=5, deadline=5000)
-@given(
-    database=tests.database_schema_strategy(),
-)
-@pytest.mark.parametrize(
-    "trace_gdf,other_args",
-    [
-        (tests.kb11_traces_cut, []),
-    ],
-)
-def test_export_data(database, trace_gdf, other_args, tmp_path_factory):
-    """
-    Test cli.export click entrypoint.
-    """
-    area_gdf: gpd.GeoDataFrame = tests.kb11_area
-    tmp_path = tmp_path_factory.mktemp(basename="test_cli_export", numbered=True)
+        area_path.parent.mkdir(exist_ok=True, parents=True)
+        traces_path.parent.mkdir(exist_ok=True, parents=True)
 
-    args = ["export"] + other_args
+        tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
+        tests.kb11_area.to_file(area_path, driver="GeoJSON")
 
-    with tests.setup_scaffold_context(tmp_path):
+        Path("unorganized").mkdir()
 
-        organizer = tests.set_up_repo_with_invalids_organized(
-            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf, organized=False
-        )
+        file_count = len(list(Path(".").iterdir()))
 
-        repo.write_database_csv(
-            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
-        )
+        export_data(Path("."), driver=driver, database=database_path)
 
-        result = runner.invoke(app=app, args=args)
+        assert len(list(Path(".").iterdir())) > file_count
 
-        tests.click_error_print(result)
+        export_dir_path = Path(utils.compile_export_dir(driver=driver))
+        assert export_dir_path.exists()
+
+        for shp in export_dir_path.rglob(f"*{spatial.DRIVER_EXTENSIONS[driver]}"):
+            assert isinstance(gpd.read_file(shp), gpd.GeoDataFrame)
+
+    except Exception:
+        os.chdir(cur_dir)
+        raise
+    finally:
+        os.chdir(cur_dir)

@@ -250,27 +250,18 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
 def rename_data_path(path: Path, rename_to: str) -> Path:
     """
     Rename the first directory of path to rename_to.
+
+    >>> str(rename_data_path(Path("data/loviisa/traces/20m/file.txt"), "hey"))
+    'hey/loviisa/traces/20m/file.txt'
+
     """
-    # Get all parent directories of file at path
-    parents = list(path.parents)
+    splitter = "/" if "/" in str(path) else r"\\"
 
-    # Get the first parent (furthest)
-    first_parent = parents[-4]
-
-    # Get the other parents
-    other_parents = parents[-4:]
-
-    # Rename the first parent
-    changed_first_parent = first_parent.with_name(rename_to)
-
-    changed_path = changed_first_parent
-
-    # Add back the other parents
-    for parent in other_parents:
-        changed_path = changed_path / parent
-
-    # Add back the original filename
-    changed_path = changed_path / path.name
-    return changed_path
+    return Path(f"{rename_to}/" + "/".join(str(path).split(splitter)[1:]))
 
 
+def compile_export_dir(driver: str) -> str:
+    """
+    Compile directory name for data exporting.
+    """
+    return f"data-exported-{driver}"

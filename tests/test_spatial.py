@@ -1,7 +1,7 @@
 """
 Tests for spatial.py.
 """
-
+from pathlib import Path
 
 import geopandas as gpd
 import pandas as pd
@@ -78,3 +78,19 @@ def test_validate_invalids(
                 update_tuple.update_values[rules.ColumnNames.VALIDITY]
                 == assume_error.value
             )
+
+
+@pytest.mark.parametrize(
+    "dataset_tuples,export_destination,driver", tests.test_convert_trace_tuples_params()
+)
+def test_convert_trace_tuples(dataset_tuples, export_destination, driver):
+    """
+    Test convert_trace_tuples.
+    """
+    result = spatial.convert_trace_tuples(
+        dataset_tuples, export_destination=export_destination, driver=driver
+    )
+
+    assert isinstance(result, list)
+    assert isinstance(result[0], tuple)
+    assert isinstance(result[0][0], Path)

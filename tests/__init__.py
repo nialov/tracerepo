@@ -19,6 +19,7 @@ from shapely.geometry import LineString, MultiLineString, Point
 import tracerepo.repo as repo
 import tracerepo.rules as rules
 from tracerepo.organize import Organizer
+from tracerepo.utils import TraceTuple
 
 
 def cut(
@@ -328,5 +329,24 @@ def test_rename_data_path_params():
         (
             Path("basedir/hello/somedir/anoterdir/yay.txt"),
             "sadfsdfsadfsadfsdafsadfsadf",
+        ),
+    ]
+
+
+@lru_cache(maxsize=None)
+def test_convert_trace_tuples_params():
+    """
+    Params for test_convert_trace_tuples.
+    """
+    return [
+        (
+            [
+                TraceTuple(
+                    traces_path=Path("data/loviisa/traces/20m/hello_traces.geojson"),
+                    area_path=Path("data/loviisa/area/20m/hello_area.geojson"),
+                )
+            ],
+            "newdata",
+            "GPKG",
         ),
     ]

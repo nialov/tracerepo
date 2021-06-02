@@ -149,19 +149,27 @@ def export_data(destination: Path, driver: str, database: Path):
     organizer = Organizer(database=repo.read_database_csv(path=database))
 
     # Query for all datasets
-    dataset_tuples = organizer.query()
+    trace_tuples = organizer.query()
 
     # Compile the export destination folder
-    export_destination = f"data-exported-{driver}"
+    export_destination = utils.compile_export_dir(driver)
 
+    convert_paths = spatial.convert_trace_tuples(
+        trace_tuples, export_destination=export_destination, driver=driver
+    )
 
-
+    spatial.save_converted_paths(
+        trace_tuples=trace_tuples,
+        convert_paths=convert_paths,
+        driver=driver,
+        destination=destination,
+    )
 
 
 @app.command()
 def export(
-    destination: Path = typer.Argument("."),
-    driver: str = typer.Option("Shapefile"),
+    destination: Path = typer.Argument(".", file_okay=False),
+    driver: str = typer.Option("ESRI Shapefile"),
     database: Path = DATABASE_OPTION,
 ):
     """

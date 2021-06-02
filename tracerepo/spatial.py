@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Sequence, Tuple, Type, Union
 
 import geopandas as gpd
-from fractopo.general import read_geofile, is_empty_area
+from fractopo.general import is_empty_area, read_geofile
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (
     ALL_VALIDATORS,
@@ -22,8 +22,11 @@ import tracerepo.rules as rules
 import tracerepo.spatial as spatial
 import tracerepo.utils as utils
 from tracerepo.rules import ValidationResults
+from tracerepo.utils import TraceTuple
 
 ANY_VALIDATOR = Union[Type[BaseValidator], Type[EmptyTargetAreaValidator]]
+
+DRIVER_EXTENSIONS = {"ESRI Shapefile": ".shp", "GPKG": ".gpkg"}
 
 
 def check_for_validator_error(
@@ -239,15 +242,98 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
 
     return update_tuple
 
-def convert_trace_tuples():
+
+def rename_trace_tuple_paths(
+    trace_tuple: TraceTuple, export_destination: str, driver: str
+) -> Tuple[Path, Path]:
     """
-    Convert between geodata filetypes.
+    Rename TraceTuple paths with new base data directory and extension.
     """
+    return rename_path(
+        trace_tuple.traces_path, export_destination, driver
+    ), rename_path(trace_tuple.area_path, export_destination, driver)
+
+
+def rename_path(path: Path, export_destination: str, driver: str) -> Path:
+    """
+    Rename path to new base data dir and extension.
+
+    >>> str(rename_path(
+    ... Path("data/loviisa/traces/20m/hey.geojson"), "newdata", "ESRI Shapefile"
+    ... ))
+     'newdata/loviisa/traces/20m/hey.shp'
+    """
+    renamed = utils.rename_data_path(path=path, rename_to=export_destination)
+
+    # Convert suffix
+    fully_renamed = renamed.with_suffix(DRIVER_EXTENSIONS[driver])
+
+    assert DRIVER_EXTENSIONS[driver] in str(fully_renamed)
+    assert export_destination in str(fully_renamed)
+
+    return fully_renamed
+
+
+def convert_trace_tuples(
+    trace_tuples: Sequence[TraceTuple], export_destination: str, driver: str
+):
+    """
+    Make paths for converting between geodata filetypes.
+
+    >>> from pprint import pprint
+    >>> trace_tuple = TraceTuple(
+    ... traces_path=Path("data/loviisa/traces/20m/traces.geojson"),
+    ... area_path=Path("data/loviisa/traces/20m/area.geojson"),
+    ... )
+    >>> pprint(convert_trace_tuples([trace_tuple], "exported", "GPKG") )
+    [(PosixPath('exported/loviisa/traces/20m/traces.gpkg'),
+      PosixPath('exported/loviisa/traces/20m/area.gpkg'))]
+
+    """
+    convert_paths = []
     # Iterate over datasets and save
-    for dataset_tuple in dataset_tuples:
-        for path in (dataset_tuple.traces_path, dataset_tuple.area_path):
+    trace_tuple: TraceTuple
+    for trace_tuple in trace_tuples:
+        convert_paths.append(
+            rename_trace_tuple_paths(
+                trace_tuple=trace_tuple,
+                export_destination=export_destination,
+                driver=driver,
+            )
+        )
 
-            # Rename the base data directory to export_destination
-            renamed = utils.rename_data_path(path=path, rename_to=export_destination)
+    return convert_paths
 
 
+def save_converted_paths(
+    trace_tuples: Sequence[TraceTuple],
+    convert_paths: Sequence[Tuple[Path, Path]],
+    driver: str,
+    destination: Path,
+):
+    """
+    Save transformed geodata files to new paths.
+    """
+    for trace_tuple, convert_path_tuple in zip(trace_tuples, convert_paths):
+
+        for original_path, convert_path in zip(
+            (trace_tuple.traces_path, trace_tuple.area_path), convert_path_tuple
+        ):
+            convert_filetype(original_path, destination / convert_path, driver=driver)
+
+
+def convert_filetype(original_path: Path, convert_path: Path, driver: str):
+    """
+    Convert from original_path to convert_path with driver.
+    """
+    if not original_path.exists():
+        raise FileNotFoundError(f"Expected original_path to exist at {original_path}.")
+
+    # Read from path
+    gdf = read_geofile(original_path)
+
+    # Make parent directories as needed
+    convert_path.parent.mkdir(exist_ok=True, parents=True)
+
+    # Save with new extension and type
+    gdf.to_file(convert_path, driver=driver)
