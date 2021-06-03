@@ -114,7 +114,7 @@ def name_column_kwargs(
     return dict(
         pandas_dtype=pa.String,
         checks=[
-            pa.Check.str_length(min_value=2, max_value=30),
+            pa.Check.str_length(min_value=2, max_value=50),
             pa.Check.str_matches(filename_regex(geom_type=geom_type)),
         ],
         allow_duplicates=allow_duplicates,
