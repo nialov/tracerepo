@@ -154,10 +154,12 @@ def export_data(destination: Path, driver: str, database: Path):
     # Compile the export destination folder
     export_destination = utils.compile_export_dir(driver)
 
+    # Compile from trace tuples into paths
     convert_paths = spatial.convert_trace_tuples(
         trace_tuples, export_destination=export_destination, driver=driver
     )
 
+    # Export to disk
     spatial.save_converted_paths(
         trace_tuples=trace_tuples,
         convert_paths=convert_paths,

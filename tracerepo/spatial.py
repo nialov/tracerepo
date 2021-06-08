@@ -276,7 +276,7 @@ def rename_path(path: Path, export_destination: str, driver: str) -> Path:
 
 def convert_trace_tuples(
     trace_tuples: Sequence[TraceTuple], export_destination: str, driver: str
-):
+) -> List[Tuple[Path, Path]]:
     """
     Make paths for converting between geodata filetypes.
 
