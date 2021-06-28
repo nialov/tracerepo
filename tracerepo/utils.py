@@ -264,4 +264,5 @@ def compile_export_dir(driver: str) -> str:
     """
     Compile directory name for data exporting.
     """
-    return f"data-exported-{driver}"
+    dash_replaced_driver = driver.replace(" ", "-")
+    return f"data-exported-{dash_replaced_driver}"

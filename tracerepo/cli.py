@@ -151,7 +151,7 @@ def export_data(destination: Path, driver: str, database: Path):
     # Query for all datasets
     trace_tuples = organizer.query()
 
-    # Compile the export destination folder
+    # Resolve the export destination folder
     export_destination = utils.compile_export_dir(driver)
 
     # Compile from trace tuples into paths
