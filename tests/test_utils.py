@@ -37,8 +37,6 @@ def test_rename_data_path(path, rename_to):
     assert rename_to in str(list(result.parents)[0])
 
 
-
-
 @pytest.mark.parametrize("driver", tests.test_compile_export_dir_params())
 def test_compile_export_dir(driver):
     """
