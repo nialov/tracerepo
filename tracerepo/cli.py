@@ -141,7 +141,7 @@ def init(path: Path = typer.Argument(rules.DATABASE_CSV)):
     repo.write_database_csv(path=path, database=df)
 
 
-def export_data(destination: Path, driver: str, database: Path):
+def export_data(destination: Path, driver: str, database: Path) -> str:
     """
     Export datasets into another format.
     """
@@ -167,6 +167,8 @@ def export_data(destination: Path, driver: str, database: Path):
         destination=destination,
     )
 
+    return export_destination
+
 
 @app.command()
 def export(
@@ -177,4 +179,8 @@ def export(
     """
     Export datasets into another format from command line.
     """
-    export_data(destination=destination, driver=driver, database=database)
+    export_destination = export_data(
+        destination=destination, driver=driver, database=database
+    )
+
+    print(f"Saved datasets to {export_destination} with driver {driver}.")
