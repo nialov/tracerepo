@@ -12,6 +12,7 @@ import pandas as pd
 import tracerepo.rules as rules
 
 geojson_driver = "GeoJSON"
+export_dir_prefix = "data-exported-"
 
 
 class TraceTuple(NamedTuple):
@@ -263,6 +264,9 @@ def rename_data_path(path: Path, rename_to: str) -> Path:
 def compile_export_dir(driver: str) -> str:
     """
     Compile directory name for data exporting.
+
+    >>> compile_export_dir("ESRI Shapefile")
+    'data-exported-ESRI-Shapefile'
     """
     dash_replaced_driver = driver.replace(" ", "-")
-    return f"data-exported-{dash_replaced_driver}"
+    return f"{export_dir_prefix}{dash_replaced_driver}"

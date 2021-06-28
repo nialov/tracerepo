@@ -350,3 +350,14 @@ def test_convert_trace_tuples_params():
             "GPKG",
         ),
     ]
+
+
+@lru_cache(maxsize=None)
+def test_compile_export_dir_params():
+    """
+    Params for test_compile_export_dir.
+    """
+    return [
+        "ESRI Shapefile",
+        "GPKG",
+    ]
