@@ -327,7 +327,16 @@ def convert_filetype(original_path: Path, convert_path: Path, driver: str):
     Convert from original_path to convert_path with driver.
     """
     if not original_path.exists():
-        raise FileNotFoundError(f"Expected original_path to exist at {original_path}.")
+        raise FileNotFoundError(
+            f"Expected {original_path.name} to exist at {original_path}."
+        )
+
+    # If already saved same trace dataset no need to overwrite
+    # If exporting to directory that you've already previously exported to
+    # it is removed before exporting
+    if convert_path.exists():
+        logging.info(f"Dataset already exists at {convert_path}.")
+        return
 
     # Read from path
     gdf = read_geofile(original_path)
@@ -336,4 +345,5 @@ def convert_filetype(original_path: Path, convert_path: Path, driver: str):
     convert_path.parent.mkdir(exist_ok=True, parents=True)
 
     # Save with new extension and type
+    logging.info(f"Saving to {convert_path} with driver {driver}.")
     gdf.to_file(convert_path, driver=driver)

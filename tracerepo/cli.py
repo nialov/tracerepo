@@ -5,6 +5,7 @@ Command line api for tracerepo.
 import logging
 from pathlib import Path
 from pprint import pprint
+from shutil import rmtree
 from typing import List
 
 import typer
@@ -101,6 +102,49 @@ def validate(
 
 
 @app.command()
+def format(
+    database: Path = DATABASE_OPTION,
+):
+    """
+    Format all dataset GeoJSON from cli.
+    """
+    format_geojson(database=database)
+
+
+def format_geojson(
+    database: Path,
+):
+    """
+    Format all dataset GeoJSON.
+    """
+    # Initialize Organizer
+    organizer = Organizer(database=repo.read_database_csv(path=database))
+
+    # Query for invalid traces
+    trace_tuples = organizer.query()
+
+    # Do not load and save same paths multiple times
+    formatted_paths = set()
+
+    # Iterate over all area trace tuples
+
+    for trace_tuple in trace_tuples:
+
+        for path in (trace_tuple.traces_path, trace_tuple.area_path):
+            if path in formatted_paths:
+                continue
+
+            # Read GeoDataFrame
+            gdf = spatial.read_geofile(path)
+
+            # Write as GeoJSON
+            utils.write_geodata(gdf=gdf, path=path)
+
+            # Add formatted paths
+            formatted_paths.add(path)
+
+
+@app.command()
 def organize(
     database: Path = DATABASE_OPTION,
     simulate: bool = typer.Option(False),
@@ -141,20 +185,50 @@ def init(path: Path = typer.Argument(rules.DATABASE_CSV)):
     repo.write_database_csv(path=path, database=df)
 
 
-def export_data(destination: Path, driver: str, database: Path) -> str:
+def export_data(
+    destination: Path,
+    driver: str,
+    database: Path,
+    area_filter: List[str] = [],
+    thematic_filter: List[str] = [],
+    traces_filter: List[str] = [],
+    scale_filter: List[str] = [],
+    overwrite: bool = True,
+) -> str:
     """
     Export datasets into another format.
     """
     # Initialize Organizer
     organizer = Organizer(database=repo.read_database_csv(path=database))
 
-    # Query for all datasets
-    trace_tuples = organizer.query()
+    # Query for datasets based on filters
+    # By default filters are empty i.e. all are selected
+    trace_tuples = organizer.query(
+        area=area_filter,
+        thematic=thematic_filter,
+        traces=traces_filter,
+        scale=scale_filter,
+    )
 
     # Resolve the export destination folder
     export_destination = utils.compile_export_dir(driver)
 
+    # Does destination already exist
+    destination_exists = Path(export_destination).exists()
+
+    if destination_exists and overwrite:
+
+        logging.info(f"Removing directory ({export_destination}) recursively.")
+        rmtree(export_destination)
+
+    elif destination_exists:
+        raise FileExistsError(
+            f"Directory already exists at {export_destination} "
+            "and overwrite is not allowed (--no-overwrite given)."
+        )
+
     # Compile from trace tuples into paths
+    # TODO: Could just return TraceTuples again as they are just paths...
     convert_paths = spatial.convert_trace_tuples(
         trace_tuples, export_destination=export_destination, driver=driver
     )
@@ -175,12 +249,24 @@ def export(
     destination: Path = typer.Argument(".", file_okay=False),
     driver: str = typer.Option("ESRI Shapefile"),
     database: Path = DATABASE_OPTION,
+    area_filter: List[str] = DATA_FILTER,
+    thematic_filter: List[str] = DATA_FILTER,
+    traces_filter: List[str] = DATA_FILTER,
+    scale_filter: List[str] = DATA_FILTER,
+    overwrite: bool = typer.Option(True),
 ):
     """
     Export datasets into another format from command line.
     """
     export_destination = export_data(
-        destination=destination, driver=driver, database=database
+        destination=destination,
+        driver=driver,
+        database=database,
+        area_filter=area_filter,
+        thematic_filter=thematic_filter,
+        traces_filter=traces_filter,
+        scale_filter=scale_filter,
+        overwrite=overwrite,
     )
 
     print(f"Saved datasets to {export_destination} with driver {driver}.")

@@ -16,7 +16,7 @@ import tracerepo.repo as repo
 import tracerepo.rules as rules
 import tracerepo.spatial as spatial
 import tracerepo.utils as utils
-from tracerepo.cli import app, export_data
+from tracerepo.cli import app, export_data, format_geojson
 
 runner = CliRunner()
 
@@ -157,6 +157,56 @@ def test_export_data(tmp_path, driver):
 
         for shp in export_dir_path.rglob(f"*{spatial.DRIVER_EXTENSIONS[driver]}"):
             assert isinstance(gpd.read_file(shp), gpd.GeoDataFrame)
+
+    except Exception:
+        os.chdir(cur_dir)
+        raise
+    finally:
+        os.chdir(cur_dir)
+
+
+def test_format_geojson(tmp_path):
+    """
+    Test format_geojson.
+    """
+    cur_dir = Path(".").absolute()
+    os.chdir(tmp_path)
+
+    try:
+        database_lines = (
+            "area,traces,thematic,scale,area-shape,validity,snap-threshold",
+            (
+                "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
+                "ahvenanmaa,20m,circle,valid,0.001"
+            ),
+        )
+
+        database_path = Path("database.csv")
+        database_path.write_text("\n".join(database_lines))
+
+        area_path = Path("data/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson")
+        traces_path = Path("data/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson")
+
+        assert not area_path.parent.exists()
+        assert not traces_path.parent.exists()
+
+        area_path.parent.mkdir(exist_ok=True, parents=True)
+        traces_path.parent.mkdir(exist_ok=True, parents=True)
+
+        tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
+        tests.kb11_area.to_file(area_path, driver="GeoJSON")
+
+        original_traces_geojson = traces_path.read_text()
+        original_area_geojson = area_path.read_text()
+
+        Path("unorganized").mkdir()
+
+        format_geojson(database=database_path)
+
+        # The original files have unindented geojson by default from
+        # gpd.to_file
+        assert len(original_traces_geojson) != len(traces_path.read_text())
+        assert len(original_area_geojson) != len(area_path.read_text())
 
     except Exception:
         os.chdir(cur_dir)
