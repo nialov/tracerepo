@@ -5,7 +5,8 @@ import os
 from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
-from pickle import loads
+
+# from pickle import loads
 from traceback import print_tb
 from typing import Callable, Iterator, Optional
 
@@ -43,6 +44,16 @@ def dislocate(dataset: gpd.GeoDataFrame, xoff: int = 100000):
     return dislocated
 
 
+def create_and_package(path: Path, create_dataset: Callable):
+    """
+    Create dataset and save as GeoPackage.
+    """
+    loaded: gpd.GeoDataFrame = create_dataset()
+    assert isinstance(loaded, gpd.GeoDataFrame)
+    loaded.to_file(path, driver="GPKG")
+    return loaded
+
+
 def cached_sample(
     path: Path, create_dataset: Callable[..., gpd.GeoDataFrame]
 ) -> gpd.GeoDataFrame:
@@ -50,14 +61,12 @@ def cached_sample(
     Cache a sample or load already existing.
     """
     if path.exists():
-        loaded = loads(path.read_bytes())
+        loaded = gpd.read_file(path)
         assert isinstance(loaded, gpd.GeoDataFrame)
         assert loaded.crs is not None
         return loaded
     else:
-        loaded = create_dataset()
-        loaded.to_pickle(path=path)
-    return loaded
+        return create_and_package(path=path, create_dataset=create_dataset)
 
 
 def df_data():
@@ -183,10 +192,10 @@ kb11_area = read_geofile(kb11_area_path)
 
 
 kb11_traces_cut_dislocated_path = Path(
-    "tests/sample_data/KB11/KB11_traces_cut_dislocated.pickle"
+    "tests/sample_data/tmp/KB11_traces_cut_dislocated.gpkg"
 )
 
-kb11_traces_cut_path = Path("tests/sample_data/KB11/KB11_traces_cut.pickle")
+kb11_traces_cut_path = Path("tests/sample_data/tmp/KB11_traces_cut.gpkg")
 
 kb11_traces_cut = cached_sample(
     path=kb11_traces_cut_path,
@@ -342,8 +351,12 @@ def test_convert_trace_tuples_params():
         (
             [
                 TraceTuple(
-                    traces_path=Path("data/loviisa/traces/20m/hello_traces.geojson"),
-                    area_path=Path("data/loviisa/area/20m/hello_area.geojson"),
+                    traces_path=Path(
+                        f"{rules.FolderNames.DATA.value}/loviisa/traces/20m/hello_traces.geojson"
+                    ),
+                    area_path=Path(
+                        f"{rules.FolderNames.DATA.value}/loviisa/area/20m/hello_area.geojson"
+                    ),
                 )
             ],
             "newdata",

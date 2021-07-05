@@ -91,7 +91,7 @@ def compiled_path(
 
     >>> path = str(compiled_path("inkoo", "traces", "drone_20m", "geta_20m_1_traces"))
     >>> path.replace("\\", "/")
-    'data/inkoo/traces/drone_20m/geta_20m_1_traces.geojson'
+    'tracerepository_data/inkoo/traces/drone_20m/geta_20m_1_traces.geojson'
 
     """
     return Path(root) / thematic / geometry / scale / f"{name}.{rules.FILETYPE}"

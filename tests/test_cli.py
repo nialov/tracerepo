@@ -132,8 +132,12 @@ def test_export_data(tmp_path, driver):
         database_path = Path("database.csv")
         database_path.write_text("\n".join(database_lines))
 
-        area_path = Path("data/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson")
-        traces_path = Path("data/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson")
+        area_path = Path(
+            f"{rules.FolderNames.DATA.value}/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+        )
+        traces_path = Path(
+            f"{rules.FolderNames.DATA.value}/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+        )
 
         assert not area_path.parent.exists()
         assert not traces_path.parent.exists()
@@ -184,8 +188,12 @@ def test_format_geojson(tmp_path):
         database_path = Path("database.csv")
         database_path.write_text("\n".join(database_lines))
 
-        area_path = Path("data/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson")
-        traces_path = Path("data/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson")
+        area_path = Path(
+            f"{rules.FolderNames.DATA.value}/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+        )
+        traces_path = Path(
+            f"{rules.FolderNames.DATA.value}/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+        )
 
         assert not area_path.parent.exists()
         assert not traces_path.parent.exists()

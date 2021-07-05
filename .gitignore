@@ -10,3 +10,4 @@ dev/
 .vim
 .esri.gz
 *.pickle
+tests/sample_data/tmp/*

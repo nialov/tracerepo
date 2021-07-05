@@ -72,7 +72,7 @@ class FolderNames(Enum):
     TODO: Add filenames as well.
     """
 
-    DATA = "data"
+    DATA = "tracerepository_data"
     TRACES = "traces"
     AREA = "area"
     UNORGANIZED = "unorganized"
@@ -114,7 +114,6 @@ def name_column_kwargs(
     return dict(
         pandas_dtype=pa.String,
         checks=[
-            pa.Check.str_length(min_value=2, max_value=50),
             pa.Check.str_matches(filename_regex(geom_type=geom_type)),
         ],
         allow_duplicates=allow_duplicates,
@@ -192,16 +191,16 @@ def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
     E.g.
 
     >>> filename_regex()
-    '^[a-z0-9_]{2,50}$'
+    '^[a-z0-9_]{2,49}$'
 
     >>> filename_regex(ColumnNames.AREA)
-    '^[a-z0-9_]{2,50}_area$'
+    '^[a-z0-9_]{2,49}_area$'
 
     >>> filename_regex(ColumnNames.TRACES)
-    '^[a-z0-9_]{2,50}_traces$'
+    '^[a-z0-9_]{2,49}_traces$'
 
     """
-    base = r"^[a-z0-9_]{2,50}"
+    base = r"^[a-z0-9_]{2,49}"
 
     if geom_type is None:
         return base + r"$"
