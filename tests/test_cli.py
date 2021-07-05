@@ -133,10 +133,12 @@ def test_export_data(tmp_path, driver):
         database_path.write_text("\n".join(database_lines))
 
         area_path = Path(
-            f"{rules.FolderNames.DATA.value}/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+            f"{rules.FolderNames.DATA.value}"
+            "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
         )
         traces_path = Path(
-            f"{rules.FolderNames.DATA.value}/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+            f"{rules.FolderNames.DATA.value}"
+            "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
         )
 
         assert not area_path.parent.exists()
@@ -189,10 +191,12 @@ def test_format_geojson(tmp_path):
         database_path.write_text("\n".join(database_lines))
 
         area_path = Path(
-            f"{rules.FolderNames.DATA.value}/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+            f"{rules.FolderNames.DATA.value}"
+            "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
         )
         traces_path = Path(
-            f"{rules.FolderNames.DATA.value}/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+            f"{rules.FolderNames.DATA.value}"
+            "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
         )
 
         assert not area_path.parent.exists()

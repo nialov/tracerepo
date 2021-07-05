@@ -352,10 +352,12 @@ def test_convert_trace_tuples_params():
             [
                 TraceTuple(
                     traces_path=Path(
-                        f"{rules.FolderNames.DATA.value}/loviisa/traces/20m/hello_traces.geojson"
+                        f"{rules.FolderNames.DATA.value}"
+                        "/loviisa/traces/20m/hello_traces.geojson"
                     ),
                     area_path=Path(
-                        f"{rules.FolderNames.DATA.value}/loviisa/area/20m/hello_area.geojson"
+                        f"{rules.FolderNames.DATA.value}"
+                        "/loviisa/area/20m/hello_area.geojson"
                     ),
                 )
             ],
