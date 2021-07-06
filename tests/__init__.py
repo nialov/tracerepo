@@ -50,6 +50,9 @@ def create_and_package(path: Path, create_dataset: Callable):
     """
     loaded: gpd.GeoDataFrame = create_dataset()
     assert isinstance(loaded, gpd.GeoDataFrame)
+
+    # Make sure tmp directory exists
+    path.parent.mkdir(parents=True, exist_ok=True)
     loaded.to_file(path, driver="GPKG")
     return loaded
 
