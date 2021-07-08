@@ -234,6 +234,7 @@ def traces_schema():
                 pa.String,
                 required=False,
                 nullable=True,
+                coerce=True,
             ),
         },
     )
