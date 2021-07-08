@@ -233,6 +233,7 @@ def traces_schema():
             VALIDATION_ERROR_COLUMN: pa.Column(
                 pa.String,
                 required=False,
+                nullable=True,
             ),
         },
     )
