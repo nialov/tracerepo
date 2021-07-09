@@ -199,7 +199,11 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                     f"\n\nException: {exc}"
                 )
                 update_tuples.append(
-                    utils.UpdateTuple(area_name="", update_values=dict(), error=True)
+                    utils.UpdateTuple(
+                        area_name=futures[future].area_path.stem,
+                        update_values=dict(),
+                        error=True,
+                    )
                 )
     return sort_update_tuples_to_match_invalids(
         update_tuples=update_tuples, invalids=invalids
@@ -220,6 +224,14 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
 
     # Read traces GeoDataFrame
     traces = read_geofile(traces_path)
+
+    if traces.empty:
+        return utils.UpdateTuple(
+            area_name=area_path.stem,
+            update_values={
+                rules.ColumnNames.VALIDITY: rules.ValidationResults.EMPTY.value
+            },
+        )
 
     # Validate with fractopo trace validation
     validated, validation_results = spatial.validate(
