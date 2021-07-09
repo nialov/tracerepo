@@ -30,6 +30,34 @@ DATABASE_OPTION = typer.Option(
 DATA_FILTER = typer.Option(default=[])
 
 
+def logging_level(level: str):
+    """
+    Make logging level string.
+    """
+    return f"Set logging level to {level}."
+
+
+@app.callback()
+def app_callback(
+    verbose: bool = typer.Option(False, help=logging_level("INFO")),
+    debug: bool = typer.Option(False, help=logging_level("DEBUG")),
+):
+    """
+    Run before app execution.
+
+    Sets logging level.
+    """
+    logging_level_str = "WARNING"
+    logging.basicConfig(level=logging.WARNING)
+    if verbose and not debug:
+        logging.basicConfig(level=logging.INFO)
+        logging_level_str = "INFO"
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+        logging_level_str = "DEBUG"
+    logging.info(f"Logging verbosity set to {logging_level_str}")
+
+
 @app.command()
 def validate(
     database: Path = DATABASE_OPTION,
