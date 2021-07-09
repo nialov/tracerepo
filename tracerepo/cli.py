@@ -48,12 +48,12 @@ def app_callback(
     Sets logging level.
     """
     logging_level_str = "WARNING"
-    logging.basicConfig(level=logging.WARNING)
+    logging.basicConfig(level=logging.WARNING, force=True)
     if verbose and not debug:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.INFO, force=True)
         logging_level_str = "INFO"
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, force=True)
         logging_level_str = "DEBUG"
     logging.info(f"Logging verbosity set to {logging_level_str}")
 
