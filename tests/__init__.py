@@ -326,6 +326,10 @@ def test_write_geodata_params():
             ),  # gdf
             True,  # assume_error
         ),
+        (
+            gpd.GeoDataFrame(geometry=[], index=[]),  # gdf
+            False,  # assume_error
+        ),
     ]
 
 

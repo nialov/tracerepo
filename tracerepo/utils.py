@@ -212,6 +212,8 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Convert list type columns to string.
     """
     gdf = gdf.copy()
+    if gdf.empty:
+        return gdf
     for column in gdf.columns.values:
         if isinstance(gdf[column].values[0], list):
             logging.info(f"Converting {column} from list to str.")
@@ -234,19 +236,24 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
 
     Default is GeoJSON.
     """
-    gdf = convert_list_columns(gdf)
+    if gdf.empty:
+        # Handle empty GeoDataFrames
+        path.write_text(gdf.to_json())
+    else:
+        gdf = convert_list_columns(gdf)
 
-    rules.traces_schema().validate(gdf)
+        rules.traces_schema().validate(gdf)
 
-    gdf.to_file(path, driver=driver)
+        gdf.to_file(path, driver=driver)
 
-    if driver == geojson_driver:
+    if driver != geojson_driver:
+        return
 
-        # Format geojson with indent of 1
-        read_json = path.read_text()
-        loaded_json = json.loads(read_json)
-        dumped_json = json.dumps(loaded_json, indent=1)
-        path.write_text(dumped_json)
+    # Format geojson with indent of 1
+    read_json = path.read_text()
+    loaded_json = json.loads(read_json)
+    dumped_json = json.dumps(loaded_json, indent=1)
+    path.write_text(dumped_json)
 
 
 def rename_data_path(path: Path, rename_to: str) -> Path:
