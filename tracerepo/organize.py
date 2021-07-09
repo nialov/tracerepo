@@ -194,7 +194,7 @@ class Organizer:
         thematic: Sequence[str] = [],
         scale: Sequence[str] = [],
         area_shape: Optional[rules.AreaShapes] = None,
-        validity: Optional[rules.ValidationResults] = None,
+        validity: Sequence[rules.ValidationResults] = [],
     ) -> Sequence[utils.TraceTuple]:
         """
         Query for trace and area data.
@@ -219,14 +219,16 @@ class Organizer:
         if not any(query_bools):
             return []
 
-        # Check area_shape, empty and validated filters
-        query_bools = self._filter_enums(
-            query_bools=query_bools,
-            area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
-            validity_values=self.columns[rules.ColumnNames.VALIDITY.value],
-            area_shape=area_shape,
-            validity=validity,
-        )
+        for validity_val in validity:
+
+            # Check area_shape, empty and validated filters
+            query_bools = self._filter_enums(
+                query_bools=query_bools,
+                area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
+                validity_values=self.columns[rules.ColumnNames.VALIDITY.value],
+                area_shape=area_shape,
+                validity=validity_val,
+            )
 
         # Return if no accepted
         if not any(query_bools):

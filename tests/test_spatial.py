@@ -61,7 +61,7 @@ def test_validate_invalids_with_full_setup(
 
         # Query for invalid traces
         invalids = organizer.query(
-            validity=rules.ValidationResults.INVALID,
+            validity=[rules.ValidationResults.INVALID],
         )
 
         for invalid in invalids:

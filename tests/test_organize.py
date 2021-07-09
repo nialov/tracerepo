@@ -195,7 +195,7 @@ def test_organizer_query_organized(
         thematic=thematic,
         scale=scale,
         area_shape=area_shape,
-        validity=validity,
+        validity=[validity],
     )
     assert isinstance(query_results, list)
 

@@ -53,7 +53,7 @@ def validate(
         thematic=thematic_filter,
         traces=traces_filter,
         scale=scale_filter,
-        validity=rules.ValidationResults.INVALID,
+        validity=[rules.ValidationResults.INVALID, rules.ValidationResults.EMPTY],
     )
 
     # Only validate a single trace dataset once
