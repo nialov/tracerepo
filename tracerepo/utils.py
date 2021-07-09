@@ -3,6 +3,7 @@ General utilities.
 """
 import json
 import logging
+from contextlib import suppress
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Sequence, Type
 
@@ -265,8 +266,27 @@ def compile_export_dir(driver: str) -> str:
     """
     Compile directory name for data exporting.
 
+    E.g.
+
     >>> compile_export_dir("ESRI Shapefile")
     'data-exported-ESRI-Shapefile'
     """
     dash_replaced_driver = driver.replace(" ", "-")
     return f"{export_dir_prefix}{dash_replaced_driver}"
+
+
+def remove_from_dict_if_in(key: str, dict_to_check: Dict[str, Path]):
+    """
+    Remove value from dict if it exists.
+
+    E.g.
+
+    >>> remove_from_dict_if_in("some_key", dict(some_key=Path(".")))
+    {}
+
+    >>> remove_from_dict_if_in("some_key", dict(other_key=Path(".")))
+    {'other_key': PosixPath('.')}
+    """
+    with suppress(KeyError):
+        dict_to_check.pop(key)
+    return dict_to_check

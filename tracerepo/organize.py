@@ -82,13 +82,32 @@ class Organizer:
     def check(self):
         """
         Check if all rows in database correspond to files.
+
+        Furthermore check if all files in data dir correspond to rows.
         """
+        all_files_and_dirs = list(Path(rules.FolderNames.DATA.value).rglob("*"))
+        all_files = {path.stem: path for path in all_files_and_dirs if path.is_file()}
+        all_dirs = {path.stem: path for path in all_files_and_dirs if path.is_dir()}
+
+        for value in (rules.FolderNames.AREA.value, rules.FolderNames.TRACES.value):
+            all_dirs = utils.remove_from_dict_if_in(key=value, dict_to_check=all_dirs)
+
         for area, traces, thematic, scale in zip(
             self.columns[rules.ColumnNames.AREA.value],
             self.columns[rules.ColumnNames.TRACES.value],
             self.columns[rules.ColumnNames.THEMATIC.value],
             self.columns[rules.ColumnNames.SCALE.value],
         ):
+
+            for value in (thematic, scale):
+                all_dirs = utils.remove_from_dict_if_in(
+                    key=value, dict_to_check=all_dirs
+                )
+            for value in (area, traces):
+                all_files = utils.remove_from_dict_if_in(
+                    key=value, dict_to_check=all_files
+                )
+
             for geom_filename, geometry in zip(
                 (area, traces),
                 (rules.ColumnNames.AREA.value, rules.ColumnNames.TRACES.value),
@@ -99,6 +118,22 @@ class Organizer:
                     scale=scale,
                     name=geom_filename,
                 )
+        orphan_files = len(all_files) != 0
+        orphan_dirs = len(all_dirs) != 0
+
+        if orphan_files or orphan_dirs:
+            orphan_file_error_str = f"Found orphan files: {list( all_files.values() )}."
+            orphan_dir_error_str = (
+                f"Found orphan directories: {list( all_dirs.values() )}."
+            )
+
+            raise FileExistsError(
+                f"Expected all files and directories in "
+                f"{rules.FolderNames.DATA.value}"
+                " to correspond to row values in database.\n"
+                f"{orphan_file_error_str}\n"
+                f"{orphan_dir_error_str}\n"
+            )
 
     @staticmethod
     def _filter_strings(
