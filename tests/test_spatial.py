@@ -41,7 +41,7 @@ def test_validate(traces, area, name, snap_threshold, assume_result_validity):
         (tests.kb11_traces_cut_dislocated, rules.ValidationResults.EMPTY),
     ],
 )
-def test_validate_invalids(
+def test_validate_invalids_with_full_setup(
     database: pd.DataFrame,
     tmp_path_factory: TempPathFactory,
     trace_gdf: gpd.GeoDataFrame,
@@ -94,3 +94,17 @@ def test_convert_trace_tuples(dataset_tuples, export_destination, driver):
     assert isinstance(result, list)
     assert isinstance(result[0], tuple)
     assert isinstance(result[0][0], Path)
+
+
+@pytest.mark.parametrize("invalids,will_fail", tests.test_validate_invalids_params())
+def test_validate_invalids(invalids, will_fail):
+    """
+    Test validate_invalids.
+    """
+    result = spatial.validate_invalids(invalids)
+
+    assert len(result) == len(invalids)
+
+    if will_fail:
+        for invalid in result:
+            assert invalid.error

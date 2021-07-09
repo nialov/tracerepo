@@ -19,6 +19,7 @@ from shapely.geometry import LineString, MultiLineString, Point
 
 import tracerepo.repo as repo
 import tracerepo.rules as rules
+import tracerepo.utils as utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
@@ -378,4 +379,43 @@ def test_compile_export_dir_params():
     return [
         "ESRI Shapefile",
         "GPKG",
+    ]
+
+
+@lru_cache(maxsize=None)
+def test_validate_invalids_params():
+    """
+    Params for test_validate_invalids.
+    """
+    return [
+        (
+            [
+                utils.TraceTuple(
+                    traces_path=Path(
+                        "./tests/sample_data/critical_validation/"
+                        "getaberget_20m_6_traces.geojson"
+                    ),
+                    area_path=Path(
+                        "tests/sample_data/critical_validation/"
+                        "getaberget_20m_6_1_area.geojson"
+                    ),
+                )
+            ],
+            False,
+        ),
+        (
+            [
+                utils.TraceTuple(
+                    traces_path=Path(
+                        "./tests/sample_data/critical_validation/"
+                        "getaberget_20m_6_traces_corrupted.geojson"
+                    ),
+                    area_path=Path(
+                        "tests/sample_data/critical_validation/"
+                        "getaberget_20m_6_1_area.geojson"
+                    ),
+                )
+            ],
+            True,
+        ),
     ]
