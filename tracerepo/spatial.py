@@ -358,4 +358,10 @@ def convert_filetype(original_path: Path, convert_path: Path, driver: str):
 
     # Save with new extension and type
     logging.info(f"Saving to {convert_path} with driver {driver}.")
-    gdf.to_file(convert_path, driver=driver)
+    try:
+        gdf.to_file(convert_path, driver=driver)
+    except Exception as err:
+        logging.error(
+            f"Failed to save {original_path} to {convert_path}"
+            f" with driver {driver} due to error:\n{err}."
+        )

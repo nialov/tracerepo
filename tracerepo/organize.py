@@ -166,8 +166,8 @@ class Organizer:
         area_shape_values: Sequence[str],
         validity_values: Sequence[str],
         query_bools: Sequence[bool],
-        area_shape: Optional[rules.AreaShapes] = None,
-        validity: Optional[rules.ValidationResults] = rules.ValidationResults.VALID,
+        area_shape: Sequence[rules.AreaShapes] = [],
+        validity: Sequence[rules.ValidationResults] = [],
     ) -> Sequence[bool]:
         """
         Filter database traces and areas based on given enum choices.
@@ -179,10 +179,25 @@ class Organizer:
                 validity_values,
             ),
         ):
-            if filterer is None:
+            if filterer is None or len(filterer) == 0:
                 continue
+
+            assert isinstance(filterer, Sequence)
+            assert None not in filterer
+            # filterer_vals = [filterer_val.value for filterer_val in filterer]
+            # boolean = lambda val: val in filterer_vals or len(filterer_vals) == 0
+            # else:
+            # boolean = lambda val: val == filterer.value
+
+            filterer_value_set = set(filt.value for filt in filterer)
+
             query_bools = [
-                all((val == filterer.value, query_bool_val))
+                all(
+                    (
+                        val in filterer_value_set,
+                        query_bool_val,
+                    )
+                )
                 for val, query_bool_val in zip(list_to_filter, query_bools)
             ]
         return query_bools
@@ -193,7 +208,7 @@ class Organizer:
         traces: Sequence[str] = [],
         thematic: Sequence[str] = [],
         scale: Sequence[str] = [],
-        area_shape: Optional[rules.AreaShapes] = None,
+        area_shape: Sequence[rules.AreaShapes] = [],
         validity: Sequence[rules.ValidationResults] = [],
     ) -> Sequence[utils.TraceTuple]:
         """
@@ -219,16 +234,14 @@ class Organizer:
         if not any(query_bools):
             return []
 
-        for validity_val in validity:
-
-            # Check area_shape, empty and validated filters
-            query_bools = self._filter_enums(
-                query_bools=query_bools,
-                area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
-                validity_values=self.columns[rules.ColumnNames.VALIDITY.value],
-                area_shape=area_shape,
-                validity=validity_val,
-            )
+        # Check area_shape, empty and validated filters
+        query_bools = self._filter_enums(
+            query_bools=query_bools,
+            area_shape_values=self.columns[rules.ColumnNames.AREA_SHAPE.value],
+            validity_values=self.columns[rules.ColumnNames.VALIDITY.value],
+            area_shape=area_shape,
+            validity=validity,
+        )
 
         # Return if no accepted
         if not any(query_bools):
