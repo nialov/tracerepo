@@ -2,6 +2,7 @@
 Tests for organize.py.
 """
 from pathlib import Path
+from typing import Sequence
 
 import pytest
 from hypothesis import example, given
@@ -129,8 +130,8 @@ def query_strategy():
     possible_traces = [traces_name]
     possible_thematic = [thematic]
     possible_scale = [scale]
-    possible_area_shape = [enum for enum in rules.AreaShapes] + [None]
-    possible_validity = [enum for enum in rules.ValidationResults] + [None]
+    possible_area_shape = [enum for enum in rules.AreaShapes]
+    possible_validity = [enum for enum in rules.ValidationResults]
 
     return dict(
         area=lists(sampled_from(possible_areas), unique=True),
@@ -189,6 +190,7 @@ def test_organizer_query_organized(
     """
     Tests for Organizer query organized.
     """
+    assert None not in (area_shape, validity)
     query_results = organizer_organized.query(
         area=area,
         traces=traces,
@@ -244,3 +246,21 @@ def test_organizer_update_organized(organizer_unorganized: Organizer):
         pass
 
     assert len(organizer_unorganized.unorganized) == 2
+
+
+@pytest.mark.parametrize(
+    "area_shape_values,validity_values,query_bools,area_shape,validity,assume_result",
+    tests.test__filter_enums_params(),
+)
+def test__filter_enums(
+    area_shape_values, validity_values, query_bools, area_shape, validity, assume_result
+):
+    """
+    Test _filter_enums.
+    """
+    result = Organizer._filter_enums(
+        area_shape_values, validity_values, query_bools, area_shape, validity
+    )
+    assert isinstance(result, Sequence)
+
+    assert result == assume_result

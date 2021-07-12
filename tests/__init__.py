@@ -423,3 +423,52 @@ def test_validate_invalids_params():
             True,
         ),
     ]
+
+
+@lru_cache(maxsize=None)
+def test__filter_enums_params():
+    """
+    Params for test__filter_enums.
+    """
+    return [
+        (
+            ["circle", "circle"],
+            ["valid", "valid"],
+            [True, True],
+            [],
+            [],
+            [True, True],
+        ),
+        (
+            ["circle", "circle"],
+            ["valid", "valid"],
+            [True, True],
+            [rules.AreaShapes.OTHER],
+            [rules.ValidationResults.VALID],
+            [False, False],
+        ),
+        (
+            ["circle", "circle"],
+            ["valid", "valid"],
+            [True, True],
+            [rules.AreaShapes.CIRCLE, rules.AreaShapes.OTHER],
+            [rules.ValidationResults.INVALID],
+            [False, False],
+        ),
+        (
+            ["circle", "circle"],
+            ["valid", "valid"],
+            [True, True],
+            [rules.AreaShapes.CIRCLE, rules.AreaShapes.OTHER],
+            [rules.ValidationResults.VALID],
+            [True, True],
+        ),
+        (
+            ["circle", "other"],
+            ["valid", "valid"],
+            [True, True],
+            [rules.AreaShapes.OTHER],
+            [rules.ValidationResults.VALID],
+            [False, True],
+        ),
+    ]
