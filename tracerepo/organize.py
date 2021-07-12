@@ -7,7 +7,7 @@ from functools import cached_property
 from itertools import compress
 from pathlib import Path
 from shutil import move
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Sequence
 
 import pandas as pd
 
