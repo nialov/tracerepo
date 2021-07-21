@@ -18,9 +18,8 @@ from fractopo.tval.trace_validators import (
     SharpCornerValidator,
 )
 
-import tracerepo.rules as rules
-import tracerepo.spatial as spatial
-import tracerepo.utils as utils
+from tracerepo import rules
+from tracerepo import utils
 from tracerepo.rules import ValidationResults
 from tracerepo.utils import TraceTuple
 
@@ -35,7 +34,7 @@ def check_for_validator_error(
     """
     Check if validator errors are in list of validation errors.
     """
-    return any([validator.ERROR in errors for validator in validators])
+    return any(validator.ERROR in errors for validator in validators)
 
 
 def validate(
@@ -80,17 +79,15 @@ def validate(
 
     # Check for critical errors that require user fix
     if any(
-        [
-            check_for_validator_error(
-                errors,
-                validators=tuple(
-                    validator
-                    for validator in ALL_VALIDATORS
-                    if validator is not SharpCornerValidator
-                ),
-            )
-            for errors in validated_error_lists
-        ]
+        check_for_validator_error(
+            errors,
+            validators=tuple(
+                validator
+                for validator in ALL_VALIDATORS
+                if validator is not SharpCornerValidator
+            ),
+        )
+        for errors in validated_error_lists
     ):
         return validated, ValidationResults.INVALID
 
@@ -234,7 +231,7 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
         )
 
     # Validate with fractopo trace validation
-    validated, validation_results = spatial.validate(
+    validated, validation_results = validate(
         traces=traces,
         area=read_geofile(area_path),
         snap_threshold=invalid.snap_threshold,

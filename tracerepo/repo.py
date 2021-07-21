@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 
-import tracerepo.rules as rules
+from tracerepo import rules
 
 
 def write_database_csv(path: Path, database: pd.DataFrame):

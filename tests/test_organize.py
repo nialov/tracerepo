@@ -11,8 +11,8 @@ from pandas.testing import assert_frame_equal
 from pytest import TempPathFactory
 
 import tests
-import tracerepo.rules as rules
-import tracerepo.utils as utils
+from tracerepo import rules
+from tracerepo import utils
 from tracerepo.organize import Organizer
 
 
@@ -130,8 +130,8 @@ def query_strategy():
     possible_traces = [traces_name]
     possible_thematic = [thematic]
     possible_scale = [scale]
-    possible_area_shape = [enum for enum in rules.AreaShapes]
-    possible_validity = [enum for enum in rules.ValidationResults]
+    possible_area_shape = list(rules.AreaShapes)
+    possible_validity = list(rules.ValidationResults)
 
     return dict(
         area=lists(sampled_from(possible_areas), unique=True),
@@ -209,7 +209,7 @@ def test_organizer_query_organized(
         )
         assert isinstance(trace_tuple.area_path, Path) or trace_tuple.area_path is None
 
-    assert all([isinstance(val, utils.TraceTuple) for val in query_results])
+    assert all(isinstance(val, utils.TraceTuple) for val in query_results)
 
     if isinstance(assumed_result, int):
         assert len(query_results) == assumed_result

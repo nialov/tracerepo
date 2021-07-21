@@ -10,7 +10,7 @@ from typing import Any, Dict, List, NamedTuple, Sequence, Type
 import geopandas as gpd
 import pandas as pd
 
-import tracerepo.rules as rules
+from tracerepo import rules
 
 geojson_driver = "GeoJSON"
 export_dir_prefix = "data-exported-"
@@ -127,8 +127,7 @@ def identify_geom_type(filename_stem: str) -> rules.ColumnNames:
         return rules.ColumnNames.AREA
     elif filename_stem.endswith("_traces"):
         return rules.ColumnNames.TRACES
-    else:
-        raise ValueError(f"Expected {filename_stem=} to end in _area or _traces.")
+    raise ValueError(f"Expected {filename_stem=} to end in _area or _traces.")
 
 
 def multi_string_filter(

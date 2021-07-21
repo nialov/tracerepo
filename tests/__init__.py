@@ -17,9 +17,9 @@ from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from shapely.geometry import LineString, MultiLineString, Point
 
-import tracerepo.repo as repo
-import tracerepo.rules as rules
-import tracerepo.utils as utils
+from tracerepo import repo
+from tracerepo import rules
+from tracerepo import utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
@@ -69,8 +69,7 @@ def cached_sample(
         assert isinstance(loaded, gpd.GeoDataFrame)
         assert loaded.crs is not None
         return loaded
-    else:
-        return create_and_package(path=path, create_dataset=create_dataset)
+    return create_and_package(path=path, create_dataset=create_dataset)
 
 
 def df_data():

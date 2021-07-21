@@ -10,9 +10,9 @@ from hypothesis import given, settings
 from pytest import TempPathFactory
 
 import tests
-import tracerepo.rules as rules
-import tracerepo.spatial as spatial
-import tracerepo.utils as utils
+from tracerepo import rules
+from tracerepo import spatial
+from tracerepo import utils
 
 
 @pytest.mark.parametrize(
@@ -71,7 +71,7 @@ def test_validate_invalids_with_full_setup(
         update_tuples = spatial.validate_invalids(invalids)
 
         assert isinstance(update_tuples, list)
-        assert all([isinstance(val, utils.UpdateTuple) for val in update_tuples])
+        assert all(isinstance(val, utils.UpdateTuple) for val in update_tuples)
 
         for update_tuple in update_tuples:
             assert (
@@ -105,6 +105,8 @@ def test_validate_invalids(invalids, will_fail):
 
     assert len(result) == len(invalids)
 
+    failed = any(invalid.error for invalid in result)
     if will_fail:
-        for invalid in result:
-            assert invalid.error
+        assert failed
+    else:
+        assert not failed

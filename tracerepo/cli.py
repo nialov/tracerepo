@@ -6,14 +6,14 @@ import logging
 from pathlib import Path
 from pprint import pprint
 from shutil import rmtree
-from typing import List
+from typing import List, Sequence
 
 import typer
 
-import tracerepo.repo as repo
-import tracerepo.rules as rules
-import tracerepo.spatial as spatial
-import tracerepo.utils as utils
+from tracerepo import repo
+from tracerepo import rules
+from tracerepo import spatial
+from tracerepo import utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()
@@ -130,16 +130,16 @@ def validate(
 
 
 @app.command()
-def format(
+def format_geojson(
     database: Path = DATABASE_OPTION,
 ):
     """
     Format all dataset GeoJSON from cli.
     """
-    format_geojson(database=database)
+    format_repo_geojson(database=database)
 
 
-def format_geojson(
+def format_repo_geojson(
     database: Path,
 ):
     """
@@ -217,10 +217,10 @@ def export_data(
     destination: Path,
     driver: str,
     database: Path,
-    area_filter: List[str] = [],
-    thematic_filter: List[str] = [],
-    traces_filter: List[str] = [],
-    scale_filter: List[str] = [],
+    area_filter: Sequence[str] = (),
+    thematic_filter: Sequence[str] = (),
+    traces_filter: Sequence[str] = (),
+    scale_filter: Sequence[str] = (),
     overwrite: bool = True,
 ) -> str:
     """

@@ -11,8 +11,8 @@ from typing import Any, Dict, List, Sequence
 
 import pandas as pd
 
-import tracerepo.rules as rules
-import tracerepo.utils as utils
+from tracerepo import rules
+from tracerepo import utils
 
 
 @dataclass
@@ -142,10 +142,10 @@ class Organizer:
         thematic_values: Sequence[str],
         scale_values: Sequence[str],
         query_bools: Sequence[bool],
-        area: Sequence[str] = [],
-        traces: Sequence[str] = [],
-        thematic: Sequence[str] = [],
-        scale: Sequence[str] = [],
+        area: Sequence[str] = (),
+        traces: Sequence[str] = (),
+        thematic: Sequence[str] = (),
+        scale: Sequence[str] = (),
     ) -> Sequence[bool]:
         """
         Filter database traces and areas based on given strings.
@@ -166,8 +166,8 @@ class Organizer:
         area_shape_values: Sequence[str],
         validity_values: Sequence[str],
         query_bools: Sequence[bool],
-        area_shape: Sequence[rules.AreaShapes] = [],
-        validity: Sequence[rules.ValidationResults] = [],
+        area_shape: Sequence[rules.AreaShapes] = (),
+        validity: Sequence[rules.ValidationResults] = (),
     ) -> Sequence[bool]:
         """
         Filter database traces and areas based on given enum choices.
@@ -204,12 +204,12 @@ class Organizer:
 
     def query(
         self,
-        area: Sequence[str] = [],
-        traces: Sequence[str] = [],
-        thematic: Sequence[str] = [],
-        scale: Sequence[str] = [],
-        area_shape: Sequence[rules.AreaShapes] = [],
-        validity: Sequence[rules.ValidationResults] = [],
+        area: Sequence[str] = (),
+        traces: Sequence[str] = (),
+        thematic: Sequence[str] = (),
+        scale: Sequence[str] = (),
+        area_shape: Sequence[rules.AreaShapes] = (),
+        validity: Sequence[rules.ValidationResults] = (),
     ) -> Sequence[utils.TraceTuple]:
         """
         Query for trace and area data.

@@ -8,7 +8,7 @@ import pytest
 from pandera.errors import SchemaError
 
 import tests
-import tracerepo.utils as utils
+from tracerepo import utils
 
 
 @pytest.mark.parametrize("gdf,assume_error", tests.test_write_geodata_params())

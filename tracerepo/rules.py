@@ -204,12 +204,11 @@ def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
 
     if geom_type is None:
         return base + r"$"
-    elif geom_type == ColumnNames.AREA:
+    if geom_type == ColumnNames.AREA:
         return base + r"_area$"
-    elif geom_type == ColumnNames.TRACES:
+    if geom_type == ColumnNames.TRACES:
         return base + r"_traces$"
-    else:
-        raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")
+    raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")
 
 
 @lru_cache(maxsize=None)
