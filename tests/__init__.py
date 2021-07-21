@@ -8,7 +8,7 @@ from pathlib import Path
 
 # from pickle import loads
 from traceback import print_tb
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator, Optional, List
 
 import geopandas as gpd
 import pandas as pd
@@ -17,7 +17,7 @@ from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from shapely.geometry import LineString, MultiLineString, Point
 
-from tracerepo import repo, rules, utils
+from tracerepo import repo, rules, utils, trace_schema
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
@@ -468,4 +468,73 @@ def test__filter_enums_params():
             [rules.ValidationResults.VALID],
             [False, True],
         ),
+    ]
+
+
+data_source_good_examples = (
+    Path("tests/sample_data/data_source_good_examples.txt")
+    .read_text()
+    .splitlines(keepends=False)
+)
+
+data_source_bad_examples = (
+    Path("tests/sample_data/data_source_bad_examples.txt")
+    .read_text()
+    .splitlines(keepends=False)
+)
+
+
+def empty_linestrings(how_many: int) -> List[LineString]:
+    """
+    Make list of empty linestring geometries.
+    """
+    return [LineString()] * how_many
+
+
+data_source_gdf_good_param = gpd.GeoDataFrame(
+    {
+        "geometry": empty_linestrings(len(data_source_good_examples)),
+        trace_schema.DATA_SOURCE_COLUMN: data_source_good_examples,
+    }
+)
+
+data_source_gdf_bad_param = gpd.GeoDataFrame(
+    {
+        "geometry": empty_linestrings(len(data_source_bad_examples)),
+        trace_schema.DATA_SOURCE_COLUMN: data_source_bad_examples,
+    }
+)
+
+
+@lru_cache(maxsize=None)
+def test_traces_schema_params():
+    """
+    Params for test_traces_schema.
+    """
+    all_params = [
+        (
+            data_source_gdf_good_param,  # gdf
+            False,  # will_fail
+            False,  # geom_test
+        ),
+        (
+            data_source_gdf_good_param,  # gdf
+            True,  # will_fail
+            False,  # geom_test
+        ),
+    ]
+
+    assert all(len(params) == 3 for params in all_params)
+
+    return all_params
+
+
+@lru_cache(maxsize=None)
+def test_data_source_regex_check_params():
+    """
+    Params for test_data_source_regex_check.
+    """
+    return [
+        *[(example, False) for example in data_source_good_examples],
+        *[(example, True) for example in data_source_bad_examples],
     ]

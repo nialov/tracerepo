@@ -10,7 +10,7 @@ from typing import Any, Dict, List, NamedTuple, Sequence, Type
 import geopandas as gpd
 import pandas as pd
 
-from tracerepo import rules
+from tracerepo import rules, trace_schema
 
 geojson_driver = "GeoJSON"
 export_dir_prefix = "data-exported-"
@@ -241,7 +241,7 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
     else:
         gdf = convert_list_columns(gdf)
 
-        rules.traces_schema().validate(gdf)
+        trace_schema.traces_schema().validate(gdf)
 
         gdf.to_file(path, driver=driver)
 

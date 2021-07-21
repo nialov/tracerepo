@@ -9,14 +9,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
 import pandera as pa
-from fractopo.tval.trace_validation import Validation
-from shapely.geometry import LineString, MultiLineString
 
 FILETYPE = "geojson"
 DATABASE_CSV = "database.csv"
 DATABASE_CSV_SEP = ","
-
-VALIDATION_ERROR_COLUMN = Validation.ERROR_COLUMN
 
 
 @unique
@@ -209,31 +205,3 @@ def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
     if geom_type == ColumnNames.TRACES:
         return base + r"_traces$"
     raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")
-
-
-@lru_cache(maxsize=None)
-def traces_schema():
-    """
-    Get pandera schema for traces GeoDataFrame.
-    """
-    return pa.DataFrameSchema(
-        index=pa.Index(pa.Int),
-        columns={
-            "geometry": pa.Column(
-                checks=[
-                    pa.Check(
-                        lambda geoms: [
-                            isinstance(geom, (LineString, MultiLineString))
-                            for geom in geoms
-                        ],
-                    )
-                ],
-            ),
-            VALIDATION_ERROR_COLUMN: pa.Column(
-                pa.String,
-                required=False,
-                nullable=True,
-                coerce=True,
-            ),
-        },
-    )

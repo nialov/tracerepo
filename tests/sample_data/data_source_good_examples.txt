@@ -1,0 +1,8 @@
+nan
+EM
+Mag
+Mag+EM
+LiDAR
+LiDAR+EM
+LiDAR+Mag
+LiDAR+Mag+EM
