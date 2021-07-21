@@ -171,7 +171,7 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
     update_tuples: List[utils.UpdateTuple] = []
 
     # multiprocessing!
-    with ProcessPoolExecutor(max_workers=8) as executor:
+    with ProcessPoolExecutor() as executor:
         # Iterate over invalids. submit as tasks
         futures = {
             executor.submit(validate_invalid, invalid): invalid for invalid in invalids
