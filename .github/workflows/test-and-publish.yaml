@@ -1,10 +1,18 @@
 name: test-and-publish
 
-on: [push, pull_request]
+on:
+  # run on all pushes to any branch
+  push:
+  # run only on master pull requests
+  pull_request:
+    branches: [master]
+  # also run periodically
+  schedule:
+    - cron: "41 7 * * 5"
 
 jobs:
   # Test
-  pytest-and-coverage:
+  pytest-coverage-format-lint:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2
@@ -22,9 +30,11 @@ jobs:
           pip install nox invoke
       - name: Test with invoke -> nox -> pytest
         run: invoke ci-test
+      - name: Lint with invoke -> nox -> linters
+        run: invoke format-and-lint
 
   build-and-publish:
-    needs: pytest-and-coverage
+    needs: pytest-coverage-format-lint
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     # Pushes to PyPI on tagged commit pushes of master branch
     # Additionally tests building with setuptools on all branches
@@ -35,15 +45,12 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Install setuptools, wheel, invoke and nox
+      - name: Install invoke and nox
         run: >-
-          python -m pip install setuptools wheel invoke nox
-      - name: Update requirements with nox session
-        run: >-
-          invoke requirements
+          python -m pip install invoke nox
       - name: Build binary wheel and a source tarball
         run: >-
-          python setup.py sdist bdist_wheel
+          invoke build
       - name: Publish distribution 📦 to PyPI on tagged commit pushes
         # Publish to PyPI on tagged commit pushes on master
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')

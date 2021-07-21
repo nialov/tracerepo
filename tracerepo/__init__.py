@@ -1,7 +1,7 @@
 """
-Package for trace data handling.
-"""
-from ._version import get_versions
+tracerepo.
 
-__version__ = get_versions()["version"]
-del get_versions
+Trace data management
+"""
+
+__version__ = "0.0.0"
