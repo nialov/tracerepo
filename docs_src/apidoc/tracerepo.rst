@@ -11,7 +11,9 @@ Submodules
    tracerepo.organize
    tracerepo.repo
    tracerepo.rules
+   tracerepo.schema_checks
    tracerepo.spatial
+   tracerepo.trace_schema
    tracerepo.utils
 
 Module contents

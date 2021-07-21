@@ -1,13 +1,13 @@
 """
 Tests for traces_schema.py.
 """
-import tests
-import pytest
 import geopandas as gpd
 import pandas as pd
-
-from tracerepo import trace_schema
 import pandera as pa
+import pytest
+
+import tests
+from tracerepo import trace_schema
 
 
 @pytest.mark.parametrize("gdf,will_fail,geom_test", tests.test_traces_schema_params())

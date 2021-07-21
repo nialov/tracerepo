@@ -1,11 +1,13 @@
 """
 Traces pandera scheming.
 """
-from shapely.geometry import LineString, MultiLineString
 from functools import lru_cache
+from typing import Any, ClassVar, Dict, List, Optional, Type, Union
+
 import pandera as pa
-from typing import Any, Dict, List, Optional, Type, Union, ClassVar
 from fractopo.tval.trace_validation import Validation
+from shapely.geometry import LineString, MultiLineString
+
 from tracerepo import schema_checks
 
 VALIDATION_ERROR_COLUMN = Validation.ERROR_COLUMN

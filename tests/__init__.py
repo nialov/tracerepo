@@ -8,7 +8,7 @@ from pathlib import Path
 
 # from pickle import loads
 from traceback import print_tb
-from typing import Callable, Iterator, Optional, List
+from typing import Callable, Iterator, List, Optional
 
 import geopandas as gpd
 import pandas as pd
@@ -17,7 +17,7 @@ from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from shapely.geometry import LineString, MultiLineString, Point
 
-from tracerepo import repo, rules, utils, trace_schema
+from tracerepo import repo, rules, trace_schema, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 

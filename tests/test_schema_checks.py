@@ -1,9 +1,9 @@
 """
 Tests for schema checks.
 """
-import tests
 import pytest
 
+import tests
 from tracerepo import schema_checks
 
 
