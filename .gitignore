@@ -11,6 +11,7 @@ dev/
 .esri.gz
 *.html
 tests/sample_data/tmp/
+*.pickle
 
 
 # We do not want to include requirements.txt
