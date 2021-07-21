@@ -10,9 +10,7 @@ from hypothesis import given, settings
 from pytest import TempPathFactory
 
 import tests
-from tracerepo import rules
-from tracerepo import spatial
-from tracerepo import utils
+from tracerepo import rules, spatial, utils
 
 
 @pytest.mark.parametrize(

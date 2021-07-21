@@ -18,8 +18,7 @@ from fractopo.tval.trace_validators import (
     SharpCornerValidator,
 )
 
-from tracerepo import rules
-from tracerepo import utils
+from tracerepo import rules, utils
 from tracerepo.rules import ValidationResults
 from tracerepo.utils import TraceTuple
 

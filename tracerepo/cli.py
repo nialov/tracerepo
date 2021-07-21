@@ -10,10 +10,7 @@ from typing import List, Sequence
 
 import typer
 
-from tracerepo import repo
-from tracerepo import rules
-from tracerepo import spatial
-from tracerepo import utils
+from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()

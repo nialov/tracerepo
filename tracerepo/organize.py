@@ -11,8 +11,7 @@ from typing import Any, Dict, List, Sequence
 
 import pandas as pd
 
-from tracerepo import rules
-from tracerepo import utils
+from tracerepo import rules, utils
 
 
 @dataclass

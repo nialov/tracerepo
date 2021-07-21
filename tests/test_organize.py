@@ -11,8 +11,7 @@ from pandas.testing import assert_frame_equal
 from pytest import TempPathFactory
 
 import tests
-from tracerepo import rules
-from tracerepo import utils
+from tracerepo import rules, utils
 from tracerepo.organize import Organizer
 
 

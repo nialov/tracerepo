@@ -12,10 +12,7 @@ from hypothesis import given, settings
 from typer.testing import CliRunner
 
 import tests
-from tracerepo import repo
-from tracerepo import rules
-from tracerepo import spatial
-from tracerepo import utils
+from tracerepo import repo, rules, spatial, utils
 from tracerepo.cli import app, export_data, format_geojson
 
 runner = CliRunner()

@@ -7,8 +7,7 @@ import pandas as pd
 import pytest
 
 import tests
-from tracerepo import repo
-from tracerepo import rules
+from tracerepo import repo, rules
 
 
 @pytest.fixture

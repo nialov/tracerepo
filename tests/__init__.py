@@ -17,9 +17,7 @@ from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from shapely.geometry import LineString, MultiLineString, Point
 
-from tracerepo import repo
-from tracerepo import rules
-from tracerepo import utils
+from tracerepo import repo, rules, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 

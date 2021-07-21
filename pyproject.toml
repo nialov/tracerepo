@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.0"
+version = "0.0.0.post67.dev0+7f1a5ea"
 description = "Trace data management"
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 
