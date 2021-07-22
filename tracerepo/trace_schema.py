@@ -2,7 +2,7 @@
 Traces pandera scheming.
 """
 from functools import lru_cache
-from typing import Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import Dict
 
 import pandera as pa
 from fractopo.tval.trace_validation import Validation

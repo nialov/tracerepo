@@ -4,4 +4,4 @@ tracerepo.
 Fracture & lineament data management.
 """
 
-__version__ = "0.0.0.post70.dev0+f0f1b2e"
+__version__ = "0.0.0.post74.dev0+33e1030"

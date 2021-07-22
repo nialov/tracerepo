@@ -125,7 +125,7 @@ def identify_geom_type(filename_stem: str) -> rules.ColumnNames:
     assert "." not in filename_stem
     if filename_stem.endswith("_area"):
         return rules.ColumnNames.AREA
-    elif filename_stem.endswith("_traces"):
+    if filename_stem.endswith("_traces"):
         return rules.ColumnNames.TRACES
     raise ValueError(f"Expected {filename_stem=} to end in _area or _traces.")
 

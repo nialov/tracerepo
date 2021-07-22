@@ -43,7 +43,12 @@ def test_cli_app_help(subcommand: str):
         (tests.kb11_traces_cut_dislocated, rules.ValidationResults.EMPTY),
     ],
 )
-def test_cli_validate_exec(trace_gdf, assume_error, database, tmp_path_factory):
+def test_cli_validate_exec(
+    trace_gdf,
+    assume_error: rules.ValidationResults,
+    database,
+    tmp_path_factory,
+):
     """
     Test tracerepo validate command with a set up of invalidated data.
     """
@@ -55,14 +60,14 @@ def test_cli_validate_exec(trace_gdf, assume_error, database, tmp_path_factory):
         organizer = tests.set_up_repo_with_invalids_organized(
             database=database, trace_gdf=trace_gdf, area_gdf=area_gdf
         )
-
-        repo.write_database_csv(
-            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
-        )
+        database_csv_path: Path = tmp_path / rules.DATABASE_CSV
+        repo.write_database_csv(path=database_csv_path, database=organizer.database)
 
         result = runner.invoke(app=app, args=["validate"])
 
         tests.click_error_print(result)
+
+        assert assume_error.value in database_csv_path.read_text()
 
 
 @settings(max_examples=5, deadline=5000)

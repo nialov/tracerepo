@@ -89,11 +89,8 @@ def validate(
         for errors in validated_error_lists
     ):
         return validated, ValidationResults.INVALID
-
     # Traces are valid
-    else:
-
-        return validated, ValidationResults.VALID
+    return validated, ValidationResults.VALID
 
 
 def unique_invalids(invalids: Sequence[utils.TraceTuple]) -> Sequence[utils.TraceTuple]:
