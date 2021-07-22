@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.0.post76.dev0+2ee1478"
+version = "0.0.0.post77.dev0+e5619a0"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 
@@ -12,8 +12,8 @@ tracerepo = "tracerepo.cli:app"
 python = "^3.8"
 pandas = "*"
 pandera = "*"
-fractopo = "*"
 typer = "*"
+fractopo = {git = "https://github.com/nialov/fractopo", branch="development"}
 
 # Extras
 # Coverage
