@@ -1,1 +1,1 @@
-tracerepo/_version.py export-subst
+*.ipynb linguist-language=Python

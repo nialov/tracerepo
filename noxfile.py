@@ -29,6 +29,8 @@ DOCS_NOTEBOOKS = Path("docs_src/notebooks").glob("*.ipynb")
 REGULAR_NOTEBOOKS = Path(NOTEBOOKS_NAME).glob("*.ipynb")
 ALL_NOTEBOOKS = list(DOCS_NOTEBOOKS) + list(REGULAR_NOTEBOOKS)
 
+PYTHON_VERSIONS = ["3.8", "3.9"]
+
 
 def filter_paths_to_existing(*iterables) -> List[str]:
     """
@@ -60,7 +62,7 @@ def install_dev(session, extras: str = ""):
     session.install("-r", DEV_REQUIREMENTS)
 
 
-@nox.session(python="3.8")
+@nox.session(python=PYTHON_VERSIONS)
 def tests_pip(session):
     """
     Run test suite with pip install.
@@ -95,7 +97,7 @@ def tests_pip(session):
     session.run("tracerepo", "--help")
 
 
-@nox.session(python="3.8")
+@nox.session(python=PYTHON_VERSIONS)
 def notebooks(session):
     """
     Run notebooks.
@@ -116,7 +118,7 @@ def notebooks(session):
         fill_notebook(session=session, notebook=notebook)
 
 
-@nox.session(python="3.8")
+@nox.session
 def format_and_lint(session):
     """
     Format and lint python files, notebooks and docs_src.
