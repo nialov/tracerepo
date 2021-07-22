@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.0"
+version = "0.0.0.post74.dev0+33e1030"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
+
+[tool.poetry.scripts]
+tracerepo = "tracerepo.cli:app"
+
 
 [tool.poetry.dependencies]
 python = "^3.8"
