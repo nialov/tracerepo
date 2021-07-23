@@ -4,7 +4,6 @@ trace-repository rules.
 from __future__ import annotations
 
 from enum import Enum, unique
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -99,7 +98,6 @@ class ValidationResults(Enum):
     CRITICAL = "critical"
 
 
-@lru_cache(maxsize=None)
 def name_column_kwargs(
     geom_type: Optional[ColumnNames],
     allow_duplicates=True,
@@ -116,7 +114,6 @@ def name_column_kwargs(
     )
 
 
-@lru_cache(maxsize=None)
 def enum_column_kwargs(enum_class: Type[Enum]) -> Dict[str, Any]:
     """
     Get kwargs for an enum column.
@@ -127,7 +124,33 @@ def enum_column_kwargs(enum_class: Type[Enum]) -> Dict[str, Any]:
     )
 
 
-@lru_cache(maxsize=None)
+def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
+    """
+    Get general, trace or area filename regex.
+
+    E.g.
+
+    >>> filename_regex()
+    '^[a-z0-9_]{2,49}$'
+
+    >>> filename_regex(ColumnNames.AREA)
+    '^[a-z0-9_]{2,49}_area$'
+
+    >>> filename_regex(ColumnNames.TRACES)
+    '^[a-z0-9_]{2,49}_traces$'
+
+    """
+    base = r"^[a-z0-9_]{2,49}"
+
+    if geom_type is None:
+        return base + r"$"
+    if geom_type == ColumnNames.AREA:
+        return base + r"_area$"
+    if geom_type == ColumnNames.TRACES:
+        return base + r"_traces$"
+    raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")
+
+
 def database_schema() -> pa.DataFrameSchema:
     """
     Get pandera DataFrame schema for database.csv.
@@ -178,30 +201,3 @@ def folder_structure() -> List[Path]:
     Get the default data folder structure.
     """
     return [Path(FolderNames.DATA.value)]
-
-
-def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
-    """
-    Get general, trace or area filename regex.
-
-    E.g.
-
-    >>> filename_regex()
-    '^[a-z0-9_]{2,49}$'
-
-    >>> filename_regex(ColumnNames.AREA)
-    '^[a-z0-9_]{2,49}_area$'
-
-    >>> filename_regex(ColumnNames.TRACES)
-    '^[a-z0-9_]{2,49}_traces$'
-
-    """
-    base = r"^[a-z0-9_]{2,49}"
-
-    if geom_type is None:
-        return base + r"$"
-    if geom_type == ColumnNames.AREA:
-        return base + r"_area$"
-    if geom_type == ColumnNames.TRACES:
-        return base + r"_traces$"
-    raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")

@@ -14,6 +14,10 @@ VALIDATION_ERROR_COLUMN = Validation.ERROR_COLUMN
 DIP_COLUMN = "DIP"
 DIP_DIR_COLUMN = "DIP_DIR"
 DATA_SOURCE_COLUMN = "Data_Source"
+DATE_COLUMN = "Date"
+OPERATOR_COLUMN = "Operator"
+SCALE_COLUMN = "Scale"
+CERTAINTY_COLUMN = "Certainty"
 
 
 def default_non_required_kwargs(
@@ -39,8 +43,28 @@ trace_columns: Dict[str, pa.Column] = {
     ),
     DATA_SOURCE_COLUMN: pa.Column(
         pa.String,
-        **default_non_required_kwargs(),
+        **default_non_required_kwargs(nullable=False),
         checks=[pa.Check(schema_checks.data_source_regex_check, element_wise=True)]
+    ),
+    DATE_COLUMN: pa.Column(
+        pa.DateTime,
+        **default_non_required_kwargs(nullable=False),
+        checks=[pa.Check(schema_checks.date_datetime_check, element_wise=True)]
+    ),
+    OPERATOR_COLUMN: pa.Column(
+        pa.String,
+        **default_non_required_kwargs(nullable=False),
+        checks=[pa.Check(schema_checks.operator_regex_check, element_wise=True)]
+    ),
+    SCALE_COLUMN: pa.Column(
+        pa.String,
+        **default_non_required_kwargs(nullable=False),
+        checks=[pa.Check(schema_checks.scale_regex_check, element_wise=True)]
+    ),
+    CERTAINTY_COLUMN: pa.Column(
+        pa.String,
+        **default_non_required_kwargs(nullable=False),
+        checks=[pa.Check(schema_checks.certainty_check, element_wise=True)]
     ),
 }
 
