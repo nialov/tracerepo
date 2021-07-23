@@ -3,12 +3,9 @@ Parameters for tests.
 """
 import os
 from contextlib import contextmanager
-from functools import lru_cache
 from pathlib import Path
-
-# from pickle import loads
 from traceback import print_tb
-from typing import Callable, Iterator, List, Optional
+from typing import Any, Callable, Iterator, List, Optional, Tuple
 
 import geopandas as gpd
 import pandas as pd
@@ -210,7 +207,6 @@ kb11_traces_cut_dislocated = cached_sample(
 )
 
 
-@lru_cache(maxsize=None)
 def test_validate_params() -> Iterator[tuple]:
     """
     Test validate params.
@@ -297,7 +293,6 @@ def click_error_print(result: Result):
     raise Exception(result.exception)
 
 
-@lru_cache(maxsize=None)
 def test_write_geodata_params():
     """
     Params for test_write_geodata.
@@ -330,7 +325,6 @@ def test_write_geodata_params():
     ]
 
 
-@lru_cache(maxsize=None)
 def test_rename_data_path_params():
     """
     Params for test_rename_data_path.
@@ -347,7 +341,6 @@ def test_rename_data_path_params():
     ]
 
 
-@lru_cache(maxsize=None)
 def test_convert_trace_tuples_params():
     """
     Params for test_convert_trace_tuples.
@@ -372,7 +365,6 @@ def test_convert_trace_tuples_params():
     ]
 
 
-@lru_cache(maxsize=None)
 def test_compile_export_dir_params():
     """
     Params for test_compile_export_dir.
@@ -383,7 +375,6 @@ def test_compile_export_dir_params():
     ]
 
 
-@lru_cache(maxsize=None)
 def test_validate_invalids_params():
     """
     Params for test_validate_invalids.
@@ -422,7 +413,6 @@ def test_validate_invalids_params():
     ]
 
 
-@lru_cache(maxsize=None)
 def test__filter_enums_params():
     """
     Params for test__filter_enums.
@@ -471,17 +461,14 @@ def test__filter_enums_params():
     ]
 
 
-data_source_good_examples = (
-    Path("tests/sample_data/data_source_good_examples.txt")
-    .read_text()
-    .splitlines(keepends=False)
-)
-
-data_source_bad_examples = (
-    Path("tests/sample_data/data_source_bad_examples.txt")
-    .read_text()
-    .splitlines(keepends=False)
-)
+def lines_in_file(path_str: str) -> List[str]:
+    """
+    Extract each line in file at ``path_str`` as a list of strings.
+    """
+    path = Path(path_str)
+    if not path.exists():
+        raise FileNotFoundError(f"Expected file to exist at {path}.")
+    return path.read_text().splitlines(keepends=False)
 
 
 def empty_linestrings(how_many: int) -> List[LineString]:
@@ -491,45 +478,125 @@ def empty_linestrings(how_many: int) -> List[LineString]:
     return [LineString()] * how_many
 
 
-data_source_gdf_good_param = gpd.GeoDataFrame(
-    {
-        "geometry": empty_linestrings(len(data_source_good_examples)),
-        trace_schema.DATA_SOURCE_COLUMN: data_source_good_examples,
-    }
+def make_example_geodataframe(column: str, values, geometries: Optional[Any] = None):
+    """
+    Make GeoDataFrame with ``values`` in ``column``.
+    """
+    gdf = gpd.GeoDataFrame(
+        {
+            "geometry": empty_linestrings(len(values))
+            if geometries is None
+            else geometries,
+            column: values,
+        }
+    )
+    return gdf
+
+
+def make_example_param(
+    column: str,
+    values,
+    will_fail: bool,
+    geometries: Optional[Any] = None,
+) -> Tuple[gpd.GeoDataFrame, bool, bool]:
+    """
+    Make example pytest param tuple.
+    """
+    gdf = make_example_geodataframe(column=column, values=values, geometries=geometries)
+    return (
+        gdf,  # gdf
+        will_fail,  # will_fail
+        geometries is not None,  # geom_test
+    )
+
+
+data_source_good_examples = lines_in_file(
+    "tests/sample_data/data_source_good_examples.txt"
 )
 
-data_source_gdf_bad_param = gpd.GeoDataFrame(
-    {
-        "geometry": empty_linestrings(len(data_source_bad_examples)),
-        trace_schema.DATA_SOURCE_COLUMN: data_source_bad_examples,
-    }
+data_source_bad_examples = lines_in_file(
+    "tests/sample_data/data_source_bad_examples.txt"
+)
+
+date_good_examples = lines_in_file("tests/sample_data/unique_dates.txt")
+date_bad_examples = lines_in_file("tests/sample_data/unique_dates_bad.txt")
+operator_good_examples = lines_in_file("tests/sample_data/operator_good_examples.txt")
+operator_bad_examples = lines_in_file("tests/sample_data/operator_bad_examples.txt")
+scale_good_examples = lines_in_file("tests/sample_data/unique_scales.txt")
+certainty_good_examples = lines_in_file("tests/sample_data/unique_certainty.txt")
+
+data_source_gdf_good_param = make_example_param(
+    column=trace_schema.DATA_SOURCE_COLUMN,
+    values=data_source_good_examples,
+    will_fail=False,
+)
+data_source_gdf_bad_param = make_example_param(
+    column=trace_schema.DATA_SOURCE_COLUMN,
+    values=data_source_bad_examples,
+    will_fail=True,
+)
+date_gdf_good_param = make_example_param(
+    column=trace_schema.DATE_COLUMN, values=date_good_examples, will_fail=False
+)
+date_gdf_bad_param = make_example_param(
+    column=trace_schema.DATE_COLUMN, values=date_bad_examples, will_fail=True
+)
+operator_gdf_good_param = make_example_param(
+    column=trace_schema.OPERATOR_COLUMN, values=operator_good_examples, will_fail=False
+)
+operator_gdf_bad_param = make_example_param(
+    column=trace_schema.OPERATOR_COLUMN, values=operator_bad_examples, will_fail=True
+)
+
+scale_gdf_good_param = make_example_param(
+    column=trace_schema.SCALE_COLUMN, values=scale_good_examples, will_fail=False
+)
+certainty_gdf_good_param = make_example_param(
+    column=trace_schema.CERTAINTY_COLUMN,
+    values=certainty_good_examples,
+    will_fail=False,
+)
+geometry_gdf_params = (
+    (
+        gpd.GeoDataFrame({"geometry": [Point(), Point(1, 1)]}),
+        True,
+        True,
+    ),
+    (
+        gpd.GeoDataFrame(
+            {"geometry": [LineString([(0, 0), (1, 1)]), MultiLineString()]}
+        ),
+        True,
+        False,
+    ),
 )
 
 
-@lru_cache(maxsize=None)
-def test_traces_schema_params():
+def test_traces_schema_params() -> List[Tuple[gpd.GeoDataFrame, bool, bool]]:
     """
     Params for test_traces_schema.
     """
     all_params = [
-        (
-            data_source_gdf_good_param,  # gdf
-            False,  # will_fail
-            False,  # geom_test
-        ),
-        (
-            data_source_gdf_good_param,  # gdf
-            True,  # will_fail
-            False,  # geom_test
-        ),
+        data_source_gdf_good_param,
+        data_source_gdf_bad_param,
+        date_gdf_good_param,
+        date_gdf_bad_param,
+        operator_gdf_good_param,
+        operator_gdf_bad_param,
+        *geometry_gdf_params,
+        scale_gdf_good_param,
+        certainty_gdf_good_param,
     ]
 
-    assert all(len(params) == 3 for params in all_params)
+    for params in all_params:
+        assert isinstance(params[0], gpd.GeoDataFrame)
+        assert isinstance(params[1], bool)
+        assert isinstance(params[2], bool)
+        assert len(params) == 3
 
     return all_params
 
 
-@lru_cache(maxsize=None)
 def test_data_source_regex_check_params():
     """
     Params for test_data_source_regex_check.
@@ -537,4 +604,14 @@ def test_data_source_regex_check_params():
     return [
         *[(example, False) for example in data_source_good_examples],
         *[(example, True) for example in data_source_bad_examples],
+    ]
+
+
+def test_date_datetime_check_params():
+    """
+    Params for test_date_datetime_check.
+    """
+    return [
+        *[(example, False) for example in date_good_examples],
+        *[(example, True) for example in date_bad_examples],
     ]
