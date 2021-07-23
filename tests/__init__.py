@@ -615,3 +615,38 @@ def test_date_datetime_check_params():
         *[(example, False) for example in date_good_examples],
         *[(example, True) for example in date_bad_examples],
     ]
+
+
+def test_sort_update_tuples_to_match_invalids_params():
+    """
+    Params for test_sort_update_tuples_to_match_invalids.
+    """
+    return [
+        (
+            [
+                utils.UpdateTuple(
+                    area_name="name_3",
+                    update_values=dict(),
+                    traces=gpd.GeoDataFrame(),
+                    traces_path=Path(),
+                ),
+                utils.UpdateTuple(
+                    area_name="name_1",
+                    update_values=dict(),
+                    traces=gpd.GeoDataFrame(),
+                    traces_path=Path(),
+                ),
+                utils.UpdateTuple(
+                    area_name="name_2",
+                    update_values=dict(),
+                    traces=gpd.GeoDataFrame(),
+                    traces_path=Path(),
+                ),
+            ],
+            [
+                utils.TraceTuple(traces_path=Path(), area_path=Path("name_1.file")),
+                utils.TraceTuple(traces_path=Path(), area_path=Path("name_2.file")),
+                utils.TraceTuple(traces_path=Path(), area_path=Path("name_3.file")),
+            ],
+        ),
+    ]

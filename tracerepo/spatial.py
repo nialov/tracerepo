@@ -118,23 +118,6 @@ def sort_update_tuples_to_match_invalids(
 ) -> List[utils.UpdateTuple]:
     """
     Sort update_tuples to match the order in invalids based on area_name.
-
-    >>> from pprint import pprint
-    >>> update_tuples = [
-    ... utils.UpdateTuple(area_name="name_3", update_values=dict()),
-    ... utils.UpdateTuple(area_name="name_1", update_values=dict()),
-    ... utils.UpdateTuple(area_name="name_2", update_values=dict()),
-    ... ]
-    >>> invalids = [
-    ... utils.TraceTuple(traces_path=None, area_path=Path("name_1.file")),
-    ... utils.TraceTuple(traces_path=None, area_path=Path("name_2.file")),
-    ... utils.TraceTuple(traces_path=None, area_path=Path("name_3.file")),
-    ... ]
-    >>> pprint(sort_update_tuples_to_match_invalids(update_tuples, invalids))
-    [UpdateTuple(area_name='name_1', update_values={}, error=False),
-     UpdateTuple(area_name='name_2', update_values={}, error=False),
-     UpdateTuple(area_name='name_3', update_values={}, error=False)]
-
     """
     # Resolve the matching area name from area_path variable
     invalids_area_names = [invalid.area_path.stem for invalid in invalids]

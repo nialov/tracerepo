@@ -2,6 +2,7 @@
 Tests for spatial.py.
 """
 from pathlib import Path
+from typing import List
 
 import geopandas as gpd
 import pandas as pd
@@ -108,3 +109,20 @@ def test_validate_invalids(invalids, will_fail):
         assert failed
     else:
         assert not failed
+
+
+@pytest.mark.parametrize(
+    "update_tuples,invalids", tests.test_sort_update_tuples_to_match_invalids_params()
+)
+def test_sort_update_tuples_to_match_invalids(
+    update_tuples, invalids: List[utils.TraceTuple]
+):
+    """
+    Test sort_update_tuples_to_match_invalids.
+    """
+    result = spatial.sort_update_tuples_to_match_invalids(update_tuples, invalids)
+
+    for name_in_updated, name_in_invalids in zip(
+        [ut.area_name for ut in result], [iv.area_path.stem for iv in invalids]
+    ):
+        assert name_in_updated == name_in_invalids
