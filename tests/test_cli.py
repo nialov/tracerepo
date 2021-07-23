@@ -34,7 +34,7 @@ def test_cli_app_help(subcommand: str):
     tests.click_error_print(result=result)
 
 
-@settings(max_examples=5, deadline=5000)
+@settings(max_examples=2, deadline=10000)
 @given(
     database=tests.database_schema_strategy(),
 )
@@ -237,3 +237,11 @@ def test_format_geojson(tmp_path):
         raise
     finally:
         os.chdir(cur_dir)
+
+
+def test_all_cli():
+    """
+    Test all cli tools in ready-made tracerepository.
+
+    TODO: Use the data put in ./tests/sample_data/tracerepository
+    """

@@ -35,7 +35,6 @@ class UpdateTuple(NamedTuple):
 
     area_name: str
     update_values: Dict[rules.ColumnNames, str]
-    traces: gpd.GeoDataFrame
     traces_path: Path
     error: bool = False
 

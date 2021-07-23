@@ -61,7 +61,8 @@ def validate(
 
     except Exception as exc:
         logging.critical(
-            f"Validation critically failed for dataset ({name}) with exception: {exc}"
+            f"Validation critically failed for dataset ({name}) with exception: {exc}",
+            exc_info=True,
         )
         return traces, ValidationResults.CRITICAL
 
@@ -180,7 +181,6 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                         area_name=futures[future].area_path.stem,
                         update_values=dict(),
                         error=True,
-                        traces=gpd.GeoDataFrame(),
                         traces_path=futures[future].traces_path,
                     )
                 )
@@ -210,7 +210,6 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
             update_values={
                 rules.ColumnNames.VALIDITY: rules.ValidationResults.EMPTY.value
             },
-            traces=traces,
             traces_path=traces_path,
         )
 
@@ -222,7 +221,8 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
         name=area_path.name,
     )
 
-    assert validated.crs == traces.crs
+    if not validated.crs == traces.crs:
+        raise ValueError("Expected crs to match for gdf before and after validation.")
 
     try:
         # Write the validated traces
@@ -238,7 +238,6 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
     update_tuple = utils.UpdateTuple(
         area_name=area_path.stem,
         update_values={rules.ColumnNames.VALIDITY: validation_results.value},
-        traces=validated,
         traces_path=traces_path,
     )
 

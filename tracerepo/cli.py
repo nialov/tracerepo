@@ -10,6 +10,7 @@ from typing import List, Sequence
 
 import pandera as pa
 import typer
+from fractopo.general import read_geofile
 
 from tracerepo import repo, rules, spatial, trace_schema, utils
 from tracerepo.organize import Organizer
@@ -99,7 +100,9 @@ def validate(
 
         pandera_pass = True
         try:
-            trace_schema.traces_schema().validate(update_tuple.traces, lazy=True)
+            trace_schema.traces_schema().validate(
+                read_geofile(update_tuple.traces_path), lazy=True
+            )
         except pa.errors.SchemaErrors as exc:
             pandera_pass = False
             print(exc.failure_cases)

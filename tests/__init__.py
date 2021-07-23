@@ -627,19 +627,16 @@ def test_sort_update_tuples_to_match_invalids_params():
                 utils.UpdateTuple(
                     area_name="name_3",
                     update_values=dict(),
-                    traces=gpd.GeoDataFrame(),
                     traces_path=Path(),
                 ),
                 utils.UpdateTuple(
                     area_name="name_1",
                     update_values=dict(),
-                    traces=gpd.GeoDataFrame(),
                     traces_path=Path(),
                 ),
                 utils.UpdateTuple(
                     area_name="name_2",
                     update_values=dict(),
-                    traces=gpd.GeoDataFrame(),
                     traces_path=Path(),
                 ),
             ],
