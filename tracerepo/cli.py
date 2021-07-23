@@ -8,9 +8,10 @@ from pprint import pprint
 from shutil import rmtree
 from typing import List, Sequence
 
+import pandera as pa
 import typer
 
-from tracerepo import repo, rules, spatial, utils
+from tracerepo import repo, rules, spatial, trace_schema, utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()
@@ -90,12 +91,22 @@ def validate(
     update_tuples = spatial.validate_invalids(invalids=unique_invalids_only)
 
     # Exit with error code 1 if there's errors in updating the database.csv
-    database_error = False
+    database_error, write_error = False, False
 
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
+        pandera_pass = True
+        try:
+            trace_schema.traces_schema().validate(update_tuple.traces, lazy=True)
+        except pa.errors.SchemaErrors as exc:
+            pandera_pass = False
+            print(exc.failure_cases)
+        if not pandera_pass:
+            update_tuple.update_values = {
+                rules.ColumnNames.VALIDITY: rules.ValidationResults.INVALID.value
+            }
         try:
             # Update Organizer database.csv
             organizer.update(
@@ -105,22 +116,24 @@ def validate(
 
             # Write the database.csv
             repo.write_database_csv(path=database, database=organizer.database)
-        except Exception as exc:
+
+        except Exception:
 
             # Error in updating database.csv
             database_error = True
 
             # Log exception
             logging.error(
-                f"Error when updating Organizer database.csv: {exc}\n"
+                f"Error when updating Organizer database.csv.\n"
                 f"update_tuple: {update_tuple}\n"
-                f"invalid: {invalid}\n"
+                f"invalid: {invalid}\n",
+                exc_info=True,
             )
 
         if report:
             pprint(update_tuple)
 
-    if database_error:
+    if database_error or write_error:
 
         # Exit with error code 1 (not successful)
         raise typer.Exit(code=1)

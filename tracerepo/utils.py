@@ -35,6 +35,8 @@ class UpdateTuple(NamedTuple):
 
     area_name: str
     update_values: Dict[rules.ColumnNames, str]
+    traces: gpd.GeoDataFrame
+    traces_path: Path
     error: bool = False
 
 
@@ -240,8 +242,6 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
         path.write_text(gdf.to_json())
     else:
         gdf = convert_list_columns(gdf)
-
-        trace_schema.traces_schema().validate(gdf)
 
         gdf.to_file(path, driver=driver)
 

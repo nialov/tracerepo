@@ -172,13 +172,16 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                 # Catch and log critical failures
                 logging.error(
                     f"Validation exception with {futures[future]}."
-                    f"\n\nException: {exc}"
+                    f"\n\nException: {exc}",
+                    exc_info=True,
                 )
                 update_tuples.append(
                     utils.UpdateTuple(
                         area_name=futures[future].area_path.stem,
                         update_values=dict(),
                         error=True,
+                        traces=gpd.GeoDataFrame(),
+                        traces_path=futures[future].traces_path,
                     )
                 )
     return sort_update_tuples_to_match_invalids(
@@ -207,6 +210,8 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
             update_values={
                 rules.ColumnNames.VALIDITY: rules.ValidationResults.EMPTY.value
             },
+            traces=traces,
+            traces_path=traces_path,
         )
 
     # Validate with fractopo trace validation
@@ -219,13 +224,22 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
 
     assert validated.crs == traces.crs
 
-    # Save the validated (overwrites old)
-    utils.write_geodata(gdf=validated, path=traces_path)
+    try:
+        # Write the validated traces
+        utils.write_geodata(gdf=validated, path=traces_path)
+    except Exception:
+        # Log exception
+        logging.error(
+            f"Error when writing validated trace GeoDataFrame to {traces_path}.",
+            exc_info=True,
+        )
 
     # Create dict with information on validity for trace-area-combo
     update_tuple = utils.UpdateTuple(
         area_name=area_path.stem,
         update_values={rules.ColumnNames.VALIDITY: validation_results.value},
+        traces=validated,
+        traces_path=traces_path,
     )
 
     return update_tuple
