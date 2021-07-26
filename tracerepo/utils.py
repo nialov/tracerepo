@@ -4,11 +4,14 @@ General utilities.
 import json
 import logging
 from contextlib import suppress
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Sequence, Type
 
 import geopandas as gpd
 import pandas as pd
+import pandera as pa
 
 from tracerepo import rules, trace_schema
 
@@ -27,7 +30,8 @@ class TraceTuple(NamedTuple):
     snap_threshold: float = 0.001
 
 
-class UpdateTuple(NamedTuple):
+@dataclass
+class UpdateTuple:
 
     """
     Tuple with information of validity for trace-area-pair.
@@ -295,3 +299,34 @@ def remove_from_dict_if_in(key: str, dict_to_check: Dict[str, Path]):
     with suppress(KeyError):
         dict_to_check.pop(key)
     return dict_to_check
+
+
+def perform_pandera_check(
+    traces: gpd.GeoDataFrame,
+) -> pd.DataFrame:
+    """
+    Validate the column data in ``traces`` ``GeoDataFrame``.
+    """
+    pandera_report: pd.DataFrame = pd.DataFrame()
+    assert pandera_report.empty
+    try:
+        trace_schema.traces_schema().validate(traces, lazy=True)
+    except pa.errors.SchemaErrors as exc:
+        pandera_report = exc.failure_cases
+        assert isinstance(pandera_report, pd.DataFrame)
+
+    return pandera_report
+
+
+def report_pandera_errors(
+    pandera_report: pd.DataFrame, report_directory: Path, area_name: str
+) -> str:
+    """
+    Report pandera errors as html files saved to a reports directory.
+    """
+    report_directory.mkdir(exist_ok=True)
+    current_time = datetime.now().strftime("%Y%m%d_%h%M")
+    report_name = f"{area_name}_report_{current_time}.html"
+    report_path = report_directory / report_name
+    pandera_report.to_html(report_path)
+    return f"Reported {area_name} traces pandera errors to {report_path}."

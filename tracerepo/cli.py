@@ -4,15 +4,13 @@ Command line api for tracerepo.
 
 import logging
 from pathlib import Path
-from pprint import pprint
 from shutil import rmtree
 from typing import List, Sequence
 
-import pandera as pa
 import typer
 from fractopo.general import read_geofile
 
-from tracerepo import repo, rules, spatial, trace_schema, utils
+from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()
@@ -65,6 +63,7 @@ def validate(
     traces_filter: List[str] = DATA_FILTER,
     scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
+    report_directory: Path = typer.Option(rules.FolderNames.REPORTS.value),
 ):
     """
     Validate trace datasets.
@@ -98,18 +97,16 @@ def validate(
     # Iterate over results
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
-        pandera_pass = True
-        try:
-            trace_schema.traces_schema().validate(
-                read_geofile(update_tuple.traces_path), lazy=True
-            )
-        except pa.errors.SchemaErrors as exc:
-            pandera_pass = False
-            print(exc.failure_cases)
-        if not pandera_pass:
+        # Read traces from disk.
+        # (Alternative is to keep GeoDataFrame in memory from multiprocessing
+        # but that is risky.)
+        traces = read_geofile(update_tuple.traces_path)
+        pandera_report = utils.perform_pandera_check(traces)
+        if not pandera_report.empty:
             update_tuple.update_values = {
                 rules.ColumnNames.VALIDITY: rules.ValidationResults.INVALID.value
             }
+
         try:
             # Update Organizer database.csv
             organizer.update(
@@ -134,7 +131,14 @@ def validate(
             )
 
         if report:
-            pprint(update_tuple)
+            typer.echo(update_tuple)
+            if not pandera_report.empty:
+                str_report = utils.report_pandera_errors(
+                    pandera_report=pandera_report,
+                    report_directory=report_directory,
+                    area_name=update_tuple.area_name,
+                )
+                typer.echo(str_report)
 
     if database_error or write_error:
 
@@ -199,7 +203,7 @@ def organize(
     move_descriptions = organizer.organize(simulate=simulate)
 
     if report:
-        pprint("\n".join(move_descriptions))
+        typer.echo("\n".join(move_descriptions))
 
     if not simulate:
         organizer.check()
@@ -310,4 +314,4 @@ def export(
         overwrite=overwrite,
     )
 
-    print(f"Saved datasets to {export_destination} with driver {driver}.")
+    typer.echo(f"Saved datasets to {export_destination} with driver {driver}.")

@@ -71,6 +71,7 @@ class FolderNames(Enum):
     TRACES = "traces"
     AREA = "area"
     UNORGANIZED = "unorganized"
+    REPORTS = "tracerepository_reports"
 
 
 @unique
