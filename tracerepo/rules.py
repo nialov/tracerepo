@@ -149,7 +149,9 @@ def filename_regex(geom_type: Optional[ColumnNames] = None) -> str:
         return base + r"_area$"
     if geom_type == ColumnNames.TRACES:
         return base + r"_traces$"
-    raise TypeError(f"Expected {geom_type=} to be None or TRACES or AREA enum.")
+    raise TypeError(
+        f"Expected geom_type {geom_type} to be None or TRACES or AREA enum."
+    )
 
 
 def database_schema() -> pa.DataFrameSchema:

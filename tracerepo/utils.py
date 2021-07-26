@@ -132,7 +132,9 @@ def identify_geom_type(filename_stem: str) -> rules.ColumnNames:
         return rules.ColumnNames.AREA
     if filename_stem.endswith("_traces"):
         return rules.ColumnNames.TRACES
-    raise ValueError(f"Expected {filename_stem=} to end in _area or _traces.")
+    raise ValueError(
+        f"Expected filename_stem {filename_stem} to end in _area or _traces."
+    )
 
 
 def multi_string_filter(
