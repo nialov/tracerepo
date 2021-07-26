@@ -4,6 +4,7 @@ Tests for utils.py.
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from pandera.errors import SchemaError
 
@@ -48,3 +49,18 @@ def test_compile_export_dir(driver):
     assert len(result) != 0
     assert utils.export_dir_prefix in result
     assert " " not in result
+
+
+@pytest.mark.parametrize("traces,will_fail", tests.test_perform_pandera_check_params())
+def test_perform_pandera_check(traces, will_fail):
+    """
+    Test perform_pandera_check.
+    """
+    pandera_report = utils.perform_pandera_check(traces)
+    assert isinstance(pandera_report, pd.DataFrame)
+
+    if will_fail:
+        assert not pandera_report.empty
+        assert pandera_report.shape[0] > 0
+    else:
+        assert pandera_report.empty

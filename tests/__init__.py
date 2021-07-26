@@ -207,6 +207,15 @@ kb11_traces_cut_dislocated = cached_sample(
 )
 
 
+def kb11_traces_cut_invalid_dips():
+    """
+    Make GeoDataFrame with invalid dip column data.
+    """
+    traces = kb11_traces_cut.copy()
+    traces[trace_schema.DIP_COLUMN] = [-1 for _ in range(traces.shape[0])]
+    return traces
+
+
 def test_validate_params() -> Iterator[tuple]:
     """
     Test validate params.
@@ -645,5 +654,26 @@ def test_sort_update_tuples_to_match_invalids_params():
                 utils.TraceTuple(traces_path=Path(), area_path=Path("name_2.file")),
                 utils.TraceTuple(traces_path=Path(), area_path=Path("name_3.file")),
             ],
+        ),
+    ]
+
+
+def test_perform_pandera_check_params():
+    """
+    Params for test_perform_pandera_check.
+    """
+    return [
+        (kb11_traces_cut, False),
+        (
+            gpd.GeoDataFrame(
+                {"geometry": [LineString()], trace_schema.DIP_COLUMN: [-1]}
+            ),
+            True,
+        ),
+        (
+            gpd.GeoDataFrame(
+                {"geometry": [LineString()], trace_schema.SCALE_COLUMN: ["hello"]}
+            ),
+            True,
         ),
     ]

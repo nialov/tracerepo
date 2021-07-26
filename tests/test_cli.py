@@ -39,20 +39,23 @@ def test_cli_app_help(subcommand: str):
     database=tests.database_schema_strategy(),
 )
 @pytest.mark.parametrize(
-    "trace_gdf,assume_error",
+    "trace_gdf,assume_error,pandera_valid",
     [
-        (tests.kb11_traces_cut, rules.ValidationResults.VALID),
+        (tests.kb11_traces_cut, rules.ValidationResults.VALID, True),
+        (tests.kb11_traces_cut_invalid_dips(), rules.ValidationResults.INVALID, False),
         (
             gpd.GeoDataFrame(
                 {"geometry": [LineString([(10e10, 10e10), (10e10, 1 + 10e10)])]}
             ),
             rules.ValidationResults.EMPTY,
+            True,
         ),
     ],
 )
 def test_cli_validate_exec(
     trace_gdf,
     assume_error: rules.ValidationResults,
+    pandera_valid: bool,
     database,
     tmp_path_factory,
 ):
@@ -71,7 +74,14 @@ def test_cli_validate_exec(
         database_csv_path.unlink(missing_ok=True)
         repo.write_database_csv(path=database_csv_path, database=organizer.database)
 
-        result = runner.invoke(app=app, args=["validate"])
+        result = runner.invoke(app=app, args=["validate", "--report"])
+
+        reports_path = Path(rules.FolderNames.REPORTS.value)
+        if not pandera_valid:
+            assert reports_path.exists()
+            assert reports_path.is_dir()
+            assert len(list(reports_path.glob("*.html"))) > 0
+            assert "html" in result.output
 
         tests.click_error_print(result)
 
