@@ -3,6 +3,7 @@ Tests for utils.py.
 """
 
 from pathlib import Path
+import time
 
 import pandas as pd
 import pytest
@@ -64,3 +65,12 @@ def test_perform_pandera_check(traces, will_fail):
         assert pandera_report.shape[0] > 0
     else:
         assert pandera_report.empty
+
+
+def test_filename_friendly_datetime_string_manual():
+    """
+    Test filename_friendly_datetime_string.
+    """
+    curr_year = str(time.localtime().tm_year)
+    result = utils.filename_friendly_datetime_string()
+    assert curr_year in result
