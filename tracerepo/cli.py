@@ -100,28 +100,15 @@ def validate(
     # Iterate over results
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
-        # Read traces from disk.
-        # (Alternative is to keep GeoDataFrame in memory from multiprocessing
-        # but that is risky.)
-        traces = read_geofile(update_tuple.traces_path)
-        try:
-            pandera_report = utils.perform_pandera_check(traces)
-        except Exception as exc:
-            logging.error(
-                f"GeoDataFrame validation critically failed with {update_tuple} traces.",
-                exc_info=True,
-            )
-            pandera_report = pd.DataFrame(
-                {"ERROR": ["Column validation critically failed...", str(exc)]}
-            )
+        # Validate and gather pandera reporting
+        pandera_update_values, pandera_report = utils.pandera_reporting(
+            update_tuple=update_tuple
+        )
 
-        if not pandera_report.empty:
-            if utils.otherwise_valid(update_tuple=update_tuple):
-                # If the dataset is otherwise marked valid mark it as unfit due
-                # to pandera schema error
-                update_tuple.update_values = {
-                    rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value
-                }
+        # If the geodataset is otherwise valid but fails pandera checks it will
+        # be marked as unfit
+        if len(pandera_update_values) > 0:
+            update_tuple.update_values = pandera_update_values
         try:
             # Update Organizer database.csv
             organizer.update(

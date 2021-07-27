@@ -7,13 +7,14 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Sequence, Type
+from typing import Any, Dict, List, NamedTuple, Sequence, Type, Tuple
 
 import geopandas as gpd
 import pandas as pd
 import pandera as pa
 
 from tracerepo import rules, trace_schema
+from fractopo import general
 
 geojson_driver = "GeoJSON"
 export_dir_prefix = "data-exported-"
@@ -356,3 +357,45 @@ def otherwise_valid(update_tuple: UpdateTuple) -> bool:
     ):
         return True
     return False
+
+
+def pandera_reporting(
+    update_tuple: UpdateTuple,
+) -> Tuple[Dict[rules.ColumnNames, str], pd.DataFrame]:
+    """
+    Check traces GeoDataFrame column data against schema and report if needed.
+    """
+    if update_tuple.update_values[rules.ColumnNames.VALIDITY] in (
+        rules.ValidationResults.EMPTY.value,
+        rules.ValidationResults.CRITICAL.value,
+    ):
+        return dict(), pd.DataFrame()
+    # Read traces from disk.
+    # (Alternative is to keep GeoDataFrame in memory from multiprocessing
+    # but that is risky.)
+    traces = general.read_geofile(update_tuple.traces_path)
+    if traces.empty:
+        logging.error(f"Empty traces uncaught by validation for {update_tuple}.")
+        return dict(), pd.DataFrame()
+    try:
+        pandera_report = perform_pandera_check(traces)
+    except Exception as exc:
+        logging.error(
+            f"GeoDataFrame validation critically failed with {update_tuple} traces.",
+            exc_info=True,
+        )
+        pandera_report = pd.DataFrame(
+            {"ERROR": ["Column validation critically failed...", str(exc)]}
+        )
+    if pandera_report.empty:
+        return dict(), pd.DataFrame()
+
+    if otherwise_valid(update_tuple=update_tuple):
+        # If the dataset is otherwise marked valid mark it as unfit due
+        # to pandera schema error
+        update_values = {
+            rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value
+        }
+        return update_values, pandera_report
+    else:
+        return dict(), pandera_report
