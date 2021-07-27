@@ -1,0 +1,11 @@
+area,traces,thematic,scale,area-shape,validity,snap-threshold
+hastholmen_area,hastholmen_traces,loviisa,infinity,other,invalid,0.001
+kb10_area,kb10_traces,loviisa,20m,other,valid,0.001
+kb10_unfit_area,kb10_unfit_traces,loviisa,20m,other,unfit,0.001
+kb11_area,kb11_traces,loviisa,20m,other,valid,0.001
+kb2_area,kb2_traces,loviisa,20m,other,valid,0.001
+kb3_area,kb3_traces,loviisa,20m,other,invalid,0.001
+kb7_area,kb7_traces,loviisa,20m,other,invalid,0.001
+kb9_area,kb9_traces,loviisa,20m,other,valid,0.001
+kl5_area,kl5_traces,loviisa,20m,other,valid,0.001
+og1_area,og1_traces,loviisa,20m,other,invalid,0.001
