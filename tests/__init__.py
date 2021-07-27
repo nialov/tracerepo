@@ -220,6 +220,10 @@ kb11_traces_cut_dislocated = cached_sample(
     path=kb11_traces_cut_dislocated_path,
     create_dataset=lambda: dislocate(dataset=kb11_traces_cut),
 )
+kb11_unfit_traces_path = (
+    READY_TRACEREPOSITORY_PATH
+    / "tracerepository_data/loviisa/traces/20m/kb10_unfit_traces.geojson"
+)
 
 
 def kb11_traces_cut_invalid_dips():
@@ -690,5 +694,61 @@ def test_perform_pandera_check_params():
                 {"geometry": [LineString()], trace_schema.SCALE_COLUMN: ["hello"]}
             ),
             True,
+        ),
+    ]
+
+
+def test_pandera_reporting_params():
+    """
+    Params for test_pandera_reporting.
+    """
+    return [
+        (
+            utils.UpdateTuple(
+                area_name="param",
+                update_values={
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.EMPTY.value
+                },
+                traces_path=Path(),
+            ),
+            True,
+            True,
+            dict(),
+        ),
+        (
+            utils.UpdateTuple(
+                area_name="param",
+                update_values={
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.CRITICAL.value
+                },
+                traces_path=Path(),
+            ),
+            True,
+            True,
+            dict(),
+        ),
+        (
+            utils.UpdateTuple(
+                area_name="kb11_traces_cut",
+                update_values={
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.VALID.value
+                },
+                traces_path=kb11_traces_cut_path,
+            ),
+            True,
+            True,
+            dict(),
+        ),
+        (
+            utils.UpdateTuple(
+                area_name="kb11_traces_unfit",
+                update_values={
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.VALID.value
+                },
+                traces_path=kb11_unfit_traces_path,
+            ),
+            False,
+            False,
+            {rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value},
         ),
     ]

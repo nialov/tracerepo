@@ -74,3 +74,23 @@ def test_filename_friendly_datetime_string_manual():
     curr_year = str(time.localtime().tm_year)
     result = utils.filename_friendly_datetime_string()
     assert curr_year in result
+
+
+@pytest.mark.parametrize(
+    "update_tuple,empty_dict,empty_df,update_values",
+    tests.test_pandera_reporting_params(),
+)
+def test_pandera_reporting(update_tuple, empty_dict, empty_df, update_values):
+    """
+    Test pandera_reporting.
+    """
+    pandera_update_values, pandera_report = utils.pandera_reporting(
+        update_tuple=update_tuple
+    )
+
+    if empty_dict:
+        assert len(pandera_update_values) == 0
+    if empty_df:
+        assert pandera_report.empty
+
+    assert update_values == pandera_update_values
