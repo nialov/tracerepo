@@ -77,7 +77,7 @@ def validate(
     # Make sure all were lists
     assert len(validated_error_column_values) == len(validated_error_lists)
 
-    # Check for critical errors that require user fix
+    # Check for major errors that require user fix
     if any(
         check_for_validator_error(
             errors,
@@ -176,10 +176,13 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                     f"\n\nException: {exc}",
                     exc_info=True,
                 )
+                update_values = {
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.CRITICAL.value
+                }
                 update_tuples.append(
                     utils.UpdateTuple(
                         area_name=futures[future].area_path.stem,
-                        update_values=dict(),
+                        update_values=update_values,
                         error=True,
                         traces_path=futures[future].traces_path,
                     )

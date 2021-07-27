@@ -332,3 +332,16 @@ def report_pandera_errors(
     report_path = report_directory / report_name
     pandera_report.to_html(report_path)
     return f"Reported {area_name} traces pandera errors to {report_path}."
+
+
+def otherwise_valid(update_tuple: UpdateTuple) -> bool:
+    """
+    Is dataset otherwise valid.
+    """
+    assert rules.ColumnNames.VALIDITY in update_tuple.update_values
+    if (
+        update_tuple.update_values[rules.ColumnNames.VALIDITY]
+        == rules.ValidationResults.VALID.value
+    ):
+        return True
+    return False

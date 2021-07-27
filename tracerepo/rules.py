@@ -97,6 +97,7 @@ class ValidationResults(Enum):
     VALID = "valid"
     INVALID = "invalid"
     CRITICAL = "critical"
+    UNFIT = "unfit"
 
 
 def name_column_kwargs(

@@ -40,9 +40,7 @@ def app_callback(
     debug: bool = typer.Option(False, help=logging_level("DEBUG")),
 ):
     """
-    Run before app execution.
-
-    Sets logging level.
+    Use tracerepo to manage and validate fracture & lineament trace data.
     """
     logging_level_str = "WARNING"
     logging.basicConfig(level=logging.WARNING, force=True)
@@ -79,7 +77,11 @@ def validate(
         thematic=thematic_filter,
         traces=traces_filter,
         scale=scale_filter,
-        validity=[rules.ValidationResults.INVALID, rules.ValidationResults.EMPTY],
+        validity=[
+            rules.ValidationResults.INVALID,
+            rules.ValidationResults.EMPTY,
+            rules.ValidationResults.UNFIT,
+        ],
     )
 
     # Only validate a single trace dataset once
@@ -103,10 +105,12 @@ def validate(
         traces = read_geofile(update_tuple.traces_path)
         pandera_report = utils.perform_pandera_check(traces)
         if not pandera_report.empty:
-            update_tuple.update_values = {
-                rules.ColumnNames.VALIDITY: rules.ValidationResults.INVALID.value
-            }
-
+            if utils.otherwise_valid(update_tuple=update_tuple):
+                # If the dataset is otherwise marked valid mark it as unfit due
+                # to pandera schema error
+                update_tuple.update_values = {
+                    rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value
+                }
         try:
             # Update Organizer database.csv
             organizer.update(
