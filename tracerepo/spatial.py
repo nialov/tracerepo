@@ -165,28 +165,24 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
                 # Get result from Future
                 # This will throw an error (if it happened in process)
                 update_tuple = future.result()
-
-                # Collect result
-                update_tuples.append(update_tuple)
-            except Exception as exc:
+            except Exception:
 
                 # Catch and log critical failures
                 logging.error(
-                    f"Validation exception with {futures[future]}."
-                    f"\n\nException: {exc}",
+                    f"Validation exception with {futures[future]}.",
                     exc_info=True,
                 )
                 update_values = {
                     rules.ColumnNames.VALIDITY: rules.ValidationResults.CRITICAL.value
                 }
-                update_tuples.append(
-                    utils.UpdateTuple(
-                        area_name=futures[future].area_path.stem,
-                        update_values=update_values,
-                        error=True,
-                        traces_path=futures[future].traces_path,
-                    )
+                update_tuple = utils.UpdateTuple(
+                    area_name=futures[future].area_path.stem,
+                    update_values=update_values,
+                    error=True,
+                    traces_path=futures[future].traces_path,
                 )
+            # Collect result
+            update_tuples.append(update_tuple)
     return sort_update_tuples_to_match_invalids(
         update_tuples=update_tuples, invalids=invalids
     )

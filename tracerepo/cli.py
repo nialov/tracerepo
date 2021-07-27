@@ -6,6 +6,7 @@ import logging
 from pathlib import Path
 from shutil import rmtree
 from typing import List, Sequence
+import pandas as pd
 
 import typer
 from fractopo.general import read_geofile
@@ -103,7 +104,17 @@ def validate(
         # (Alternative is to keep GeoDataFrame in memory from multiprocessing
         # but that is risky.)
         traces = read_geofile(update_tuple.traces_path)
-        pandera_report = utils.perform_pandera_check(traces)
+        try:
+            pandera_report = utils.perform_pandera_check(traces)
+        except Exception as exc:
+            logging.error(
+                f"GeoDataFrame validation critically failed with {update_tuple} traces.",
+                exc_info=True,
+            )
+            pandera_report = pd.DataFrame(
+                {"ERROR": ["Column validation critically failed...", str(exc)]}
+            )
+
         if not pandera_report.empty:
             if utils.otherwise_valid(update_tuple=update_tuple):
                 # If the dataset is otherwise marked valid mark it as unfit due

@@ -221,10 +221,14 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     if gdf.empty:
         return gdf
     for column in gdf.columns.values:
-        if isinstance(gdf[column].values[0], list):
+        column_data = gdf[column]
+        assert isinstance(column_data, pd.Series)
+        if isinstance(column_data.values[0], list):
             logging.info(f"Converting {column} from list to str.")
-            gdf[column] = [tuple(item) for item in gdf[column].values]
-            gdf[column] = gdf[column].astype(str)
+            gdf[column] = [str(tuple(item)) for item in column_data.values]
+            # column_data = gdf[column]
+            # assert isinstance(column_data, pd.Series)
+            # gdf[column] = column_data.astype(str)
     return gdf
 
 
