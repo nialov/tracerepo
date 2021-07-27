@@ -320,6 +320,13 @@ def perform_pandera_check(
     return pandera_report
 
 
+def filename_friendly_datetime_string() -> str:
+    """
+    Get filename friendly datetime string.
+    """
+    return datetime.now().strftime("%Y%m%d_%H%M")
+
+
 def report_pandera_errors(
     pandera_report: pd.DataFrame, report_directory: Path, area_name: str
 ) -> str:
@@ -327,7 +334,7 @@ def report_pandera_errors(
     Report pandera errors as html files saved to a reports directory.
     """
     report_directory.mkdir(exist_ok=True)
-    current_time = datetime.now().strftime("%Y%m%d_%h%M")
+    current_time = filename_friendly_datetime_string()
     report_name = f"{area_name}_report_{current_time}.html"
     report_path = report_directory / report_name
     pandera_report.to_html(report_path)
