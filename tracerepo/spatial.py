@@ -237,6 +237,17 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
             exc_info=True,
         )
 
+        # Return with critical error
+        # Validation does minor edits that are required for the dataset to be
+        # valid so writing is always required.
+        return utils.UpdateTuple(
+            area_name=area_path.stem,
+            update_values={
+                rules.ColumnNames.VALIDITY: ValidationResults.CRITICAL.value
+            },
+            traces_path=traces_path,
+        )
+
     # Create dict with information on validity for trace-area-combo
     update_tuple = utils.UpdateTuple(
         area_name=area_path.stem,

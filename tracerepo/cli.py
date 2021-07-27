@@ -123,12 +123,12 @@ def validate(
 
         except Exception:
 
-            # Error in updating database.csv
+            # Error in updating or writing database.csv
             database_error = True
 
             # Log exception
             logging.error(
-                f"Error when updating Organizer database.csv.\n"
+                f"Error when updating or writing Organizer database.csv.\n"
                 f"update_tuple: {update_tuple}\n"
                 f"invalid: {invalid}\n",
                 exc_info=True,
