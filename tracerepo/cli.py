@@ -6,8 +6,8 @@ import logging
 from pathlib import Path
 from shutil import rmtree
 from typing import List, Sequence
-import pandas as pd
 
+import pandas as pd
 import typer
 from fractopo.general import read_geofile
 

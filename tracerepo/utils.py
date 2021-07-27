@@ -7,14 +7,14 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Sequence, Type, Tuple
+from typing import Any, Dict, List, NamedTuple, Sequence, Tuple, Type
 
 import geopandas as gpd
 import pandas as pd
 import pandera as pa
+from fractopo import general
 
 from tracerepo import rules, trace_schema
-from fractopo import general
 
 geojson_driver = "GeoJSON"
 export_dir_prefix = "data-exported-"
