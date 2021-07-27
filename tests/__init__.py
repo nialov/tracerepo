@@ -18,6 +18,8 @@ from tracerepo import repo, rules, trace_schema, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
+READY_TRACEREPOSITORY_PATH = Path("tests/sample_data/tracerepository/")
+
 
 def cut(
     dataset: gpd.GeoDataFrame,
@@ -139,6 +141,19 @@ def setup_scaffold_context(tmp_path: Path):
     os.chdir(tmp_path)
     try:
         yield repo.scaffold()
+    finally:
+        os.chdir(current_dir)
+
+
+@contextmanager
+def change_dir_context(path: Path):
+    """
+    Temporarily change directory context to ``path``.
+    """
+    current_dir = Path(".").resolve()
+    os.chdir(path)
+    try:
+        yield path
     finally:
         os.chdir(current_dir)
 

@@ -4,6 +4,7 @@ Tests for cli.py.
 
 import os
 from pathlib import Path
+from shutil import rmtree
 from warnings import warn
 
 import geopandas as gpd
@@ -252,6 +253,68 @@ def test_format_geojson(tmp_path):
 def test_all_cli():
     """
     Test all cli tools in ready-made tracerepository.
-
-    TODO: Use the data put in ./tests/sample_data/tracerepository
     """
+    database_csv_path = Path(rules.DATABASE_CSV)
+    with tests.change_dir_context(tests.READY_TRACEREPOSITORY_PATH):
+
+        # Read database.csv before execution
+        csv_text_before = database_csv_path.read_text()
+
+        # Assert that that what we expect is in database
+        assert rules.ValidationResults.VALID.value in csv_text_before
+        assert rules.ValidationResults.INVALID.value in csv_text_before
+        assert rules.ValidationResults.CRITICAL.value not in csv_text_before
+
+        # Run tracerepo --help
+        help_result = runner.invoke(app=app, args=["--help"])
+        tests.click_error_print(help_result)
+
+        # Run tracerepo check
+        check_result = runner.invoke(app=app, args=["check"])
+        tests.click_error_print(check_result)
+
+        # Run tracerepo organize
+        organize_result = runner.invoke(app=app, args=["organize"])
+        tests.click_error_print(organize_result)
+
+        # Run tracerepo organize
+        format_result = runner.invoke(app=app, args=["format-geojson"])
+        tests.click_error_print(format_result)
+
+        # Run tracerepo validate
+        # Validate kb* and hastholmen infinity traces
+        validate_result = runner.invoke(
+            app=app,
+            args=[
+                "validate",
+                "--traces-filter=kb",
+                "--traces-filter=hastholmen",
+                "--report",
+            ],
+        )
+
+        # Make sure pandera error was caught
+        assert "Reported" in validate_result.stdout
+        assert "html" in validate_result.stdout
+        reports_path = Path(rules.FolderNames.REPORTS.value)
+        assert reports_path.exists()
+        assert len(list(reports_path.glob("*.html"))) > 0
+        rmtree(reports_path)
+
+        # Test that there we no changes to database
+        csv_text_after = database_csv_path.read_text()
+        assert csv_text_after == csv_text_before
+        assert rules.ValidationResults.VALID.value in csv_text_after
+        assert rules.ValidationResults.INVALID.value in csv_text_after
+        assert rules.ValidationResults.CRITICAL.value not in csv_text_after
+
+        # Run tracerepo export
+        export_result = runner.invoke(app=app, args=["export"])
+        tests.click_error_print(export_result)
+
+        # Find export directory
+        for directory in Path(".").glob("data-exported-*"):
+            if directory.is_dir():
+                # Verify contents
+                assert len(list(directory.rglob("*.shp"))) > 0
+                rmtree(directory)
