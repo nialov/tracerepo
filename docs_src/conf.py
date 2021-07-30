@@ -1,3 +1,6 @@
+"""
+Configuration file for Sphinx.
+"""
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -34,6 +37,8 @@ release = imported_package.__version__  # type: ignore
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx_autodoc_typehints",
+    "sphinx_gallery.gen_gallery",
     "sphinx_rtd_theme",
     "nbsphinx",
 ]
@@ -43,6 +48,12 @@ source_suffix = {
     ".rst": "restructuredtext",
 }
 master_doc = "index"
+
+# Sphinx-gallery config
+sphinx_gallery_conf = {
+    "examples_dirs": "../examples",  # path to your example scripts
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+}
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

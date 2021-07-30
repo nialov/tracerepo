@@ -3,10 +3,32 @@ name = "tracerepo"
 version = "0.0.0.post109.dev0+8222ece"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
+readme = "README.rst"
+license = "MIT"
+# Make sure hyphens/underscores are correct in urls
+homepage = "https://github.com/nialov/tracerepo"
+repository = "https://github.com/nialov/tracerepo"
+documentation = "https://tracerepo.readthedocs.io/en/latest/"
+# For inspiration: https://pydigger.com/keywords
+keywords = [
+    "data",
+    "gis",
+    "geology",
+    "fracture",
+    "topology",
+]
+# See https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: GIS",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only"
+]
+include = ["CHANGELOG.md"]
 
 [tool.poetry.scripts]
 tracerepo = "tracerepo.cli:app"
-
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -24,12 +46,16 @@ coverage-badge = {version = "*", optional = true}
 sphinx = {version = "*", optional = true}
 sphinx-rtd-theme = {version = "*", optional = true}
 nbsphinx = {version = "*", optional = true}
+sphinx-gallery = {version = "*", optional = true}
+sphinx-autodoc-typehints = {version = "*", optional = true}
 
 # Linting and formatting
 pylint = {version = "*", optional = true}
 rstcheck = {version = "*", optional = true}
 black = {version = "*", optional = true}
 black-nb = {version = "*", optional = true}
+blacken-docs = {version = "*", optional = true}
+blackdoc = {version = "*", optional = true}
 isort = {version = "*", optional = true}
 
 # Typecheck
@@ -41,12 +67,28 @@ invoke = "*"
 jupyterlab = "*"
 ipython = "*"
 pytest = "*"
+pre-commit = "*"
 hypothesis = "*"
 
 [tool.poetry.extras]
 coverage = ["coverage", "coverage-badge"]
-docs = ["sphinx", "sphinx-rtd-theme", "nbsphinx"]
-format-lint = ["pylint", "rstcheck", "sphinx", "black", "black-nb", "isort"] 
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "nbsphinx",
+    "sphinx-gallery",
+    "sphinx-autodoc-typehints"
+]
+format-lint = [
+    "pylint",
+    "rstcheck",
+    "sphinx",
+    "black",
+    "black-nb",
+    "isort",
+    "blacken-docs",
+    "blackdoc"
+]
 typecheck = ["mypy"]
 
 [build-system]
@@ -82,7 +124,7 @@ fail-under = "9.5"
 output-format = "text"
 
 [tool.pylint.messages_control]
-max-line-length = 100
+max-line-length = 90
 disable = [
     "C0103",
     "C0302",
@@ -97,3 +139,9 @@ disable = [
 
 [tool.pylint.similarities]
 ignore-imports = true
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

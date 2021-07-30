@@ -1,11 +1,12 @@
 # Changes here will be overwritten by Copier
-_commit: 3eb7001
+_commit: 7bfecef
 _src_path: https://github.com/nialov/nialov-py-template.git
 classifier: 'Topic :: Scientific/Engineering :: GIS'
 description: Fracture & lineament data management.
 email: nikolasovaskainen@gmail.com
 full_name: Nikolas Ovaskainen
 github_account: nialov
+keyword: data
 keywords: data analysis spatial geology
 package: tracerepo
 year: 2021

@@ -11,10 +11,12 @@ import nox
 PACKAGE_NAME = "tracerepo"
 
 # Paths
-DOCS_APIDOC_DIR_PATH = Path("docs_src/apidoc")
+DOCS_SRC_PATH = Path("docs_src")
+DOCS_APIDOC_DIR_PATH = DOCS_SRC_PATH / "apidoc"
 DOCS_DIR_PATH = Path("docs")
-COVERAGE_SVG_PATH = Path("docs_src/imgs/coverage.svg")
+COVERAGE_SVG_PATH = DOCS_SRC_PATH / Path("imgs/coverage.svg")
 PROFILE_SCRIPT_PATH = Path("tests/_profile.py")
+README_PATH = Path("README.rst")
 
 # Path strings
 TESTS_NAME = "tests"
@@ -23,16 +25,19 @@ TASKS_NAME = "tasks.py"
 NOXFILE_NAME = "noxfile.py"
 DEV_REQUIREMENTS = "requirements.txt"
 DOCS_REQUIREMENTS = "docs_src/requirements.txt"
+DOCS_EXAMPLES = "examples"
+DOCS_AUTO_EXAMPLES = "docs_src/auto_examples"
 
 # Globs
 DOCS_NOTEBOOKS = Path("docs_src/notebooks").glob("*.ipynb")
 REGULAR_NOTEBOOKS = Path(NOTEBOOKS_NAME).glob("*.ipynb")
+DOCS_RST_PATHS = DOCS_SRC_PATH.rglob("*.rst")
 ALL_NOTEBOOKS = list(DOCS_NOTEBOOKS) + list(REGULAR_NOTEBOOKS)
 
 PYTHON_VERSIONS = ["3.8", "3.9"]
 
 
-def filter_paths_to_existing(*iterables) -> List[str]:
+def filter_paths_to_existing(*iterables: str) -> List[str]:
     """
     Filter paths to only existing.
     """
@@ -70,9 +75,9 @@ def tests_pip(session):
     # Check if any tests exist
     tests_path = Path(TESTS_NAME)
     if (
-        (not tests_path.exists())
-        or (tests_path.is_file())
-        or (len(list(tests_path.iterdir())) == 0)
+        not tests_path.exists()
+        or tests_path.is_file()
+        or len(list(tests_path.iterdir())) == 0
     ):
         print("No tests in {TESTS_NAME} directory.")
         return
@@ -93,8 +98,8 @@ def tests_pip(session):
         COVERAGE_SVG_PATH.parent.mkdir(parents=True)
     session.run("coverage-badge", "-o", str(COVERAGE_SVG_PATH))
 
-    # Test that cli installation works
-    session.run("tracerepo", "--help")
+    # Test that entrypoint works.
+    session.run(PACKAGE_NAME, "--help")
 
 
 @nox.session(python=PYTHON_VERSIONS)
@@ -103,7 +108,7 @@ def notebooks(session):
     Run notebooks.
 
     Notebooks are usually run in remote so use pip install.
-    Note that notebooks shouldn't have side effects i.e. file disk file writing.
+    Note that notebooks shouldn't have side effects i.e. disk file writing.
     """
     # Check if any notebooks exist.
     if len(ALL_NOTEBOOKS) == 0:
@@ -124,7 +129,7 @@ def format_and_lint(session):
     Format and lint python files, notebooks and docs_src.
     """
     existing_paths = filter_paths_to_existing(
-        PACKAGE_NAME, TESTS_NAME, TASKS_NAME, NOXFILE_NAME
+        PACKAGE_NAME, TESTS_NAME, TASKS_NAME, NOXFILE_NAME, DOCS_EXAMPLES
     )
 
     if len(existing_paths) == 0:
@@ -146,6 +151,20 @@ def format_and_lint(session):
     # Format notebooks
     for notebook in ALL_NOTEBOOKS:
         session.run("black-nb", str(notebook))
+
+    # Format code blocks in documentation files
+    session.run(
+        "blacken-docs",
+        *filter_paths_to_existing(
+            str(README_PATH), *list(map(str, list(DOCS_RST_PATHS)))
+        ),
+    )
+
+    # Format code blocks in Python files
+    session.run(
+        "blackdoc",
+        *existing_paths,
+    )
 
     # Lint docs
     session.run(
@@ -199,7 +218,7 @@ def requirements(session):
     )
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def docs(session):
     """
     Make documentation.
@@ -228,14 +247,21 @@ def docs(session):
         "sphinx-apidoc", "-o", "./docs_src/apidoc", f"./{PACKAGE_NAME}", "-e", "-f"
     )
 
-    # Create docs in ./docs folder
-    session.run(
-        "sphinx-build",
-        "./docs_src",
-        "./docs",
-        "-b",
-        "html",
-    )
+    try:
+        # Create docs in ./docs folder
+        session.run(
+            "sphinx-build",
+            "./docs_src",
+            "./docs",
+            "-b",
+            "html",
+        )
+
+    finally:
+        # Clean up sphinx-gallery folder in ./docs_src/auto_examples
+        auto_examples_path = Path(DOCS_AUTO_EXAMPLES)
+        if auto_examples_path.exists():
+            rmtree(auto_examples_path)
 
 
 @nox.session(reuse_venv=True)
@@ -251,7 +277,7 @@ def update_version(session):
     session.run("poetry-dynamic-versioning")
 
 
-@nox.session
+@nox.session(reuse_venv=True, python=PYTHON_VERSIONS)
 def build(session):
     """
     Build package with poetry.
