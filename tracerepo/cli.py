@@ -7,9 +7,7 @@ from pathlib import Path
 from shutil import rmtree
 from typing import List, Sequence
 
-import pandas as pd
 import typer
-from fractopo.general import read_geofile
 
 from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
