@@ -269,9 +269,11 @@ def rename_path(path: Path, export_destination: str, driver: str) -> Path:
     """
     Rename path to new base data dir and extension.
 
-    >>> str(rename_path(
-    ... Path("data/loviisa/traces/20m/hey.geojson"), "newdata", "ESRI Shapefile"
-    ... ))
+    >>> str(
+    ...     rename_path(
+    ...         Path("data/loviisa/traces/20m/hey.geojson"), "newdata", "ESRI Shapefile"
+    ...     )
+    ... )
      'newdata/loviisa/traces/20m/hey.shp'
     """
     renamed = utils.rename_data_path(path=path, rename_to=export_destination)
@@ -293,10 +295,10 @@ def convert_trace_tuples(
 
     >>> from pprint import pprint
     >>> trace_tuple = TraceTuple(
-    ... traces_path=Path("data/loviisa/traces/20m/traces.geojson"),
-    ... area_path=Path("data/loviisa/traces/20m/area.geojson"),
+    ...     traces_path=Path("data/loviisa/traces/20m/traces.geojson"),
+    ...     area_path=Path("data/loviisa/traces/20m/area.geojson"),
     ... )
-    >>> pprint(convert_trace_tuples([trace_tuple], "exported", "GPKG") )
+    >>> pprint(convert_trace_tuples([trace_tuple], "exported", "GPKG"))
     [(PosixPath('exported/loviisa/traces/20m/traces.gpkg'),
       PosixPath('exported/loviisa/traces/20m/area.gpkg'))]
 
