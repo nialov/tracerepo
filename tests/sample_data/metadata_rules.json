@@ -1,0 +1,33 @@
+{
+    "data_source": {
+        "order": {
+            "EM": 3,
+            "Mag":2,
+            "LiDAR":1
+    },
+        "separator":"+" 
+    },
+    "operators": [
+        "Markovaara-Koivisto M.",
+        "Martinkauppi A.",
+        "Ovaskainen N.",
+        "Aaltonen I.",
+        "Engström J.",
+        "Laxström H.",
+        "Nordbäck N.",
+        "Hietava J.",
+        "Wik H."
+    ],
+    "scale": {
+        "order": {
+            "1:500 000": 1,
+            "1:200 000": 2,
+            "Infinity": 3
+    },
+        "separator":"/" 
+    },
+    "certainty": [
+        "1_Geoph_OR_LiDAR",
+        "2_Geoph_AND_LiDAR"
+    ]
+}
