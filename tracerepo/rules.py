@@ -5,9 +5,10 @@ from __future__ import annotations
 
 from enum import Enum, unique
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandera as pa
+from pydantic import BaseModel
 
 FILETYPE = "geojson"
 DATABASE_CSV = "database.csv"
@@ -59,12 +60,10 @@ class AreaShapes(Enum):
 
 
 @unique
-class FolderNames(Enum):
+class PathNames(Enum):
 
     """
-    Folder names.
-
-    TODO: Add filenames as well.
+    Path names.
     """
 
     DATA = "tracerepository_data"
@@ -72,6 +71,8 @@ class FolderNames(Enum):
     AREA = "area"
     UNORGANIZED = "unorganized"
     REPORTS = "tracerepository_reports"
+    METADATA = "metadata_json.json"
+    DATABASE_CSV = "database.csv"
 
 
 @unique
@@ -204,4 +205,33 @@ def folder_structure() -> List[Path]:
     """
     Get the default data folder structure.
     """
-    return [Path(FolderNames.DATA.value)]
+    return [Path(PathNames.DATA.value)]
+
+
+class OrderedMeta(BaseModel):
+
+    """
+    Metadata construct for e.g. data_source and scale.
+    """
+
+    order: Dict[str, int]
+    separator: str
+
+
+class Metadata(BaseModel):
+
+    """
+    Metadata schema from json file for trace metadata validation.
+    """
+
+    certainty: Tuple[str, ...]
+    data_source: OrderedMeta
+    operators: Tuple[str, ...]
+    scale: OrderedMeta
+    filepath: Path
+
+    def __hash__(self):
+        """
+        Implement hashing using just the filepath.
+        """
+        return hash(self.filepath)

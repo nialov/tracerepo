@@ -2,7 +2,7 @@
 Trace schema checks used in validation.
 """
 import re
-from typing import Any, Tuple
+from typing import Any, Dict, Tuple
 
 import numpy as np
 
@@ -19,27 +19,71 @@ def pattern_matcher(value: str, pattern_str: str) -> bool:
     return pattern_match is not None
 
 
-def data_source_regex_check(value: str) -> bool:
+# def data_source_regex_check(value: str, data_source_priorities: Dict[str, int]) -> bool:
+#     """
+#     Regex check for data source column.
+
+#     E.g.
+
+#     >>> data_source_regex_check("LiDAR")
+#     True
+
+#     Order matters, EM must come after LiDAR.
+
+#     >>> data_source_regex_check("EM+LiDAR")
+#     False
+
+#     >>> data_source_regex_check("LiDAR+EM")
+#     True
+
+#     TODO: Could get sources from json where priority is indicated by number.
+#     """
+#     return named_priority_check(
+#         value,
+#     )
+#     # data_source_names = set
+# (data_source.name for data_source in data_source_priorities)
+#     # if len(value) == 0:
+#     #     return False
+#     # if value in data_source_names:
+#     #     return True
+#     # if not any(data_source_name in value for data_source_name in data_source_names):
+#     #     return False
+
+#     # pattern_str = r"^(?:LiDAR(?:\+(?:Mag(?:\+EM)?|EM))?|Mag(?:\+EM)?|nan|EM)$"
+#     # return pattern_matcher(pattern_str=pattern_str, value=value)
+
+
+def named_priority_check(value: str, named_priorities: Dict[str, int], separator: str):
     """
-    Regex check for data source column.
-
-    E.g.
-
-    >>> data_source_regex_check("LiDAR")
-    True
-
-    Order matters, EM must come after LiDAR.
-
-    >>> data_source_regex_check("EM+LiDAR")
-    False
-
-    >>> data_source_regex_check("LiDAR+EM")
-    True
-
-    TODO: Could get sources from json where priority is indicated by number.
+    Check that value matches a predetermined name and priority order of names.
     """
-    pattern_str = r"^(?:LiDAR(?:\+(?:Mag(?:\+EM)?|EM))?|Mag(?:\+EM)?|nan|EM)$"
-    return pattern_matcher(pattern_str=pattern_str, value=value)
+    if len(value) == 0:
+        return False
+    # Check if value matches one of the named
+    if value in named_priorities:
+        return True
+    # Check if any of the named are actually in the value string
+    if not any(name in value for name in named_priorities):
+        return False
+    # Check if separator is within the value string
+    if separator not in value:
+        return False
+    # Split by separator
+    split_value = value.split(sep=separator)
+
+    # Check that all in split value are in named_priorities
+    if not all(val in named_priorities for val in split_value):
+        return False
+
+    previous = 0
+    for part in split_value:
+        current = named_priorities[part]
+        if current > previous:
+            previous = current
+        else:
+            return False
+    return True
 
 
 def date_datetime_check(raw_value: Any) -> bool:

@@ -44,7 +44,7 @@ def scaffold() -> pd.DataFrame:
     Make scaffold start for a repo.
     """
     # Make unorganized folder
-    Path(rules.FolderNames.UNORGANIZED.value).mkdir(exist_ok=True)
+    Path(rules.PathNames.UNORGANIZED.value).mkdir(exist_ok=True)
 
     # Make other default folders
     for path in rules.folder_structure():

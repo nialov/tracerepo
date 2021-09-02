@@ -3,15 +3,18 @@ Parameters for tests.
 """
 import os
 from contextlib import contextmanager
+from functools import lru_cache
 from pathlib import Path
 from traceback import print_tb
 from typing import Any, Callable, Iterator, List, Optional, Tuple
 
 import geopandas as gpd
 import pandas as pd
+import pytest
 from click.testing import Result
 from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
+from json5 import loads
 from shapely.geometry import LineString, MultiLineString, Point
 
 from tracerepo import repo, rules, trace_schema, utils
@@ -19,6 +22,7 @@ from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
 READY_TRACEREPOSITORY_PATH = Path("tests/sample_data/tracerepository/")
+METADATA_JSON_PATH = Path("tests/sample_data/metadata_rules.json")
 
 
 def cut(
@@ -123,10 +127,10 @@ def df_with_row(
     df = df.append(srs)
 
     traces_path = (
-        Path(rules.FolderNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
+        Path(rules.PathNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
     )
     area_path = (
-        Path(rules.FolderNames.UNORGANIZED.value) / f"{area_name}.{rules.FILETYPE}"
+        Path(rules.PathNames.UNORGANIZED.value) / f"{area_name}.{rules.FILETYPE}"
     )
 
     return df, traces_path, area_path
@@ -175,7 +179,7 @@ def set_up_repo_with_invalids_organized(
         organizer.columns[rules.ColumnNames.AREA.value],
     ):
         save_path = (
-            lambda name: Path(rules.FolderNames.UNORGANIZED.value)
+            lambda name: Path(rules.PathNames.UNORGANIZED.value)
             / f"{name}.{rules.FILETYPE}"
         )
         trace_path = save_path(name=trace_name)
@@ -378,11 +382,11 @@ def test_convert_trace_tuples_params():
             [
                 TraceTuple(
                     traces_path=Path(
-                        f"{rules.FolderNames.DATA.value}"
+                        f"{rules.PathNames.DATA.value}"
                         "/loviisa/traces/20m/hello_traces.geojson"
                     ),
                     area_path=Path(
-                        f"{rules.FolderNames.DATA.value}"
+                        f"{rules.PathNames.DATA.value}"
                         "/loviisa/area/20m/hello_area.geojson"
                     ),
                 )
@@ -586,43 +590,50 @@ certainty_gdf_good_param = make_example_param(
 )
 geometry_gdf_params = (
     (
-        gpd.GeoDataFrame({"geometry": [Point(), Point(1, 1)]}),
-        True,
-        True,
+        (
+            gpd.GeoDataFrame({"geometry": [Point(), Point(1, 1)]}),
+            True,
+            True,
+        ),
+        "points",
     ),
     (
-        gpd.GeoDataFrame(
-            {"geometry": [LineString([(0, 0), (1, 1)]), MultiLineString()]}
+        (
+            gpd.GeoDataFrame(
+                {"geometry": [LineString([(0, 0), (1, 1)]), MultiLineString()]}
+            ),
+            True,
+            False,
         ),
-        True,
-        False,
+        "ls_and_mls",
     ),
 )
 
 
-def test_traces_schema_params() -> List[Tuple[gpd.GeoDataFrame, bool, bool]]:
+def test_traces_schema_params() -> list:
     """
     Params for test_traces_schema.
     """
     all_params = [
-        data_source_gdf_good_param,
-        data_source_gdf_bad_param,
-        date_gdf_good_param,
-        date_gdf_bad_param,
-        operator_gdf_good_param,
-        operator_gdf_bad_param,
+        (data_source_gdf_good_param, "data_source_gdf_good_param"),
+        (data_source_gdf_bad_param, "data_source_gdf_bad_param"),
+        (date_gdf_good_param, "date_gdf_good_param"),
+        (date_gdf_bad_param, "date_gdf_bad_param"),
+        (operator_gdf_good_param, "operator_gdf_good_param"),
+        (operator_gdf_bad_param, "operator_gdf_bad_param"),
+        (scale_gdf_good_param, "scale_gdf_good_param"),
+        (certainty_gdf_good_param, "certainty_gdf_good_param"),
         *geometry_gdf_params,
-        scale_gdf_good_param,
-        certainty_gdf_good_param,
     ]
 
     for params in all_params:
-        assert isinstance(params[0], gpd.GeoDataFrame)
-        assert isinstance(params[1], bool)
-        assert isinstance(params[2], bool)
-        assert len(params) == 3
+        actual_params = params[0]
+        assert isinstance(actual_params[0], gpd.GeoDataFrame)
+        assert isinstance(actual_params[1], bool)
+        assert isinstance(actual_params[2], bool)
+        assert len(actual_params) == 3
 
-    return all_params
+    return [pytest.param(*params[0], id=params[1]) for params in all_params]
 
 
 def test_data_source_regex_check_params():
@@ -630,8 +641,14 @@ def test_data_source_regex_check_params():
     Params for test_data_source_regex_check.
     """
     return [
-        *[(example, False) for example in data_source_good_examples],
-        *[(example, True) for example in data_source_bad_examples],
+        *[
+            (example, False, metadata_loaded().data_source.order)
+            for example in data_source_good_examples
+        ],
+        *[
+            (example, True, metadata_loaded().data_source.order)
+            for example in data_source_bad_examples
+        ],
     ]
 
 
@@ -752,3 +769,13 @@ def test_pandera_reporting_params():
             {rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value},
         ),
     ]
+
+
+@lru_cache(maxsize=None)
+def metadata_loaded() -> rules.Metadata:
+    """
+    Load and return json metadata of traces schema.
+    """
+    return rules.Metadata(
+        **loads(METADATA_JSON_PATH.read_text()), filepath=METADATA_JSON_PATH
+    )

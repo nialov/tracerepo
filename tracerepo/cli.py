@@ -8,6 +8,7 @@ from shutil import rmtree
 from typing import List, Sequence
 
 import typer
+from json5 import loads
 
 from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
@@ -60,7 +61,8 @@ def validate(
     traces_filter: List[str] = DATA_FILTER,
     scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
-    report_directory: Path = typer.Option(rules.FolderNames.REPORTS.value),
+    report_directory: Path = typer.Option(rules.PathNames.REPORTS.value),
+    metadata_json: Path = typer.Option(rules.PathNames.METADATA.value),
 ):
     """
     Validate trace datasets.
@@ -96,11 +98,17 @@ def validate(
 
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
+
+    metadata = rules.Metadata(
+        **loads(metadata_json.read_text()), filepath=metadata_json
+    )
+
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
         # Validate and gather pandera reporting
         pandera_update_values, pandera_report = utils.pandera_reporting(
-            update_tuple=update_tuple
+            update_tuple=update_tuple,
+            metadata=metadata,
         )
 
         # If the geodataset is otherwise valid but fails pandera checks it will

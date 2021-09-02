@@ -53,12 +53,17 @@ def test_cli_app_help(subcommand: str):
         ),
     ],
 )
+@pytest.mark.parametrize(
+    "metadata_json",
+    [Path("tests/sample_data/metadata_rules.json")],
+)
 def test_cli_validate_exec(
     trace_gdf,
     assume_error: rules.ValidationResults,
     pandera_valid: bool,
     database,
     tmp_path_factory,
+    metadata_json,
 ):
     """
     Test tracerepo validate command with a set up of invalidated data.
@@ -75,9 +80,11 @@ def test_cli_validate_exec(
         database_csv_path.unlink(missing_ok=True)
         repo.write_database_csv(path=database_csv_path, database=organizer.database)
 
-        result = runner.invoke(app=app, args=["validate", "--report"])
+        result = runner.invoke(
+            app=app, args=["validate", "--report", f"--metadata-json={metadata_json}"]
+        )
 
-        reports_path = Path(rules.FolderNames.REPORTS.value)
+        reports_path = Path(rules.PathNames.REPORTS.value)
         if not pandera_valid:
             assert reports_path.exists()
             assert reports_path.is_dir()
@@ -156,11 +163,11 @@ def test_export_data(tmp_path, driver):
         database_path.write_text("\n".join(database_lines))
 
         area_path = Path(
-            f"{rules.FolderNames.DATA.value}"
+            f"{rules.PathNames.DATA.value}"
             "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
         )
         traces_path = Path(
-            f"{rules.FolderNames.DATA.value}"
+            f"{rules.PathNames.DATA.value}"
             "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
         )
 
@@ -214,11 +221,11 @@ def test_format_geojson(tmp_path):
         database_path.write_text("\n".join(database_lines))
 
         area_path = Path(
-            f"{rules.FolderNames.DATA.value}"
+            f"{rules.PathNames.DATA.value}"
             "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
         )
         traces_path = Path(
-            f"{rules.FolderNames.DATA.value}"
+            f"{rules.PathNames.DATA.value}"
             "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
         )
 
@@ -296,7 +303,7 @@ def test_all_cli():
         # Make sure pandera error was caught
         assert "Reported" in validate_result.stdout
         assert "html" in validate_result.stdout
-        reports_path = Path(rules.FolderNames.REPORTS.value)
+        reports_path = Path(rules.PathNames.REPORTS.value)
         assert reports_path.exists()
         assert len(list(reports_path.glob("*.html"))) > 0
         rmtree(reports_path)

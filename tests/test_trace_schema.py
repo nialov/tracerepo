@@ -15,7 +15,7 @@ def test_traces_schema(gdf: gpd.GeoDataFrame, will_fail: bool, geom_test: bool):
     """
     Test traces_schema.
     """
-    schema = trace_schema.traces_schema()
+    schema = trace_schema.traces_schema(tests.metadata_loaded())
 
     assert isinstance(schema, pa.DataFrameSchema)
 

@@ -28,7 +28,7 @@ class Organizer:
         Post initialization steps.
         """
         self.database = rules.database_schema().validate(self.database)
-        self.unorganized_folder = Path(rules.FolderNames.UNORGANIZED.value)
+        self.unorganized_folder = Path(rules.PathNames.UNORGANIZED.value)
 
     @property
     def unorganized(self) -> List[Path]:
@@ -84,11 +84,11 @@ class Organizer:
 
         Furthermore check if all files in data dir correspond to rows.
         """
-        all_files_and_dirs = list(Path(rules.FolderNames.DATA.value).rglob("*"))
+        all_files_and_dirs = list(Path(rules.PathNames.DATA.value).rglob("*"))
         all_files = {path.stem: path for path in all_files_and_dirs if path.is_file()}
         all_dirs = {path.stem: path for path in all_files_and_dirs if path.is_dir()}
 
-        for value in (rules.FolderNames.AREA.value, rules.FolderNames.TRACES.value):
+        for value in (rules.PathNames.AREA.value, rules.PathNames.TRACES.value):
             all_dirs = utils.remove_from_dict_if_in(key=value, dict_to_check=all_dirs)
 
         for area, traces, thematic, scale in zip(
@@ -128,7 +128,7 @@ class Organizer:
 
             raise FileExistsError(
                 f"Expected all files and directories in "
-                f"{rules.FolderNames.DATA.value}"
+                f"{rules.PathNames.DATA.value}"
                 " to correspond to row values in database.\n"
                 f"{orphan_file_error_str}\n"
                 f"{orphan_dir_error_str}\n"

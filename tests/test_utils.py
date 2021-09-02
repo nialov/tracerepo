@@ -57,7 +57,9 @@ def test_perform_pandera_check(traces, will_fail):
     """
     Test perform_pandera_check.
     """
-    pandera_report = utils.perform_pandera_check(traces)
+    pandera_report = utils.perform_pandera_check(
+        traces, metadata=tests.metadata_loaded()
+    )
     assert isinstance(pandera_report, pd.DataFrame)
 
     if will_fail:
@@ -85,7 +87,8 @@ def test_pandera_reporting(update_tuple, empty_dict, empty_df, update_values):
     Test pandera_reporting.
     """
     pandera_update_values, pandera_report = utils.pandera_reporting(
-        update_tuple=update_tuple
+        update_tuple=update_tuple,
+        metadata=tests.metadata_loaded(),
     )
 
     if empty_dict:

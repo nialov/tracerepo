@@ -89,7 +89,7 @@ def compiled_path(
     geometry: str,
     scale: str,
     name: str,
-    root: str = rules.FolderNames.DATA.value,
+    root: str = rules.PathNames.DATA.value,
 ) -> Path:
     r"""
     Compile Path.
@@ -309,7 +309,7 @@ def remove_from_dict_if_in(key: str, dict_to_check: Dict[str, Path]):
 
 
 def perform_pandera_check(
-    traces: gpd.GeoDataFrame,
+    traces: gpd.GeoDataFrame, metadata: rules.Metadata
 ) -> pd.DataFrame:
     """
     Validate the column data in ``traces`` ``GeoDataFrame``.
@@ -317,7 +317,7 @@ def perform_pandera_check(
     pandera_report: pd.DataFrame = pd.DataFrame()
     assert pandera_report.empty
     try:
-        trace_schema.traces_schema().validate(traces, lazy=True)
+        trace_schema.traces_schema(metadata=metadata).validate(traces, lazy=True)
     except pa.errors.SchemaErrors as exc:
         pandera_report = exc.failure_cases
         assert isinstance(pandera_report, pd.DataFrame)
@@ -360,7 +360,7 @@ def otherwise_valid(update_tuple: UpdateTuple) -> bool:
 
 
 def pandera_reporting(
-    update_tuple: UpdateTuple,
+    update_tuple: UpdateTuple, metadata: rules.Metadata
 ) -> Tuple[Dict[rules.ColumnNames, str], pd.DataFrame]:
     """
     Check traces GeoDataFrame column data against schema and report if needed.
@@ -378,7 +378,7 @@ def pandera_reporting(
         logging.error(f"Empty traces uncaught by validation for {update_tuple}.")
         return dict(), pd.DataFrame()
     try:
-        pandera_report = perform_pandera_check(traces)
+        pandera_report = perform_pandera_check(traces, metadata=metadata)
     except Exception as exc:
         logging.error(
             f"GeoDataFrame validation critically failed with {update_tuple} traces.",
