@@ -132,11 +132,13 @@ disable = [
     "R0902",
     "R0913",
     "R0914",
+    "R1735",
     "W0212",
     "W0621",
     "W0703",
     "W1203",
     ]
+extension-pkg-whitelist = "pydantic"
 
 [tool.pylint.similarities]
 ignore-imports = true
