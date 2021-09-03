@@ -397,5 +397,4 @@ def pandera_reporting(
             rules.ColumnNames.VALIDITY: rules.ValidationResults.UNFIT.value
         }
         return update_values, pandera_report
-    else:
-        return dict(), pandera_report
+    return dict(), pandera_report

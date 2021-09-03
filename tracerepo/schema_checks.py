@@ -36,7 +36,6 @@ def pattern_matcher(value: str, pattern_str: str) -> bool:
 #     >>> data_source_regex_check("LiDAR+EM")
 #     True
 
-#     TODO: Could get sources from json where priority is indicated by number.
 #     """
 #     return named_priority_check(
 #         value,
@@ -64,20 +63,22 @@ def named_priority_check(value: str, named_priorities: Dict[str, int], separator
     if value in named_priorities:
         return True
     # Check if any of the named are actually in the value string
-    if not any(name in value for name in named_priorities):
+    if (not any(name in value for name in named_priorities)) or separator not in value:
         return False
     # Check if separator is within the value string
-    if separator not in value:
-        return False
+    # if separator not in value:
+    #     return False
     # Split by separator
     split_value = value.split(sep=separator)
 
-    # Check that all in split value are in named_priorities
-    if not all(val in named_priorities for val in split_value):
-        return False
+    # if not all(val in named_priorities for val in split_value):
+    #     return False
 
     previous = 0
     for part in split_value:
+        # Check that all in split value are in named_priorities
+        if part not in named_priorities:
+            return False
         current = named_priorities[part]
         if current > previous:
             previous = current
