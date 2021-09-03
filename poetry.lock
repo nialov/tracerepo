@@ -655,7 +655,7 @@ python-versions = ">=3.6"
 name = "json5"
 version = "0.9.6"
 description = "A Python implementation of the JSON5 data format."
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1946,7 +1946,7 @@ typecheck = ["mypy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "e53130ed2538bbae670b1b73c3cfbaca0128d6de274a155eda4855097ab9121b"
+content-hash = "1b20cac8d82fcd6bd52960f18f9781f0c640f1bd089022c0cb844827f8754f8b"
 
 [metadata.files]
 alabaster = [
