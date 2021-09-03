@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.0.post119.dev0+39e6686"
+version = "0.0.0.post120.dev0+1312832"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
@@ -61,6 +61,7 @@ isort = {version = "*", optional = true}
 # Typecheck
 mypy = {version = "*", optional = true}
 pydantic = "^1.8.2"
+json5 = "^0.9.6"
 
 [tool.poetry.dev-dependencies]
 nox = "*"
