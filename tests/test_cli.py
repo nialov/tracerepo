@@ -55,7 +55,7 @@ def test_cli_app_help(subcommand: str):
 )
 @pytest.mark.parametrize(
     "metadata_json",
-    [Path("tests/sample_data/metadata_rules.json")],
+    [Path("tests/sample_data/metadata_rules.json").absolute()],
 )
 def test_cli_validate_exec(
     trace_gdf,
@@ -63,7 +63,7 @@ def test_cli_validate_exec(
     pandera_valid: bool,
     database,
     tmp_path_factory,
-    metadata_json,
+    metadata_json: Path,
 ):
     """
     Test tracerepo validate command with a set up of invalidated data.
@@ -261,6 +261,7 @@ def test_all_cli():
     """
     Test all cli tools in ready-made tracerepository.
     """
+    metadata_json = Path("tests/sample_data/metadata_rules.json").absolute()
     database_csv_path = Path(rules.DATABASE_CSV)
     with tests.change_dir_context(tests.READY_TRACEREPOSITORY_PATH):
 
@@ -297,6 +298,7 @@ def test_all_cli():
                 "--traces-filter=kb",
                 "--traces-filter=hastholmen",
                 "--report",
+                f"--metadata-json={metadata_json}",
             ],
         )
 
