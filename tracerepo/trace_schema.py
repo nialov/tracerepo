@@ -42,6 +42,25 @@ def default_non_required_kwargs(
     return dict(required=required, coerce=coerce, nullable=nullable)
 
 
+def prioritized_values_check(
+    named_priorities: Dict[str, int], separator: str, name: str
+) -> pa.checks.Check:
+    """
+    Construct check for e.g. data source and scale columns.
+
+    Both have fixed values and fixed order of the values.
+    """
+    return pa.Check(
+        lambda value: schema_checks.named_priority_check(
+            value,
+            named_priorities=named_priorities,
+            separator=separator,
+        ),
+        element_wise=True,
+        name=name,
+    )
+
+
 @lru_cache(maxsize=None)
 def traces_schema(metadata: rules.Metadata):
     """
@@ -52,55 +71,49 @@ def traces_schema(metadata: rules.Metadata):
         DIP_COLUMN: pa.Column(
             pa.Float,
             **default_non_required_kwargs(),
-            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=90.0)]
+            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=90.0)],
         ),
         DIP_DIR_COLUMN: pa.Column(
             pa.Float,
             **default_non_required_kwargs(),
-            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=360.0)]
+            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=360.0)],
         ),
         DATA_SOURCE_COLUMN: pa.Column(
             pa.String,
             **default_non_required_kwargs(nullable=False),
             checks=[
-                pa.Check(
-                    lambda value: schema_checks.named_priority_check(
-                        value,
-                        named_priorities=metadata.data_source.order,
-                        separator=metadata.data_source.separator,
-                    ),
-                    element_wise=True,
+                prioritized_values_check(
+                    named_priorities=metadata.data_source.order,
+                    separator=metadata.data_source.separator,
+                    name=f"Value and priority order check for {DATA_SOURCE_COLUMN}.",
                 )
-            ]
+            ],
         ),
         DATE_COLUMN: pa.Column(
             pa.DateTime,
             **default_non_required_kwargs(nullable=False),
-            checks=[pa.Check(schema_checks.date_datetime_check, element_wise=True)]
+            checks=[pa.Check(schema_checks.date_datetime_check, element_wise=True)],
         ),
         OPERATOR_COLUMN: pa.Column(
             pa.String,
             **default_non_required_kwargs(nullable=False),
-            checks=[pa.Check.isin(metadata.operators)]
+            checks=[pa.Check.isin(metadata.operators)],
         ),
         SCALE_COLUMN: pa.Column(
             pa.String,
             **default_non_required_kwargs(nullable=False),
             checks=[
-                pa.Check(
-                    lambda value: schema_checks.named_priority_check(
-                        value,
-                        named_priorities=metadata.scale.order,
-                        separator=metadata.scale.separator,
-                    ),
-                    element_wise=True,
+                prioritized_values_check(
+                    named_priorities=metadata.scale.order,
+                    separator=metadata.scale.separator,
+                    name=f"Value and priority order check for {SCALE_COLUMN}.",
                 )
-            ]
+            ],
         ),
         CERTAINTY_COLUMN: pa.Column(
             pa.String,
             **default_non_required_kwargs(nullable=False),
-            checks=[pa.Check.isin(metadata.certainty)]
+            checks=[pa.Check.isin(metadata.certainty)],
         ),
     }
     return pa.DataFrameSchema(
