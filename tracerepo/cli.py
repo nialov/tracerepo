@@ -62,7 +62,9 @@ def validate(
     scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
     report_directory: Path = typer.Option(rules.PathNames.REPORTS.value),
-    metadata_json: Path = typer.Option(rules.PathNames.METADATA.value),
+    metadata_json: Path = typer.Option(
+        rules.PathNames.METADATA.value, exists=True, dir_okay=False
+    ),
 ):
     """
     Validate trace datasets.
