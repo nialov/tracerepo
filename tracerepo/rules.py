@@ -71,7 +71,7 @@ class PathNames(Enum):
     AREA = "area"
     UNORGANIZED = "unorganized"
     REPORTS = "tracerepository_reports"
-    METADATA = "metadata_json.json"
+    METADATA = "metadata_rules.json"
     DATABASE_CSV = "database.csv"
 
 
