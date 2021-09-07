@@ -16,8 +16,8 @@ from fractopo import general
 
 from tracerepo import rules, trace_schema
 
-geojson_driver = "GeoJSON"
-export_dir_prefix = "data-exported-"
+GEOJSON_DRIVER = "GeoJSON"
+EXPORT_DIR_PREFIX = "data-exported-"
 
 
 class TraceTuple(NamedTuple):
@@ -241,7 +241,7 @@ def write_geojson(gdf: gpd.GeoDataFrame, path: Path):
     path.write_text(as_json)
 
 
-def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_driver):
+def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = GEOJSON_DRIVER):
     """
     Write geodata with driver.
 
@@ -255,7 +255,7 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = geojson_drive
 
         gdf.to_file(path, driver=driver)
 
-    if driver != geojson_driver:
+    if driver != GEOJSON_DRIVER:
         return
 
     # Format geojson with indent of 1
@@ -288,7 +288,7 @@ def compile_export_dir(driver: str) -> str:
     'data-exported-ESRI-Shapefile'
     """
     dash_replaced_driver = driver.replace(" ", "-")
-    return f"{export_dir_prefix}{dash_replaced_driver}"
+    return f"{EXPORT_DIR_PREFIX}{dash_replaced_driver}"
 
 
 def remove_from_dict_if_in(key: str, dict_to_check: Dict[str, Path]):
