@@ -55,7 +55,7 @@ def test_cli_app_help(subcommand: str):
 )
 @pytest.mark.parametrize(
     "metadata_json",
-    [Path("tests/sample_data/metadata_rules.json").absolute()],
+    [tests.METADATA_JSON_PATH.absolute()],
 )
 def test_cli_validate_exec(
     trace_gdf,
@@ -68,6 +68,7 @@ def test_cli_validate_exec(
     """
     Test tracerepo validate command with a set up of invalidated data.
     """
+    assert metadata_json.exists() and metadata_json.is_file()
     area_gdf: gpd.GeoDataFrame = tests.kb11_area
     tmp_path = tmp_path_factory.mktemp(basename="test_cli_validate_exec", numbered=True)
 
