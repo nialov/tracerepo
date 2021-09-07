@@ -48,7 +48,7 @@ def test_compile_export_dir(driver):
     result = utils.compile_export_dir(driver)
     assert isinstance(result, str)
     assert len(result) != 0
-    assert utils.export_dir_prefix in result
+    assert utils.EXPORT_DIR_PREFIX in result
     assert " " not in result
 
 

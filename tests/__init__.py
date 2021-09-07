@@ -22,7 +22,7 @@ from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
 READY_TRACEREPOSITORY_PATH = Path("tests/sample_data/tracerepository/")
-METADATA_JSON_PATH = Path("tests/sample_data/metadata_rules.json")
+METADATA_JSON_PATH = READY_TRACEREPOSITORY_PATH / rules.PathNames.METADATA.value
 
 
 def cut(
