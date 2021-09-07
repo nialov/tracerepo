@@ -6,7 +6,6 @@ from typing import Dict
 
 import pandera as pa
 from fractopo.tval.trace_validation import Validation
-from shapely.geometry import LineString, MultiLineString
 
 from tracerepo import rules, schema_checks
 
@@ -18,19 +17,6 @@ DATE_COLUMN = "Date"
 OPERATOR_COLUMN = "Operator"
 SCALE_COLUMN = "Scale"
 CERTAINTY_COLUMN = "Certainty"
-
-
-# class MetadataKeys:
-
-#     """
-#     K
-#     """
-#     certainty = "certainty"
-#     data_source = "data-source"
-#     operators = "operators"
-#     scale = "scale"
-#     order = "order"
-#     separator = "separator"
 
 
 def default_non_required_kwargs(
@@ -120,14 +106,6 @@ def traces_schema(metadata: rules.Metadata):
         index=pa.Index(pa.Int),
         columns={
             "geometry": pa.Column(
-                checks=[
-                    pa.Check(
-                        lambda geoms: [
-                            isinstance(geom, (LineString, MultiLineString))
-                            for geom in geoms
-                        ],
-                    )
-                ],
                 required=True,
             ),
             **trace_columns,
