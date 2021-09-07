@@ -9,6 +9,7 @@ from traceback import print_tb
 from typing import Any, Callable, Iterator, List, Optional, Tuple
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 from click.testing import Result
@@ -218,6 +219,7 @@ kb11_traces_cut = cached_sample(
     path=kb11_traces_cut_path,
     create_dataset=lambda: cut(dataset=kb11_traces, start=0, end=50),
 )
+kb11_traces_cut_length = kb11_traces_cut.shape[0]
 
 
 kb11_traces_cut_dislocated = cached_sample(
@@ -557,6 +559,7 @@ operator_bad_examples = lines_in_file("tests/sample_data/operator_bad_examples.t
 scale_good_examples = lines_in_file("tests/sample_data/unique_scales.txt")
 certainty_good_examples = lines_in_file("tests/sample_data/unique_certainty.txt")
 
+
 data_source_gdf_good_param = make_example_param(
     column=trace_schema.DATA_SOURCE_COLUMN,
     values=data_source_good_examples,
@@ -588,26 +591,6 @@ certainty_gdf_good_param = make_example_param(
     values=certainty_good_examples,
     will_fail=False,
 )
-geometry_gdf_params = (
-    (
-        (
-            gpd.GeoDataFrame({"geometry": [Point(), Point(1, 1)]}),
-            True,
-            True,
-        ),
-        "points",
-    ),
-    (
-        (
-            gpd.GeoDataFrame(
-                {"geometry": [LineString([(0, 0), (1, 1)]), MultiLineString()]}
-            ),
-            True,
-            False,
-        ),
-        "ls_and_mls",
-    ),
-)
 
 
 def test_traces_schema_params() -> list:
@@ -623,7 +606,6 @@ def test_traces_schema_params() -> list:
         (operator_gdf_bad_param, "operator_gdf_bad_param"),
         (scale_gdf_good_param, "scale_gdf_good_param"),
         (certainty_gdf_good_param, "certainty_gdf_good_param"),
-        *geometry_gdf_params,
     ]
 
     for params in all_params:
@@ -700,15 +682,14 @@ def test_perform_pandera_check_params():
     """
     return [
         (kb11_traces_cut, False),
+        (kb11_traces_cut.drop(columns=["geometry"]), True),
         (
-            gpd.GeoDataFrame(
-                {"geometry": [LineString()], trace_schema.DIP_COLUMN: [-1]}
-            ),
-            True,
-        ),
-        (
-            gpd.GeoDataFrame(
-                {"geometry": [LineString()], trace_schema.SCALE_COLUMN: ["hello"]}
+            kb11_traces_cut.assign(
+                **{
+                    trace_schema.SCALE_COLUMN: np.array(
+                        ["this is not correct scale..."] * kb11_traces_cut_length
+                    )
+                }
             ),
             True,
         ),
