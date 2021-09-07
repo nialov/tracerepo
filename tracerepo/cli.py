@@ -5,7 +5,7 @@ Command line api for tracerepo.
 import logging
 from pathlib import Path
 from shutil import rmtree
-from typing import Sequence, Tuple
+from typing import List, Sequence
 
 import typer
 from json5 import loads
@@ -56,10 +56,10 @@ def app_callback(
 @app.command()
 def validate(
     database: Path = DATABASE_OPTION,
-    area_filter: Tuple[str, ...] = DATA_FILTER,
-    thematic_filter: Tuple[str, ...] = DATA_FILTER,
-    traces_filter: Tuple[str, ...] = DATA_FILTER,
-    scale_filter: Tuple[str, ...] = DATA_FILTER,
+    area_filter: List[str] = DATA_FILTER,
+    thematic_filter: List[str] = DATA_FILTER,
+    traces_filter: List[str] = DATA_FILTER,
+    scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
     report_directory: Path = typer.Option(rules.PathNames.REPORTS.value),
     metadata_json: Path = typer.Option(
@@ -304,10 +304,10 @@ def export(
     destination: Path = typer.Argument(".", file_okay=False),
     driver: str = typer.Option("ESRI Shapefile"),
     database: Path = DATABASE_OPTION,
-    area_filter: Tuple[str, ...] = DATA_FILTER,
-    thematic_filter: Tuple[str, ...] = DATA_FILTER,
-    traces_filter: Tuple[str, ...] = DATA_FILTER,
-    scale_filter: Tuple[str, ...] = DATA_FILTER,
+    area_filter: List[str] = DATA_FILTER,
+    thematic_filter: List[str] = DATA_FILTER,
+    traces_filter: List[str] = DATA_FILTER,
+    scale_filter: List[str] = DATA_FILTER,
     overwrite: bool = typer.Option(True),
 ):
     """
