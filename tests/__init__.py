@@ -558,6 +558,7 @@ operator_good_examples = lines_in_file("tests/sample_data/operator_good_examples
 operator_bad_examples = lines_in_file("tests/sample_data/operator_bad_examples.txt")
 scale_good_examples = lines_in_file("tests/sample_data/unique_scales.txt")
 certainty_good_examples = lines_in_file("tests/sample_data/unique_certainty.txt")
+lineament_id_good_examples = lines_in_file("tests/sample_data/unique_lineament_ids.txt")
 
 
 data_source_gdf_good_param = make_example_param(
@@ -591,6 +592,11 @@ certainty_gdf_good_param = make_example_param(
     values=certainty_good_examples,
     will_fail=False,
 )
+lineament_id_gdf_good_param = make_example_param(
+    column=trace_schema.LINEAMENT_ID_COLUMN,
+    values=lineament_id_good_examples,
+    will_fail=False,
+)
 
 
 def test_traces_schema_params() -> list:
@@ -606,6 +612,7 @@ def test_traces_schema_params() -> list:
         (operator_gdf_bad_param, "operator_gdf_bad_param"),
         (scale_gdf_good_param, "scale_gdf_good_param"),
         (certainty_gdf_good_param, "certainty_gdf_good_param"),
+        (lineament_id_gdf_good_param, "lineament_id_gdf_good_param"),
     ]
 
     for params in all_params:
@@ -757,6 +764,6 @@ def metadata_loaded() -> rules.Metadata:
     """
     Load and return json metadata of traces schema.
     """
-    return rules.Metadata(
-        **loads(METADATA_JSON_PATH.read_text()), filepath=METADATA_JSON_PATH
-    )
+    loaded_metadata = loads(METADATA_JSON_PATH.read_text())
+    assert isinstance(loaded_metadata, dict)
+    return rules.Metadata(**loaded_metadata, filepath=METADATA_JSON_PATH)

@@ -30,5 +30,10 @@
     "certainty": [
         "1_Geoph_OR_LiDAR",
         "2_Geoph_AND_LiDAR"
+    ],
+    "lineament_id_prefixes": [
+        "M",
+        "EM",
+        "L"
     ]
 }
