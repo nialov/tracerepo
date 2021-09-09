@@ -83,7 +83,7 @@ def lineament_id_check(raw_value: Any, lineament_id_prefixes: Tuple[str, ...]) -
     """
     Check that Lineament_ID column value matches predefined pattern.
 
-    >>> lineament_id_check("M_A1", ("M", ))
+    >>> lineament_id_check("M_A1", ("M",))
     True
 
     >>> lineament_id_check("M_A1", ("M", "L", "EM"))
