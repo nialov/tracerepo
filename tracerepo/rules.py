@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 import pandera as pa
 from pydantic import BaseModel
+from typer import colors
 
 FILETYPE = "geojson"
 DATABASE_CSV = "database.csv"
@@ -99,6 +100,19 @@ class ValidationResults(Enum):
     INVALID = "invalid"
     CRITICAL = "critical"
     UNFIT = "unfit"
+
+    @classmethod
+    def color_dict(cls) -> Dict[str, str]:
+        """
+        Assign colors to each enum value for cli reporting.
+        """
+        return {
+            cls.EMPTY.value: colors.WHITE,
+            cls.VALID.value: colors.GREEN,
+            cls.INVALID.value: colors.RED,
+            cls.CRITICAL.value: colors.BRIGHT_RED,
+            cls.UNFIT.value: colors.YELLOW,
+        }
 
 
 def name_column_kwargs(

@@ -141,7 +141,28 @@ def validate(
             )
 
         if report:
-            typer.echo(update_tuple)
+            # UpdateTuple(area_name='finland_em_lineaments_1_500000_area',
+            # update_values={<ColumnNames.VALIDITY: 'validity'>: 'unfit'},
+            # traces_path=PosixPath('tracerepository_data/finland/traces/500000/
+            # finland_em_lineaments_1_500000_traces.geojson'),
+            # error=False)
+            typer.echo("")
+            typer.secho(
+                f"Validation results for area: { update_tuple.area_name }",
+                fg=typer.colors.BRIGHT_WHITE,
+            )
+            typer.secho(
+                f"(Traces: {update_tuple.traces_path.name})", fg=typer.colors.CYAN
+            )
+
+            validation_result = update_tuple.update_values[rules.ColumnNames.VALIDITY]
+            typer.secho(
+                f"Validation result: {validation_result}",
+                fg=rules.ValidationResults.color_dict()[validation_result],
+            )
+            # if update_tuple.update_values[rules.ColumnNames.VALIDITY.value]
+            # == rules.ValidationResults.CRITICAL:
+
             if not pandera_report.empty:
                 str_report = utils.report_pandera_errors(
                     pandera_report=pandera_report,
