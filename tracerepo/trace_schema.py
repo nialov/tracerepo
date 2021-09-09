@@ -17,6 +17,7 @@ DATE_COLUMN = "Date"
 OPERATOR_COLUMN = "Operator"
 SCALE_COLUMN = "Scale"
 CERTAINTY_COLUMN = "Certainty"
+LINEAMENT_ID_COLUMN = "Lineament_ID"
 
 
 def default_non_required_kwargs(
@@ -100,6 +101,21 @@ def traces_schema(metadata: rules.Metadata):
             pa.String,
             **default_non_required_kwargs(nullable=False),
             checks=[pa.Check.isin(metadata.certainty)],
+        ),
+        LINEAMENT_ID_COLUMN: pa.Column(
+            pa.String,
+            **default_non_required_kwargs(nullable=False),
+            checks=[
+                pa.Check(
+                    lambda raw_value: schema_checks.lineament_id_check(
+                        raw_value=raw_value,
+                        lineament_id_prefixes=metadata.lineament_id_prefixes,
+                    ),
+                    element_wise=True,
+                    name=f"{LINEAMENT_ID_COLUMN} check.",
+                )
+            ],
+            allow_duplicates=False,
         ),
     }
     return pa.DataFrameSchema(

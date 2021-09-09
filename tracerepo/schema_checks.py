@@ -2,9 +2,11 @@
 Trace schema checks used in validation.
 """
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 import numpy as np
+
+LINEAMENT_ID_PATTERN_UNFORMATTED = r"^({})_\w\d+$"
 
 
 def pattern_matcher(value: str, pattern_str: str) -> bool:
@@ -75,3 +77,27 @@ def date_datetime_check(raw_value: Any) -> bool:
         return all((after_2000, before_2100))
     except (ValueError, TypeError):
         return False
+
+
+def lineament_id_check(raw_value: Any, lineament_id_prefixes: Tuple[str, ...]) -> bool:
+    """
+    Check that Lineament_ID column value matches predefined pattern.
+
+    >>> lineament_id_check("M_A1", ("M", ))
+    True
+
+    >>> lineament_id_check("M_A1", ("M", "L", "EM"))
+    True
+
+    >>> lineament_id_check("L_A1", ("M", "L", "EM"))
+    True
+
+    >>> lineament_id_check("H_A1", ("M", "L", "EM"))
+    False
+    """
+    if not isinstance(raw_value, str) or len(raw_value) == 0:
+        return False
+    compiled_pattern = re.compile(
+        LINEAMENT_ID_PATTERN_UNFORMATTED.format("|".join(lineament_id_prefixes))
+    )
+    return compiled_pattern.match(raw_value) is not None
