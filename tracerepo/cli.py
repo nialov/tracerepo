@@ -101,9 +101,15 @@ def validate(
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
 
-    metadata = rules.Metadata(
-        **loads(metadata_json.read_text()), filepath=metadata_json
-    )
+    loaded_metadata = loads(metadata_json.read_text())
+
+    if not isinstance(loaded_metadata, dict):
+        raise TypeError(
+            f"Expected {metadata_json} to parse as a dict."
+            f" Got {type(loaded_metadata)}"
+        )
+
+    metadata = rules.Metadata(**loaded_metadata, filepath=metadata_json)
 
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 

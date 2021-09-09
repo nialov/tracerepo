@@ -239,8 +239,9 @@ class Metadata(BaseModel):
     """
 
     certainty: Tuple[str, ...]
-    data_source: OrderedMeta
     operators: Tuple[str, ...]
+    lineament_id_prefixes: Tuple[str, ...]
+    data_source: OrderedMeta
     scale: OrderedMeta
     filepath: Path
 
