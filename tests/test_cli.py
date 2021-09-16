@@ -198,7 +198,7 @@ def test_export_data(tmp_path, driver):
     file_count = len(list(tmp_path.iterdir()))
 
     export_data(
-        tmp_path,
+        destination=tmp_path,
         driver=driver,
         database=database_path,
         tracerepository_path=tmp_path,
@@ -208,6 +208,7 @@ def test_export_data(tmp_path, driver):
 
     export_dir_path = tmp_path / Path(utils.compile_export_dir(driver=driver))
     assert export_dir_path.exists()
+    assert len(list(export_dir_path.iterdir())) > 0
 
     for shp in export_dir_path.rglob(f"*{spatial.DRIVER_EXTENSIONS[driver]}"):
         assert isinstance(gpd.read_file(shp), gpd.GeoDataFrame)
@@ -300,7 +301,7 @@ def test_all_cli(ready_tracerepository: Path):
     assert rules.ValidationResults.CRITICAL.value not in csv_text_before
 
     # Run help and subcommands without arguments
-    for cmd in ("--help", "check", "organize", "format-geojson", "export"):
+    for cmd in ("--help", "check", "organize", "format-geojson"):
         # Run tracerepo --help
         help_result = runner.invoke(
             app=app,
@@ -341,8 +342,21 @@ def test_all_cli(ready_tracerepository: Path):
     assert rules.ValidationResults.INVALID.value in csv_text_after
     assert rules.ValidationResults.CRITICAL.value not in csv_text_after
 
+    # Run tracerepo export
+    validate_result = runner.invoke(
+        app=app,
+        args=[
+            "export",
+            str(ready_tracerepository),
+            f"--tracerepository-path={ready_tracerepository}",
+        ],
+    )
+
     # Find export directory
+    found = []
     for directory in ready_tracerepository.glob(f"{utils.EXPORT_DIR_PREFIX}*"):
+        found.append(directory)
         if directory.is_dir():
             # Verify contents
             assert len(list(directory.rglob("*.shp"))) > 0
+    assert len(found) > 0
