@@ -361,8 +361,9 @@ def convert_filetype(original_path: Path, convert_path: Path, driver: str):
     logging.info(f"Saving to {convert_path} with driver {driver}.")
     try:
         gdf.to_file(convert_path, driver=driver)
-    except Exception as err:
+    except Exception:
         logging.error(
             f"Failed to save {original_path} to {convert_path}"
-            f" with driver {driver} due to error:\n{err}."
+            f" with driver {driver} due to error.",
+            exc_info=True,
         )

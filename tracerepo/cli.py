@@ -307,10 +307,11 @@ def export_data(
     traces_filter: Sequence[str] = (),
     scale_filter: Sequence[str] = (),
     overwrite: bool = True,
-) -> str:
+) -> Path:
     """
     Export datasets into another format.
     """
+    assert destination.is_dir()
     # Initialize Organizer
     organizer = Organizer(
         tracerepository_path=tracerepository_path,
@@ -327,26 +328,27 @@ def export_data(
     )
 
     # Resolve the export destination folder
-    export_destination = utils.compile_export_dir(driver)
+    export_destination_dir = utils.compile_export_dir(driver)
+    export_destination_path = destination / export_destination_dir
 
     # Does destination already exist
-    destination_exists = Path(export_destination).exists()
+    destination_exists = export_destination_path.exists()
 
     if destination_exists and overwrite:
 
-        logging.info(f"Removing directory ({export_destination}) recursively.")
-        rmtree(export_destination)
+        logging.info(f"Removing directory ({export_destination_path}) recursively.")
+        rmtree(export_destination_path)
 
     elif destination_exists:
         raise FileExistsError(
-            f"Directory already exists at {export_destination} "
+            f"Directory already exists at {export_destination_path} "
             "and overwrite is not allowed (--no-overwrite given)."
         )
 
     # Compile from trace tuples into paths
     # TODO: Could just return TraceTuples again as they are just paths...
     convert_paths = spatial.convert_trace_tuples(
-        trace_tuples, export_destination=export_destination, driver=driver
+        trace_tuples, export_destination=export_destination_dir, driver=driver
     )
 
     # Export to disk
@@ -357,7 +359,7 @@ def export_data(
         destination=destination,
     )
 
-    return export_destination
+    return export_destination_path
 
 
 @app.command()
