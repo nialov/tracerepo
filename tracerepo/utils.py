@@ -89,19 +89,24 @@ def compiled_path(
     geometry: str,
     scale: str,
     name: str,
-    root: str = rules.PathNames.DATA.value,
+    root: Path,
+    data_root: str = rules.PathNames.DATA.value,
 ) -> Path:
     r"""
     Compile Path.
 
     E.g.
 
-    >>> path = str(compiled_path("inkoo", "traces", "drone_20m", "geta_20m_1_traces"))
+    >>> path = str(
+    ...     compiled_path(
+    ...         "inkoo", "traces", "drone_20m", "geta_20m_1_traces", root=Path(".")
+    ...     )
+    ... )
     >>> path.replace("\\", "/")
     'tracerepository_data/inkoo/traces/drone_20m/geta_20m_1_traces.geojson'
 
     """
-    return Path(root) / thematic / geometry / scale / f"{name}.{rules.FILETYPE}"
+    return root / data_root / thematic / geometry / scale / f"{name}.{rules.FILETYPE}"
 
 
 def check_database_row_files(
@@ -109,11 +114,14 @@ def check_database_row_files(
     geometry: str,
     scale: str,
     name: str,
+    root: Path,
 ):
     """
     Check that a row in database actually corresponds to trace and area files.
     """
-    path = compiled_path(thematic=thematic, geometry=geometry, scale=scale, name=name)
+    path = compiled_path(
+        root=root, thematic=thematic, geometry=geometry, scale=scale, name=name
+    )
     if not path.exists():
         raise FileNotFoundError(f"Expected {name} file to exist at {path}.")
 
@@ -190,6 +198,7 @@ def query_result_tuple(
     traces_val: str,
     area_val: str,
     snap_threshold: float,
+    tracerepository_path: Path,
 ) -> TraceTuple:
     """
     Compile TraceTuple with trace path, area path and snap_threshold.
@@ -197,12 +206,14 @@ def query_result_tuple(
     Some of paths might be None based on geometry_filter.
     """
     traces_path = compiled_path(
+        root=tracerepository_path,
         thematic=thematic_val,
         scale=scale_val,
         name=traces_val,
         geometry=rules.ColumnNames.TRACES.value,
     )
     area_path = compiled_path(
+        root=tracerepository_path,
         thematic=thematic_val,
         scale=scale_val,
         name=area_val,

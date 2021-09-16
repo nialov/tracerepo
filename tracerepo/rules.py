@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from enum import Enum, unique
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Optional, Tuple, Type, Union
 
 import pandera as pa
 from pydantic import BaseModel
@@ -215,11 +215,11 @@ def database_schema() -> pa.DataFrameSchema:
     )
 
 
-def folder_structure() -> List[Path]:
-    """
-    Get the default data folder structure.
-    """
-    return [Path(PathNames.DATA.value)]
+# def folder_structure() -> List[Path]:
+#     """
+#     Get the default data folder structure.
+#     """
+#     return [Path(PathNames.DATA.value)]
 
 
 class OrderedMeta(BaseModel):

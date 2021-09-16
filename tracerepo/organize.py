@@ -22,13 +22,17 @@ class Organizer:
     """
 
     database: pd.DataFrame
+    tracerepository_path: Path
 
     def __post_init__(self):
         """
         Post initialization steps.
         """
+        assert self.tracerepository_path.exists()
         self.database = rules.database_schema().validate(self.database)
-        self.unorganized_folder = Path(rules.PathNames.UNORGANIZED.value)
+        self.unorganized_folder = (
+            self.tracerepository_path / rules.PathNames.UNORGANIZED.value
+        )
 
     @property
     def unorganized(self) -> List[Path]:
@@ -50,7 +54,11 @@ class Organizer:
             thematic = self.columns[rules.ColumnNames.THEMATIC.value][idx_in_database]
             scale = self.columns[rules.ColumnNames.SCALE.value][idx_in_database]
             destination = utils.compiled_path(
-                thematic=thematic, geometry=geometry, scale=scale, name=filename_stem
+                root=self.tracerepository_path,
+                thematic=thematic,
+                geometry=geometry,
+                scale=scale,
+                name=filename_stem,
             )
             if not simulate:
                 destination.parent.mkdir(parents=True, exist_ok=True)
@@ -84,7 +92,8 @@ class Organizer:
 
         Furthermore check if all files in data dir correspond to rows.
         """
-        all_files_and_dirs = list(Path(rules.PathNames.DATA.value).rglob("*"))
+        data_path = self.tracerepository_path / Path(rules.PathNames.DATA.value)
+        all_files_and_dirs = list(data_path.rglob("*"))
         all_files = {path.stem: path for path in all_files_and_dirs if path.is_file()}
         all_dirs = {path.stem: path for path in all_files_and_dirs if path.is_dir()}
 
@@ -112,6 +121,7 @@ class Organizer:
                 (rules.ColumnNames.AREA.value, rules.ColumnNames.TRACES.value),
             ):
                 utils.check_database_row_files(
+                    root=self.tracerepository_path,
                     thematic=thematic,
                     geometry=geometry,
                     scale=scale,
@@ -128,7 +138,7 @@ class Organizer:
 
             raise FileExistsError(
                 f"Expected all files and directories in "
-                f"{rules.PathNames.DATA.value}"
+                f"{data_path.absolute()}"
                 " to correspond to row values in database.\n"
                 f"{orphan_file_error_str}\n"
                 f"{orphan_dir_error_str}\n"
@@ -266,6 +276,7 @@ class Organizer:
         # filter) into named tuples.
         paths: List[utils.TraceTuple] = [
             utils.query_result_tuple(
+                tracerepository_path=self.tracerepository_path,
                 thematic_val=thematic_val,
                 scale_val=scale_val,
                 traces_val=traces_val,

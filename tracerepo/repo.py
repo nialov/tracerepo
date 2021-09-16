@@ -39,16 +39,20 @@ def scaffold_database():
     )
 
 
-def scaffold() -> pd.DataFrame:
+def scaffold(tracerepository_path: Path) -> pd.DataFrame:
     """
     Make scaffold start for a repo.
     """
+    unorganized_path = tracerepository_path / rules.PathNames.UNORGANIZED.value
+    data_path = tracerepository_path / rules.PathNames.DATA.value
     # Make unorganized folder
-    Path(rules.PathNames.UNORGANIZED.value).mkdir(exist_ok=True)
+    unorganized_path.mkdir(exist_ok=True)
+    data_path.mkdir(exist_ok=True)
 
-    # Make other default folders
-    for path in rules.folder_structure():
-        path.mkdir(exist_ok=True, parents=True)
+    # # Make other default folders
+
+    # for path in rules.folder_structure():
+    #     path.mkdir(exist_ok=True, parents=True)
 
     # Create dataframe for relations between datasets
     df = scaffold_database()

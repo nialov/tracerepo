@@ -17,11 +17,13 @@ app = typer.Typer()
 
 DATABASE_OPTION = typer.Option(
     rules.DATABASE_CSV,
+)
+
+TRACEREPOSITORY_PATH_OPTION = typer.Option(
+    ".",
     exists=True,
-    file_okay=True,
-    dir_okay=False,
-    writable=True,
-    readable=True,
+    file_okay=False,
+    dir_okay=True,
 )
 
 DATA_FILTER = typer.Option(default=())
@@ -53,9 +55,24 @@ def app_callback(
     logging.info(f"Logging verbosity set to {logging_level_str}")
 
 
+def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:
+    """
+    Load and parse json metadata of trace columns.
+    """
+    # Load metadata of column restrictions
+    loaded_metadata = loads(metadata_json_path.read_text())
+    if not isinstance(loaded_metadata, dict):
+        raise TypeError(
+            f"Expected {metadata_json_path} to parse as a dict."
+            f" Got {type(loaded_metadata)}."
+        )
+    return rules.Metadata(**loaded_metadata, filepath=metadata_json_path)
+
+
 @app.command()
 def validate(
-    database: Path = DATABASE_OPTION,
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
     area_filter: List[str] = DATA_FILTER,
     thematic_filter: List[str] = DATA_FILTER,
     traces_filter: List[str] = DATA_FILTER,
@@ -71,8 +88,15 @@ def validate(
 
     Only validates if the dataset has been marked as invalid in database.csv.
     """
+    database = tracerepository_path / database_name
     # Initialize Organizer
-    organizer = Organizer(database=repo.read_database_csv(path=database))
+    organizer = Organizer(
+        tracerepository_path=tracerepository_path,
+        database=repo.read_database_csv(path=database),
+    )
+
+    # Load metadata of traces column restrictions
+    metadata = load_metadata_from_json(metadata_json_path=metadata_json)
 
     # Query for invalid traces
     invalids = organizer.query(
@@ -100,16 +124,6 @@ def validate(
 
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
-
-    loaded_metadata = loads(metadata_json.read_text())
-
-    if not isinstance(loaded_metadata, dict):
-        raise TypeError(
-            f"Expected {metadata_json} to parse as a dict."
-            f" Got {type(loaded_metadata)}"
-        )
-
-    metadata = rules.Metadata(**loaded_metadata, filepath=metadata_json)
 
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
@@ -185,22 +199,25 @@ def validate(
 
 @app.command()
 def format_geojson(
-    database: Path = DATABASE_OPTION,
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
 ):
     """
     Format all dataset GeoJSON from cli.
     """
-    format_repo_geojson(database=database)
+    database = tracerepository_path / database_name
+    format_repo_geojson(database=database, tracerepository_path=tracerepository_path)
 
 
-def format_repo_geojson(
-    database: Path,
-):
+def format_repo_geojson(tracerepository_path: Path, database: Path):
     """
     Format all dataset GeoJSON.
     """
     # Initialize Organizer
-    organizer = Organizer(database=repo.read_database_csv(path=database))
+    organizer = Organizer(
+        tracerepository_path=tracerepository_path,
+        database=repo.read_database_csv(path=database),
+    )
 
     # Query for invalid traces
     trace_tuples = organizer.query()
@@ -228,14 +245,19 @@ def format_repo_geojson(
 
 @app.command()
 def organize(
-    database: Path = DATABASE_OPTION,
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
     simulate: bool = typer.Option(False),
     report: bool = typer.Option(True),
 ):
     """
     Organize repo.
     """
-    organizer = Organizer(database=repo.read_database_csv(path=database))
+    database = tracerepository_path / database_name
+    organizer = Organizer(
+        tracerepository_path=tracerepository_path,
+        database=repo.read_database_csv(path=database),
+    )
 
     move_descriptions = organizer.organize(simulate=simulate)
 
@@ -248,29 +270,38 @@ def organize(
 
 @app.command()
 def check(
-    database: Path = DATABASE_OPTION,
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
 ):
     """
     Check repo.
     """
-    organizer = Organizer(database=repo.read_database_csv(path=database))
+    database = tracerepository_path / database_name
+    organizer = Organizer(
+        tracerepository_path=tracerepository_path,
+        database=repo.read_database_csv(path=database),
+    )
 
     organizer.check()
 
 
 @app.command()
-def init(path: Path = typer.Argument(rules.DATABASE_CSV)):
+def init(
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
+):
     """
     Initialize tracerepo in current directory.
     """
-    df = repo.scaffold()
-    repo.write_database_csv(path=path, database=df)
+    df = repo.scaffold(tracerepository_path=tracerepository_path)
+    repo.write_database_csv(path=tracerepository_path / database_name, database=df)
 
 
 def export_data(
     destination: Path,
     driver: str,
     database: Path,
+    tracerepository_path: Path,
     area_filter: Sequence[str] = (),
     thematic_filter: Sequence[str] = (),
     traces_filter: Sequence[str] = (),
@@ -281,7 +312,10 @@ def export_data(
     Export datasets into another format.
     """
     # Initialize Organizer
-    organizer = Organizer(database=repo.read_database_csv(path=database))
+    organizer = Organizer(
+        tracerepository_path=tracerepository_path,
+        database=repo.read_database_csv(path=database),
+    )
 
     # Query for datasets based on filters
     # By default filters are empty i.e. all are selected
@@ -330,7 +364,8 @@ def export_data(
 def export(
     destination: Path = typer.Argument(".", file_okay=False),
     driver: str = typer.Option("ESRI Shapefile"),
-    database: Path = DATABASE_OPTION,
+    tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
+    database_name: str = DATABASE_OPTION,
     area_filter: List[str] = DATA_FILTER,
     thematic_filter: List[str] = DATA_FILTER,
     traces_filter: List[str] = DATA_FILTER,
@@ -340,7 +375,9 @@ def export(
     """
     Export datasets into another format from command line.
     """
+    database = tracerepository_path / database_name
     export_destination = export_data(
+        tracerepository_path=tracerepository_path,
         destination=destination,
         driver=driver,
         database=database,
