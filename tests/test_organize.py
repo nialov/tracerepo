@@ -11,18 +11,18 @@ from pandas.testing import assert_frame_equal
 from pytest import TempPathFactory
 
 import tests
-from tracerepo import rules, utils
+from tracerepo import repo, rules, utils
 from tracerepo.organize import Organizer
 
 
-def setup_df_with_traces_and_area(df):
+def setup_df_with_traces_and_area(df, tracerepository_path: Path):
     """
     Set up df with associated data.
     """
     df, traces_path, area_path = tests.df_with_row(df=df)
 
-    traces_path.touch()
-    area_path.touch()
+    (tracerepository_path / traces_path).touch()
+    (tracerepository_path / area_path).touch()
 
     return df
 
@@ -34,20 +34,22 @@ def df_with_traces_and_area(tmp_path):
 
     traces and area file will be in unorganized.
     """
-    with tests.setup_scaffold_context(tmp_path) as df:
-
-        df = setup_df_with_traces_and_area(df=df)
-
-        yield df
+    df = setup_df_with_traces_and_area(
+        repo.scaffold(tmp_path), tracerepository_path=tmp_path
+    )
+    yield df
 
 
 @pytest.fixture
-def organizer_unorganized(df_with_traces_and_area):
+def organizer_unorganized(tmp_path):
     """
     Fix up an Organizer with files in unorganized.
     """
-    df = df_with_traces_and_area
-    yield Organizer(database=df)
+    df = setup_df_with_traces_and_area(
+        repo.scaffold(tracerepository_path=tmp_path), tracerepository_path=tmp_path
+    )
+    repo.scaffold(tmp_path)
+    yield Organizer(database=df, tracerepository_path=tmp_path)
 
 
 @pytest.fixture(scope="module")
@@ -56,13 +58,16 @@ def organizer_organized(tmp_path_factory: TempPathFactory):
     Fix up an Organizer with files organized.
     """
     tmp_path = tmp_path_factory.mktemp(basename="organizer_organized")
-    with tests.setup_scaffold_context(tmp_path) as df:
+    df = setup_df_with_traces_and_area(
+        repo.scaffold(tracerepository_path=tmp_path), tracerepository_path=tmp_path
+    )
+    # with tests.setup_scaffold_context(tmp_path) as df:
 
-        df = setup_df_with_traces_and_area(df=df)
-        organizer = Organizer(database=df)
-        organizer.organize(simulate=False)
-        organizer.check()
-        yield organizer
+    #     df = setup_df_with_traces_and_area(df=df)
+    organizer = Organizer(database=df, tracerepository_path=tmp_path)
+    organizer.organize(simulate=False)
+    organizer.check()
+    yield organizer
 
 
 def test_organizer_check_unorganized(organizer_unorganized):

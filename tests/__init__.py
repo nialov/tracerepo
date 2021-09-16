@@ -1,8 +1,6 @@
 """
 Parameters for tests.
 """
-import os
-from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
 from traceback import print_tb
@@ -18,7 +16,7 @@ from hypothesis.strategies import composite, from_regex, integers, lists, sample
 from json5 import loads
 from shapely.geometry import LineString, MultiLineString, Point
 
-from tracerepo import repo, rules, trace_schema, utils
+from tracerepo import rules, trace_schema, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
 
@@ -137,36 +135,37 @@ def df_with_row(
     return df, traces_path, area_path
 
 
-@contextmanager
-def setup_scaffold_context(tmp_path: Path):
-    """
-    Set up a repo scaffold at a temporary directory.
-    """
-    current_dir = Path(".").resolve()
-    os.chdir(tmp_path)
-    try:
-        yield repo.scaffold()
-    finally:
-        os.chdir(current_dir)
+# @contextmanager
+# def setup_scaffold_context(tmp_path: Path):
+#     """
+#     Set up a repo scaffold at a temporary directory.
+#     """
+#     current_dir = Path(".").resolve()
+#     os.chdir(tmp_path)
+#     try:
+#         yield repo.scaffold()
+#     finally:
+#         os.chdir(current_dir)
 
 
-@contextmanager
-def change_dir_context(path: Path):
-    """
-    Temporarily change directory context to ``path``.
-    """
-    current_dir = Path(".").resolve()
-    os.chdir(path)
-    try:
-        yield path
-    finally:
-        os.chdir(current_dir)
+# @contextmanager
+# def change_dir_context(path: Path):
+#     """
+#     Temporarily change directory context to ``path``.
+#     """
+#     current_dir = Path(".").resolve()
+#     os.chdir(path)
+#     try:
+#         yield path
+#     finally:
+#         os.chdir(current_dir)
 
 
 def set_up_repo_with_invalids_organized(
     database: pd.DataFrame,
     trace_gdf: gpd.GeoDataFrame,
     area_gdf: gpd.GeoDataFrame,
+    tracerepository_path: Path,
     organized=True,
 ) -> Organizer:
     """
@@ -174,13 +173,14 @@ def set_up_repo_with_invalids_organized(
 
     Areas will be all marked as invalid.
     """
-    organizer = Organizer(database)
+    organizer = Organizer(database, tracerepository_path=tracerepository_path)
     for trace_name, area_name in zip(
         organizer.columns[rules.ColumnNames.TRACES.value],
         organizer.columns[rules.ColumnNames.AREA.value],
     ):
         save_path = (
-            lambda name: Path(rules.PathNames.UNORGANIZED.value)
+            lambda name: tracerepository_path
+            / Path(rules.PathNames.UNORGANIZED.value)
             / f"{name}.{rules.FILETYPE}"
         )
         trace_path = save_path(name=trace_name)

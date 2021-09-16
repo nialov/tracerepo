@@ -2,7 +2,6 @@
 Tests for cli.py.
 """
 
-import os
 from pathlib import Path
 from shutil import copytree, rmtree
 from warnings import warn
@@ -16,7 +15,7 @@ from typer.testing import CliRunner
 
 import tests
 from tracerepo import repo, rules, spatial, utils
-from tracerepo.cli import app, export_data, format_geojson
+from tracerepo.cli import app, export_data, format_repo_geojson
 
 runner = CliRunner()
 
@@ -72,31 +71,41 @@ def test_cli_validate_exec(
     area_gdf: gpd.GeoDataFrame = tests.kb11_area
     tmp_path = tmp_path_factory.mktemp(basename="test_cli_validate_exec", numbered=True)
 
-    with tests.setup_scaffold_context(tmp_path):
+    # Make default directories
+    repo.scaffold(tmp_path)
 
-        organizer = tests.set_up_repo_with_invalids_organized(
-            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf
-        )
-        database_csv_path: Path = tmp_path / rules.DATABASE_CSV
-        database_csv_path.unlink(missing_ok=True)
-        repo.write_database_csv(path=database_csv_path, database=organizer.database)
+    organizer = tests.set_up_repo_with_invalids_organized(
+        database=database,
+        trace_gdf=trace_gdf,
+        area_gdf=area_gdf,
+        tracerepository_path=tmp_path,
+    )
+    database_csv_path: Path = tmp_path / rules.DATABASE_CSV
+    database_csv_path.unlink(missing_ok=True)
+    repo.write_database_csv(path=database_csv_path, database=organizer.database)
 
-        result = runner.invoke(
-            app=app, args=["validate", "--report", f"--metadata-json={metadata_json}"]
-        )
+    result = runner.invoke(
+        app=app,
+        args=[
+            "validate",
+            "--report",
+            f"--metadata-json={metadata_json}",
+            f"--tracerepository-path={tmp_path}",
+        ],
+    )
 
-        reports_path = Path(rules.PathNames.REPORTS.value)
-        if not pandera_valid:
-            assert reports_path.exists()
-            assert reports_path.is_dir()
-            assert len(list(reports_path.glob("*.html"))) > 0
-            assert "html" in result.output
+    reports_path = Path(rules.PathNames.REPORTS.value)
+    if not pandera_valid:
+        assert reports_path.exists()
+        assert reports_path.is_dir()
+        assert len(list(reports_path.glob("*.html"))) > 0
+        assert "html" in result.output
 
-        tests.click_error_print(result)
+    tests.click_error_print(result)
 
-        # TODO: Inconsistent results here
-        if assume_error.value not in database_csv_path.read_text():
-            warn(f"Expected {assume_error.value} to be in {database_csv_path}.")
+    # TODO: Inconsistent results here
+    if assume_error.value not in database_csv_path.read_text():
+        warn(f"Expected {assume_error.value} to be in {database_csv_path}.")
 
 
 @settings(max_examples=5, deadline=5000)
@@ -117,30 +126,36 @@ def test_cli_organize(database, trace_gdf, other_args, tmp_path_factory):
     """
     area_gdf: gpd.GeoDataFrame = tests.kb11_area
     tmp_path = tmp_path_factory.mktemp(basename="test_cli_organize", numbered=True)
+    other_args.append(f"--tracerepository-path={tmp_path}")
 
     args = ["organize"] + other_args
 
-    with tests.setup_scaffold_context(tmp_path):
+    # make default directories
+    repo.scaffold(tmp_path)
 
-        organizer = tests.set_up_repo_with_invalids_organized(
-            database=database, trace_gdf=trace_gdf, area_gdf=area_gdf, organized=False
-        )
+    organizer = tests.set_up_repo_with_invalids_organized(
+        database=database,
+        trace_gdf=trace_gdf,
+        area_gdf=area_gdf,
+        organized=False,
+        tracerepository_path=tmp_path,
+    )
 
-        repo.write_database_csv(
-            path=tmp_path / rules.DATABASE_CSV, database=organizer.database
-        )
+    repo.write_database_csv(
+        path=tmp_path / rules.DATABASE_CSV, database=organizer.database
+    )
 
-        result = runner.invoke(app=app, args=args)
+    result = runner.invoke(app=app, args=args)
 
-        if "--simulate" not in args:
-            organizer.check()
+    if "--simulate" not in args:
+        organizer.check()
 
-        if "--report" in args:
-            assert len(result.stdout) > 0
-        elif "--no-report" in args:
-            assert len(result.stdout) == 0
+    if "--report" in args:
+        assert len(result.stdout) > 0
+    elif "--no-report" in args:
+        assert len(result.stdout) == 0
 
-        tests.click_error_print(result)
+    tests.click_error_print(result)
 
 
 @pytest.mark.parametrize("driver", ["ESRI Shapefile", "GPKG"])
@@ -148,111 +163,103 @@ def test_export_data(tmp_path, driver):
     """
     Test export_data.
     """
-    cur_dir = Path(".").absolute()
-    os.chdir(tmp_path)
+    database_lines = (
+        "area,traces,thematic,scale,area-shape,validity,snap-threshold",
+        (
+            "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
+            "ahvenanmaa,20m,circle,valid,0.001"
+        ),
+    )
 
-    try:
-        database_lines = (
-            "area,traces,thematic,scale,area-shape,validity,snap-threshold",
-            (
-                "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
-                "ahvenanmaa,20m,circle,valid,0.001"
-            ),
-        )
+    database_path = tmp_path / Path("database.csv")
+    database_path.write_text("\n".join(database_lines))
 
-        database_path = Path("database.csv")
-        database_path.write_text("\n".join(database_lines))
+    area_path = tmp_path / Path(
+        f"{rules.PathNames.DATA.value}"
+        "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+    )
+    traces_path = tmp_path / Path(
+        f"{rules.PathNames.DATA.value}"
+        "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+    )
 
-        area_path = Path(
-            f"{rules.PathNames.DATA.value}"
-            "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
-        )
-        traces_path = Path(
-            f"{rules.PathNames.DATA.value}"
-            "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
-        )
+    assert not area_path.parent.exists()
+    assert not traces_path.parent.exists()
 
-        assert not area_path.parent.exists()
-        assert not traces_path.parent.exists()
+    area_path.parent.mkdir(exist_ok=True, parents=True)
+    traces_path.parent.mkdir(exist_ok=True, parents=True)
 
-        area_path.parent.mkdir(exist_ok=True, parents=True)
-        traces_path.parent.mkdir(exist_ok=True, parents=True)
+    tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
+    tests.kb11_area.to_file(area_path, driver="GeoJSON")
 
-        tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
-        tests.kb11_area.to_file(area_path, driver="GeoJSON")
+    unorganized_path = tmp_path / "unorganized"
+    unorganized_path.mkdir()
 
-        Path("unorganized").mkdir()
+    file_count = len(list(tmp_path.iterdir()))
 
-        file_count = len(list(Path(".").iterdir()))
+    export_data(
+        tmp_path,
+        driver=driver,
+        database=database_path,
+        tracerepository_path=tmp_path,
+    )
 
-        export_data(Path("."), driver=driver, database=database_path)
+    assert len(list(tmp_path.iterdir())) > file_count
 
-        assert len(list(Path(".").iterdir())) > file_count
+    export_dir_path = tmp_path / Path(utils.compile_export_dir(driver=driver))
+    assert export_dir_path.exists()
 
-        export_dir_path = Path(utils.compile_export_dir(driver=driver))
-        assert export_dir_path.exists()
-
-        for shp in export_dir_path.rglob(f"*{spatial.DRIVER_EXTENSIONS[driver]}"):
-            assert isinstance(gpd.read_file(shp), gpd.GeoDataFrame)
-
-    finally:
-        os.chdir(cur_dir)
+    for shp in export_dir_path.rglob(f"*{spatial.DRIVER_EXTENSIONS[driver]}"):
+        assert isinstance(gpd.read_file(shp), gpd.GeoDataFrame)
 
 
 def test_format_geojson(tmp_path):
     """
     Test format_geojson.
     """
-    cur_dir = Path(".").absolute()
-    os.chdir(tmp_path)
+    database_lines = (
+        "area,traces,thematic,scale,area-shape,validity,snap-threshold",
+        (
+            "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
+            "ahvenanmaa,20m,circle,valid,0.001"
+        ),
+    )
 
-    try:
-        database_lines = (
-            "area,traces,thematic,scale,area-shape,validity,snap-threshold",
-            (
-                "getaberget_20m_1_1_area,getaberget_20m_1_traces,"
-                "ahvenanmaa,20m,circle,valid,0.001"
-            ),
-        )
+    database_path = tmp_path / Path("database.csv")
+    database_path.write_text("\n".join(database_lines))
 
-        database_path = Path("database.csv")
-        database_path.write_text("\n".join(database_lines))
+    area_path = tmp_path / Path(
+        f"{rules.PathNames.DATA.value}"
+        "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
+    )
+    traces_path = tmp_path / Path(
+        f"{rules.PathNames.DATA.value}"
+        "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
+    )
 
-        area_path = Path(
-            f"{rules.PathNames.DATA.value}"
-            "/ahvenanmaa/area/20m/getaberget_20m_1_1_area.geojson"
-        )
-        traces_path = Path(
-            f"{rules.PathNames.DATA.value}"
-            "/ahvenanmaa/traces/20m/getaberget_20m_1_traces.geojson"
-        )
+    assert not area_path.parent.exists()
+    assert not traces_path.parent.exists()
 
-        assert not area_path.parent.exists()
-        assert not traces_path.parent.exists()
+    area_path.parent.mkdir(exist_ok=True, parents=True)
+    traces_path.parent.mkdir(exist_ok=True, parents=True)
 
-        area_path.parent.mkdir(exist_ok=True, parents=True)
-        traces_path.parent.mkdir(exist_ok=True, parents=True)
+    tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
+    tests.kb11_area.to_file(area_path, driver="GeoJSON")
 
-        tests.kb11_traces_cut.to_file(traces_path, driver="GeoJSON")
-        tests.kb11_area.to_file(area_path, driver="GeoJSON")
+    original_traces_geojson = traces_path.read_text()
+    original_area_geojson = area_path.read_text()
 
-        original_traces_geojson = traces_path.read_text()
-        original_area_geojson = area_path.read_text()
+    unorganized_path = tmp_path / "unorganized"
+    unorganized_path.mkdir()
 
-        Path("unorganized").mkdir()
+    format_repo_geojson(
+        database=tmp_path / database_path, tracerepository_path=tmp_path
+    )
 
-        format_geojson(database=database_path)
-
-        # The original files have unindented geojson by default from
-        # gpd.to_file
-        assert len(original_traces_geojson) != len(traces_path.read_text())
-        assert len(original_area_geojson) != len(area_path.read_text())
-
-    except Exception:
-        os.chdir(cur_dir)
-        raise
-    finally:
-        os.chdir(cur_dir)
+    # The original files have unindented geojson by default from
+    # gpd.to_file
+    assert len(original_traces_geojson) != len(traces_path.read_text())
+    assert len(original_area_geojson) != len(area_path.read_text())
 
 
 @pytest.fixture
@@ -260,16 +267,16 @@ def ready_tracerepository(tmp_path):
     """
     Set up a ready tracerepository.
     """
-    current_path = Path(".").absolute()
+    # current_path = Path(".").absolute()
     destination_repo_path = copytree(
         tests.READY_TRACEREPOSITORY_PATH,
         tmp_path / tests.READY_TRACEREPOSITORY_PATH.name,
     ).absolute()
     assert isinstance(destination_repo_path, Path)
     assert destination_repo_path.is_dir()
-    os.chdir(destination_repo_path)
+    # os.chdir(destination_repo_path)
     yield destination_repo_path
-    os.chdir(current_path)
+    # os.chdir(current_path)
     if destination_repo_path.exists():
         rmtree(destination_repo_path)
 
@@ -278,11 +285,11 @@ def test_all_cli(ready_tracerepository: Path):
     """
     Test all cli tools in ready-made tracerepository.
     """
-    metadata_json = Path(rules.PathNames.METADATA.value)
-    database_csv_path = Path(rules.DATABASE_CSV)
+    metadata_json_path = ready_tracerepository / Path(rules.PathNames.METADATA.value)
+    database_csv_path = ready_tracerepository / Path(rules.DATABASE_CSV)
 
-    assert (ready_tracerepository / metadata_json).exists()
-    assert (ready_tracerepository / database_csv_path).exists()
+    assert (metadata_json_path).exists()
+    assert (database_csv_path).exists()
 
     # Read database.csv before execution
     csv_text_before = database_csv_path.read_text()
@@ -295,7 +302,15 @@ def test_all_cli(ready_tracerepository: Path):
     # Run help and subcommands without arguments
     for cmd in ("--help", "check", "organize", "format-geojson", "export"):
         # Run tracerepo --help
-        help_result = runner.invoke(app=app, args=[cmd])
+        help_result = runner.invoke(
+            app=app,
+            args=[
+                cmd,
+                f"--tracerepository-path={ready_tracerepository}"
+                if "--help" not in cmd
+                else "",
+            ],
+        )
         tests.click_error_print(help_result)
 
     # Run tracerepo validate
@@ -307,7 +322,8 @@ def test_all_cli(ready_tracerepository: Path):
             "--traces-filter=kb",
             "--traces-filter=hastholmen",
             "--report",
-            f"--metadata-json={metadata_json}",
+            f"--metadata-json={metadata_json_path}",
+            f"--tracerepository-path={ready_tracerepository}",
         ],
     )
 
@@ -326,7 +342,7 @@ def test_all_cli(ready_tracerepository: Path):
     assert rules.ValidationResults.CRITICAL.value not in csv_text_after
 
     # Find export directory
-    for directory in Path(".").glob(f"{utils.EXPORT_DIR_PREFIX}*"):
+    for directory in ready_tracerepository.glob(f"{utils.EXPORT_DIR_PREFIX}*"):
         if directory.is_dir():
             # Verify contents
             assert len(list(directory.rglob("*.shp"))) > 0
