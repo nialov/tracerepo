@@ -29,7 +29,7 @@ def test_validate(traces, area, name, snap_threshold, assume_result_validity):
     assert validation_results == assume_result_validity
 
 
-@settings(max_examples=5, deadline=5000)
+@settings(max_examples=3, deadline=10000)
 @given(
     database=tests.database_schema_strategy(),
 )
