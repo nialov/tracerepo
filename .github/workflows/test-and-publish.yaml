@@ -66,7 +66,7 @@ jobs:
 
   changelog:
     runs-on: ubuntu-latest
-    name: Update CHANGELOG.md
+    name: Create changelog for release
     steps:
       - uses: actions/checkout@v2
       - name: Create changelog text
@@ -75,15 +75,27 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           exclude_types: other,docs,chore,style,build,ci,test
-      - name: Create CHANGELOG.md
-        run: echo ${{ steps.changelog.outputs.changelog }} > CHANGELOG.md
-      - name: Commit CHANGELOG.md
-        run: |
-          git config --global user.name 'nialov'
-          git config --global user.email 'nikolasovaskainen@gmail.com'
-          git add CHANGELOG.md
-          git commit -m "docs(changelog): update changelog" || echo "no changes"
-          git push || echo "nothing to push"
+      # - name: Create CHANGELOG.md
+      #   run: echo ${{ steps.changelog.outputs.changelog }} > CHANGELOG.md
+      # - name: Write to CHANGELOG.md
+      #   uses: DamianReeves/write-file-action@master
+      #   with:
+      #     path: ./CHANGELOG.md
+      #     contents: ${{ steps.changelog.outputs.changelog }}
+      #     write-mode: overwrite
+      # - name: Commit and push CHANGELOG.md
+      #   uses: EndBug/add-and-commit@v7
+      #   with:
+      #     add: CHANGELOG.md
+      #     message: "docs: Update CHANGELOG.md"
+      #     branch: master
+      # - name: Commit CHANGELOG.md
+      #   run: |
+      #     git config --global user.name 'nialov'
+      #     git config --global user.email 'nikolasovaskainen@gmail.com'
+      #     git add CHANGELOG.md
+      #     git commit -m "docs(changelog): update changelog" || echo "no changes"
+      #     git push || echo "nothing to push"
 
   # build-and-publish:
   #   runs-on: ubuntu-latest
@@ -119,14 +131,12 @@ jobs:
     name: Release on GitHub
     steps:
       - uses: actions/checkout@v2
-      - name: Create RELEASE_CHANGELOG.md
-        run: echo ${{ steps.changelog.outputs.changes }} > RELEASE_CHANGELOG.md
+      # - name: Create RELEASE_CHANGELOG.md
+      #   run: echo ${{ steps.changelog.outputs.changes }} > RELEASE_CHANGELOG.md
       - name: Publish release on GitHub
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            RELEASE_CHANGELOG.md
-          body_path: RELEASE_CHANGELOG.md
+          body: ${{ steps.changelog.outputs.changes }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
