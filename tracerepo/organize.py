@@ -188,6 +188,7 @@ class Organizer:
                 validity_values,
             ),
         ):
+            assert isinstance(filterer, Sequence)
             if filterer is None or len(filterer) == 0:
                 continue
 

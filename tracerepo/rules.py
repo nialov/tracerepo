@@ -174,7 +174,7 @@ def database_schema() -> pa.DataFrameSchema:
     """
     Get pandera DataFrame schema for database.csv.
     """
-    return pa.DataFrameSchema(
+    schema = pa.DataFrameSchema(
         # Index is the area name
         index=pa.Index(
             **name_column_kwargs(allow_duplicates=False, geom_type=ColumnNames.AREA)
@@ -213,6 +213,8 @@ def database_schema() -> pa.DataFrameSchema:
             ),
         },
     )
+    assert isinstance(schema, pa.DataFrameSchema)
+    return schema
 
 
 # def folder_structure() -> List[Path]:
