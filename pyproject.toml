@@ -34,7 +34,7 @@ tracerepo = "tracerepo.cli:app"
 python = "^3.8"
 pandas = "*"
 pandera = "*"
-typer = "*"
+typer = "^0.3.2"
 fractopo = "~0.1.0"
 pyproj = "~3.1"
 
