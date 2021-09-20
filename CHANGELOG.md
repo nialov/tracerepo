@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased (2021-09-20)
+## v0.0.3 (2021-09-20)
 
 #### Fixes
 
 -   typecheck fixes
 
 Full set of changes:
-[`v0.0.2...c72f28e`](https://github.com/nialov/tracerepo/compare/v0.0.2...c72f28e)
+[`v0.0.2...v0.0.3`](https://github.com/nialov/tracerepo/compare/v0.0.2...v0.0.3)
 
 ## v0.0.2 (2021-09-18)
 
