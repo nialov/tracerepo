@@ -64,79 +64,149 @@ jobs:
       - name: Build docs with invoke -> nox session
         run: invoke docs
 
-  changelog:
+  citation:
     runs-on: ubuntu-latest
-    name: Create changelog for release
+    name: Build citation and validate it
     steps:
       - uses: actions/checkout@v2
-      - name: Create changelog text
-        id: changelog
-        uses: loopwerk/tag-changelog@v1
+      - name: Set up Python 🐍
+        uses: actions/setup-python@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          exclude_types: other,docs,chore,style,build,ci,test
-      # - name: Create CHANGELOG.md
-      #   run: echo ${{ steps.changelog.outputs.changelog }} > CHANGELOG.md
-      # - name: Write to CHANGELOG.md
-      #   uses: DamianReeves/write-file-action@master
-      #   with:
-      #     path: ./CHANGELOG.md
-      #     contents: ${{ steps.changelog.outputs.changelog }}
-      #     write-mode: overwrite
-      # - name: Commit and push CHANGELOG.md
-      #   uses: EndBug/add-and-commit@v7
-      #   with:
-      #     add: CHANGELOG.md
-      #     message: "docs: Update CHANGELOG.md"
-      #     branch: master
-      # - name: Commit CHANGELOG.md
-      #   run: |
-      #     git config --global user.name 'nialov'
-      #     git config --global user.email 'nikolasovaskainen@gmail.com'
-      #     git add CHANGELOG.md
-      #     git commit -m "docs(changelog): update changelog" || echo "no changes"
-      #     git push || echo "nothing to push"
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nox invoke
+      - name: Build docs with invoke -> nox session
+        run: invoke citation
+      - uses: actions/upload-artifact@v2
+        with:
+          name: citation-cff
+          path: CITATION.cff
+    
 
-  # build-and-publish:
-  #   runs-on: ubuntu-latest
-  #   # Requires that unit tests pass but doesn't require lints
-  #   needs: pytest-coverage
-  #   name: Build and publish Python 🐍 distributions 📦 to PyPI
-  #   # Pushes to PyPI on tagged commit pushes of master branch
-  #   # Additionally tests building with setuptools on all branches
-  #   steps:
-  #     - uses: actions/checkout@master
-  #     - name: Set up Python 3.8
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: 3.8
-  #     - name: Install invoke and nox
-  #       run: >-
-  #         python -m pip install invoke nox
-  #     - name: Build binary wheel and a source tarball
-  #       run: >-
-  #         invoke build
-  #     - name: Publish distribution 📦 to PyPI on tagged commit pushes
-  #       # Publish to PyPI on tagged commit pushes on master
-  #       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-  #       uses: pypa/gh-action-pypi-publish@master
-  #       with:
-  #         user: __token__
-  #         password: ${{ secrets.PYPI_PASSWORD }}
+  # From https://github.com/dieghernan/cff-validator
+  Validate-CITATION-cff:
+    runs-on: ubuntu-latest
+    needs: citation
+    name: Validate CITATION.cff
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # This is needed for workflows running on
+      # ubuntu-20.04 or later
+      - name: Install V8
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y libv8-dev
+      - name: Validate CITATION.cff
+        uses: dieghernan/cff-validator@main
+      # Upload artifact
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: citation-cff-errors
+          path: citation_cff_errors.md
+    
+
+  build-and-publish:
+    runs-on: ubuntu-latest
+    # Requires that unit tests pass but doesn't require lints
+    needs: [pytest-coverage, Validate-CITATION-cff]
+    name: Build and publish Python 🐍 distributions 📦 to PyPI
+    # Pushes to PyPI on tagged commit pushes of master branch
+    # Additionally tests building with setuptools on all branches
+    steps:
+      - uses: actions/checkout@master
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install invoke and nox
+        run: >-
+          python -m pip install invoke nox
+      - name: Build binary wheel and a source tarball
+        run: >-
+          invoke build
+      - name: Publish distribution 📦 to PyPI on tagged commit pushes
+        # Publish to PyPI on tagged commit pushes on master
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_PASSWORD }}
+
+  changelog:
+    runs-on: ubuntu-latest
+    name: Update CHANGELOG.md
+    needs: pytest-coverage
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch tags
+        run: git fetch --prune --unshallow --tags --force
+      - name: Set up Python 🐍
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Set output variable to current tag
+        id: current_tag
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Switch to master branch
+        run: |
+          git checkout master
+          git pull
+      - name: Install invoke, nox and pandoc
+        run: |
+          python -m pip install --upgrade pip
+          pip install invoke nox
+          sudo apt install pandoc
+      - name: Update changelog using auto-changelog
+        run: >
+          invoke changelog
+      - name: Echo CHANGELOG.md for debugging
+        run: cat CHANGELOG.md
+      - name: Commit CHANGELOG.md if processing tag
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): update changelog" || echo "no changes"
+          git push || echo "nothing/failed to push"
+      - name: Upload CHANGELOG.md artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: changelog
+          path: ./CHANGELOG.md
 
   release:
     runs-on: ubuntu-latest
-    # Requires tests and changelog make pass
-    needs: [pytest-coverage, changelog]
+    needs: [pytest-coverage, changelog, Validate-CITATION-cff]
     name: Release on GitHub
     steps:
       - uses: actions/checkout@v2
-      # - name: Create RELEASE_CHANGELOG.md
-      #   run: echo ${{ steps.changelog.outputs.changes }} > RELEASE_CHANGELOG.md
+      - name: Download CHANGELOG.md artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: changelog
+      - name: Create incremental changelog
+        run: >
+          cat CHANGELOG.md 
+          | sed -n '1,/github/p' 
+          > RELEASE_CHANGELOG.md
+
+      - name: Echo RELEASE_CHANGELOG.md
+        run: cat RELEASE_CHANGELOG.md
+
       - name: Publish release on GitHub
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
         uses: softprops/action-gh-release@v1
         with:
-          body: ${{ steps.changelog.outputs.changes }}
+          files: |
+            RELEASE_CHANGELOG.md
+          body_path: RELEASE_CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

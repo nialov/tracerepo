@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 # -- Project information -----------------------------------------------------
 
-project = "tracerepo".replace("_", "-")
+project = "tracerepo"
 copyright = "2021, Nikolas Ovaskainen"
 author = "Nikolas Ovaskainen"
 

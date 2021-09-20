@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.1"
+version = "0.0.2.post1.dev0+c72f28e"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
@@ -101,6 +101,19 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry-dynamic-versioning]
 enable = true
 vcs = "git"
+
+[tool.poetry-dynamic-versioning.substitution]
+files = [
+    "*.py",
+    "*/__init__.py",
+    "*/__version__.py",
+    "*/_version.py",
+    "./CITATION.cff",
+]
+patterns = [
+    "(^__version__\\s*=\\s*['\"])[^'\"]*(['\"])",
+    "(^version:\\s*['\"])[^'\"]*(['\"])",
+]
 
 [tool.pytest.ini_options]
 testpaths =[

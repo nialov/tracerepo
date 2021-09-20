@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+
+- family-names: Ovaskainen
+  given-names: Nikolas
+title: tracerepo
+version: "0.0.2.post1.dev0+c72f28e"
+date-released: "2021-09-20"
+keywords:
+  - python
+  - data
+contact:
+  - email: "nikolasovaskainen@gmail.com"
+url: "https://github.com/nialov/tracerepo"
+repository-code: "https://github.com/nialov/tracerepo"
