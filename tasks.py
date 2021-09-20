@@ -128,11 +128,11 @@ def citation(c):
 
 
 @task
-def changelog(c):
+def changelog(c, latest_version=""):
     """
     Generate changelog.
     """
-    c.run("nox --session changelog")
+    c.run(f"nox --session changelog -- {latest_version}")
 
 
 @task(
@@ -153,15 +153,18 @@ def prepush(_):
     """
 
 
-@task(pre=[ci_test])
-def tag(_, tag="", annotation=""):
+@task(pre=[prepush])
+def tag(c, tag="", annotation=""):
     """
     Make new tag and update version strings accordingly
     """
     if len(tag) == 0:
-        raise ValueError(f"Tag string must be specified with '--tag=*'.")
+        raise ValueError("Tag string must be specified with '--tag=*'.")
     if len(annotation) == 0:
-        raise ValueError(f"Annotation string must be specified with '--annotation=*'.")
+        raise ValueError("Annotation string must be specified with '--annotation=*'.")
+
+    # Create changelog with 'tag' as latest version
+    c.run(f"nox --session changelog -- {tag}")
 
     # Remove v at the start of tag
     tag = tag if "v" not in tag else tag[1:]

@@ -395,6 +395,19 @@ def changelog(session):
     """
     Create CHANGELOG.md.
     """
+    if session.posargs:
+        if isinstance(session.posargs, str):
+            version = session.posargs
+        elif isinstance(session.posargs, (tuple, list)):
+            version = session.posargs[0]
+        else:
+            raise TypeError(
+                f"Expected (str,tuple,list) as posargs type. Got: {type(session.posargs)}"
+                f" with contents: {session.posargs}."
+            )
+    else:
+        version = ""
+    assert isinstance(version, str)
     # Path to changelog.md
     changelog_path = Path(CHANGELOG_MD_NAME).absolute()
 
@@ -408,18 +421,16 @@ def changelog(session):
 
     # Install auto-changelog from own repo
     session.install("git+https://github.com/nialov/auto-changelog.git")
-    changelog_output = subprocess.check_output(
-        [
-            "auto-changelog",
-            "--tag-prefix=v",
-            "--stdout",
-            "--unreleased",
-        ]
+    session.run(
+        "auto-changelog",
+        "--tag-prefix=v",
+        f"--output={CHANGELOG_MD_NAME}",
+        f"--latest-version={version}" if len(version) > 0 else "--unreleased",
     )
 
     # Add empty lines after each line of changelog
     new_lines = []
-    for line in changelog_output.decode("utf-8").splitlines():
+    for line in changelog_path.read_text().splitlines():
         new_lines.append(line)
         new_lines.append("")
 
@@ -436,5 +447,6 @@ def changelog(session):
             CHANGELOG_MD_NAME,
             external=True,
         )
+    print(changelog_path.read_text())
 
     assert changelog_path.exists()
