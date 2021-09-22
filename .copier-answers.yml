@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier
-_commit: 42946fc
+_commit: 338e4e4
 _src_path: https://github.com/nialov/nialov-py-template.git
 classifier: 'Topic :: Scientific/Engineering :: GIS'
 description: Fracture & lineament data management.
