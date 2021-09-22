@@ -10,12 +10,14 @@ import geopandas as gpd
 import pytest
 from click.testing import Result
 from hypothesis import given, settings
+from rich.console import Console
+from rich.table import Table
 from shapely.geometry import LineString
 from typer.testing import CliRunner
 
 import tests
 from tracerepo import repo, rules, spatial, utils
-from tracerepo.cli import app, export_data, format_repo_geojson
+from tracerepo.cli import app, export_data, format_repo_geojson, report_validation_table
 
 runner = CliRunner()
 
@@ -360,3 +362,13 @@ def test_all_cli(ready_tracerepository: Path):
             # Verify contents
             assert len(list(directory.rglob("*.shp"))) > 0
     assert len(found) > 0
+
+
+@pytest.mark.parametrize("invalids", tests.test_report_validation_table_params())
+def test_report_validation_table(invalids):
+    """
+    Test report_validation_table.
+    """
+    result = report_validation_table(invalids)
+    Console().print(result)
+    assert isinstance(result, Table)

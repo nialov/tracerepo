@@ -767,3 +767,20 @@ def metadata_loaded() -> rules.Metadata:
     loaded_metadata = loads(METADATA_JSON_PATH.read_text())
     assert isinstance(loaded_metadata, dict)
     return rules.Metadata(**loaded_metadata, filepath=METADATA_JSON_PATH)
+
+
+@lru_cache(maxsize=None)
+def test_report_validation_table_params():
+    """
+    Params for test_report_validation_table.
+    """
+
+    return [
+        [
+            utils.TraceTuple(
+                traces_path=Path("traces.gpkg"),
+                area_path=Path("area.gpkg"),
+                snap_threshold=0.001,
+            )
+        ],
+    ]
