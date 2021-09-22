@@ -9,6 +9,8 @@ from typing import List, Sequence
 
 import typer
 from json5 import loads
+from rich.console import Console
+from rich.table import Table
 
 from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
@@ -69,6 +71,24 @@ def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:
     return rules.Metadata(**loaded_metadata, filepath=metadata_json_path)
 
 
+def report_validation_table(invalids: List[utils.TraceTuple]) -> Table:
+    """
+    Generate a rich Table from invalids.
+    """
+    table = Table(title="Selected Validation Targets")
+    table.add_column("Traces", header_style="bold", style="bold green")
+    table.add_column("Area", header_style="bold", style="bold green")
+    table.add_column("Snap Threshold", header_style="bold", style="bold blue")
+
+    for trace_tuple in invalids:
+        table.add_row(
+            trace_tuple.traces_path.name,
+            trace_tuple.area_path.name,
+            str(trace_tuple.snap_threshold),
+        )
+    return table
+
+
 @app.command()
 def validate(
     tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
@@ -88,6 +108,7 @@ def validate(
 
     Only validates if the dataset has been marked as invalid in database.csv.
     """
+    console = Console()
     database = tracerepository_path / database_name
     # Initialize Organizer
     organizer = Organizer(
@@ -115,6 +136,10 @@ def validate(
     # Means you might have to validate for each area dataset
     # that uses the traces.
     unique_invalids_only = spatial.unique_invalids(invalids=invalids)
+
+    # Report which data are validated
+    if report:
+        console.print(report_validation_table(unique_invalids_only))
 
     # Validate the invalids
     update_tuples = spatial.validate_invalids(invalids=unique_invalids_only)
