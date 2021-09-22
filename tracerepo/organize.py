@@ -220,7 +220,7 @@ class Organizer:
         scale: Sequence[str] = (),
         area_shape: Sequence[rules.AreaShapes] = (),
         validity: Sequence[rules.ValidationResults] = (),
-    ) -> Sequence[utils.TraceTuple]:
+    ) -> List[utils.TraceTuple]:
         """
         Query for trace and area data.
         """
