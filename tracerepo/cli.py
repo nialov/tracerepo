@@ -71,7 +71,7 @@ def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:
     return rules.Metadata(**loaded_metadata, filepath=metadata_json_path)
 
 
-def report_validation_table(invalids: List[utils.TraceTuple]) -> Table:
+def report_validation_table(invalids: Sequence[utils.TraceTuple]) -> Table:
     """
     Generate a rich Table from invalids.
     """
@@ -372,14 +372,14 @@ def export_data(
 
     # Compile from trace tuples into paths
     # TODO: Could just return TraceTuples again as they are just paths...
-    convert_paths = spatial.convert_trace_tuples(
+    dest_trace_tuples = spatial.convert_trace_tuples(
         trace_tuples, export_destination=export_destination_dir, driver=driver
     )
 
     # Export to disk
     spatial.save_converted_paths(
-        trace_tuples=trace_tuples,
-        convert_paths=convert_paths,
+        src_trace_tuples=trace_tuples,
+        dest_trace_tuples=dest_trace_tuples,
         driver=driver,
         destination=destination,
     )

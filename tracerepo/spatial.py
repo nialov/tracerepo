@@ -256,13 +256,15 @@ def validate_invalid(invalid: utils.TraceTuple) -> utils.UpdateTuple:
 
 def rename_trace_tuple_paths(
     trace_tuple: TraceTuple, export_destination: str, driver: str
-) -> Tuple[Path, Path]:
+) -> TraceTuple:
     """
     Rename TraceTuple paths with new base data directory and extension.
     """
-    return rename_path(
-        trace_tuple.traces_path, export_destination, driver
-    ), rename_path(trace_tuple.area_path, export_destination, driver)
+    return TraceTuple(
+        traces_path=rename_path(trace_tuple.traces_path, export_destination, driver),
+        area_path=rename_path(trace_tuple.area_path, export_destination, driver),
+        snap_threshold=trace_tuple.snap_threshold,
+    )
 
 
 def rename_path(path: Path, export_destination: str, driver: str) -> Path:
@@ -289,7 +291,7 @@ def rename_path(path: Path, export_destination: str, driver: str) -> Path:
 
 def convert_trace_tuples(
     trace_tuples: Sequence[TraceTuple], export_destination: str, driver: str
-) -> List[Tuple[Path, Path]]:
+) -> List[TraceTuple]:
     """
     Make paths for converting between geodata filetypes.
 
@@ -298,12 +300,15 @@ def convert_trace_tuples(
     ...     traces_path=Path("data/loviisa/traces/20m/traces.geojson"),
     ...     area_path=Path("data/loviisa/traces/20m/area.geojson"),
     ... )
-    >>> pprint(convert_trace_tuples([trace_tuple], "exported", "GPKG"))
-    [(PosixPath('exported/loviisa/traces/20m/traces.gpkg'),
-      PosixPath('exported/loviisa/traces/20m/area.gpkg'))]
-
+    >>> converted = convert_trace_tuples([trace_tuple], "exported", "GPKG")[0]
+    >>> pprint(list(converted.traces_path.parents))
+    [PosixPath('exported/loviisa/traces/20m'),
+     PosixPath('exported/loviisa/traces'),
+     PosixPath('exported/loviisa'),
+     PosixPath('exported'),
+     PosixPath('.')]
     """
-    convert_paths = []
+    convert_paths: List[TraceTuple] = []
     # Iterate over datasets and save
     trace_tuple: TraceTuple
     for trace_tuple in trace_tuples:
@@ -319,18 +324,19 @@ def convert_trace_tuples(
 
 
 def save_converted_paths(
-    trace_tuples: Sequence[TraceTuple],
-    convert_paths: Sequence[Tuple[Path, Path]],
+    src_trace_tuples: Sequence[TraceTuple],
+    dest_trace_tuples: Sequence[TraceTuple],
     driver: str,
     destination: Path,
 ):
     """
     Save transformed geodata files to new paths.
     """
-    for trace_tuple, convert_path_tuple in zip(trace_tuples, convert_paths):
+    for src_trace_tuple, dest_trace_tuple in zip(src_trace_tuples, dest_trace_tuples):
 
         for original_path, convert_path in zip(
-            (trace_tuple.traces_path, trace_tuple.area_path), convert_path_tuple
+            (src_trace_tuple.traces_path, src_trace_tuple.area_path),
+            (dest_trace_tuple.traces_path, dest_trace_tuple.area_path),
         ):
             convert_filetype(original_path, destination / convert_path, driver=driver)
 
