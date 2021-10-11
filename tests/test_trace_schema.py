@@ -28,6 +28,5 @@ def test_traces_schema(gdf: gpd.GeoDataFrame, will_fail: bool, geom_test: bool):
         if will_fail:
             return
         raise
-    if will_fail:
-        assert False
+    assert not will_fail
     assert isinstance(validated, pd.DataFrame)
