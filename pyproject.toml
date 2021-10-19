@@ -64,6 +64,7 @@ isort = {version = "*", optional = true}
 mypy = {version = "*", optional = true}
 pydantic = "^1.8.2"
 json5 = "^0.9.6"
+nialog = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 nox = "*"
