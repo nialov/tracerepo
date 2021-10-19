@@ -14,11 +14,16 @@ from click.testing import Result
 from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from json5 import loads
+
+# Setup nialog logging
+from nialog.logger import setup_module_logging
 from shapely.geometry import LineString, MultiLineString, Point
 
 from tracerepo import rules, trace_schema, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
+
+setup_module_logging()
 
 READY_TRACEREPOSITORY_PATH = Path("tests/sample_data/tracerepository/")
 METADATA_JSON_PATH = READY_TRACEREPOSITORY_PATH / rules.PathNames.METADATA.value
