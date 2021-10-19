@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased (2021-10-13)
+## Unreleased (2021-10-19)
+
+#### New Features
+
+-   (cli): add nialog logging
 
 #### Fixes
 
 -   (cli): report validation targets with table
 
 Full set of changes:
-[`v0.0.3...624ad4c`](https://github.com/nialov/tracerepo/compare/v0.0.3...624ad4c)
+[`v0.0.3...2e3396c`](https://github.com/nialov/tracerepo/compare/v0.0.3...2e3396c)
 
 ## v0.0.3 (2021-09-20)
 
