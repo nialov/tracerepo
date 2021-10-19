@@ -9,6 +9,7 @@ from typing import List, Sequence
 
 import typer
 from json5 import loads
+from nialog.logger import setup_module_logging
 from rich.console import Console
 from rich.table import Table
 
@@ -46,15 +47,19 @@ def app_callback(
     """
     Use tracerepo to manage and validate fracture & lineament trace data.
     """
-    logging_level_str = "WARNING"
-    logging.basicConfig(level=logging.WARNING, force=True)
-    if verbose and not debug:
-        logging.basicConfig(level=logging.INFO, force=True)
-        logging_level_str = "INFO"
+    logging_level_int = logging.WARNING
+    # logging.basicConfig(level=logging.WARNING, force=True)
+    if verbose:
+        # logging.basicConfig(level=logging.INFO, force=True)
+        logging_level_int = logging.INFO
     if debug:
-        logging.basicConfig(level=logging.DEBUG, force=True)
-        logging_level_str = "DEBUG"
-    logging.info(f"Logging verbosity set to {logging_level_str}")
+        # logging.basicConfig(level=logging.DEBUG, force=True)
+        logging_level_int = logging.DEBUG
+    setup_module_logging(logging_level_int=logging_level_int)
+    logging.info(
+        "Logging verbosity set and nialog initialized.",
+        extra=dict(logging_level_int=logging_level_int, verbose=verbose, debug=debug),
+    )
 
 
 def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:
