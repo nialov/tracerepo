@@ -267,7 +267,11 @@ def database_schema_strategy(draw):
     area_index = draw(
         lists(elements=name_regex(rules.ColumnNames.AREA), **size_kwargs, unique=True)
     )
-    traces = draw(lists(elements=name_regex(rules.ColumnNames.TRACES), **size_kwargs))
+    # traces also has to be unique as some tests put the traces files into
+    # unorganized directory during test set up
+    traces = draw(
+        lists(elements=name_regex(rules.ColumnNames.TRACES), **size_kwargs, unique=True)
+    )
     thematic = draw(lists(elements=name_regex(None), **size_kwargs))
     scale = draw(lists(elements=name_regex(None), **size_kwargs))
 
