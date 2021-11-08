@@ -8,12 +8,12 @@ repos:
       - id: commitizen
         stages: [commit-msg]
   - repo: https://github.com/psf/black
-    rev: 21.9b0
+    rev: 21.10b0
     hooks:
       - id: black
         language_version: python3
   - repo: https://github.com/pycqa/isort
-    rev: 5.9.3
+    rev: 5.10.0
     hooks:
       - id: isort
   - repo: https://github.com/pycqa/flake8
