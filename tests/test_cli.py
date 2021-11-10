@@ -83,7 +83,8 @@ def test_cli_validate_exec(
         tracerepository_path=tmp_path,
     )
     database_csv_path: Path = tmp_path / rules.DATABASE_CSV
-    database_csv_path.unlink(missing_ok=True)
+    if database_csv_path.exists():
+        database_csv_path.unlink()
     repo.write_database_csv(path=database_csv_path, database=organizer.database)
 
     result = runner.invoke(
