@@ -7,7 +7,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Sequence, Tuple, Type
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Type
 
 import geopandas as gpd
 import pandas as pd
@@ -29,6 +29,7 @@ class TraceTuple(NamedTuple):
     traces_path: Path
     area_path: Path
     snap_threshold: float = 0.001
+    validity: Optional[str] = None
 
 
 @dataclass
@@ -197,6 +198,7 @@ def query_result_tuple(
     scale_val: str,
     traces_val: str,
     area_val: str,
+    validity_val: str,
     snap_threshold: float,
     tracerepository_path: Path,
 ) -> TraceTuple:
@@ -221,7 +223,10 @@ def query_result_tuple(
     )
 
     return TraceTuple(
-        traces_path=traces_path, area_path=area_path, snap_threshold=snap_threshold
+        traces_path=traces_path,
+        area_path=area_path,
+        snap_threshold=snap_threshold,
+        validity=validity_val,
     )
 
 

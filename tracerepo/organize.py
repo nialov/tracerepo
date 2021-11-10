@@ -264,11 +264,19 @@ class Organizer:
             rules.ColumnNames.TRACES.value,
             rules.ColumnNames.AREA.value,
             rules.ColumnNames.SNAP_THRESHOLD.value,
+            rules.ColumnNames.VALIDITY.value,
         ]
 
         # Compress the values corresponding to columns_needed based on
         # query_bools boolean list
-        thematic_vals, scale_vals, trace_vals, area_vals, snap_vals = tuple(
+        (
+            thematic_vals,
+            scale_vals,
+            trace_vals,
+            area_vals,
+            snap_vals,
+            validity_vals,
+        ) = tuple(
             list(compress(data=self.columns[col], selectors=query_bools))
             for col in columns_needed
         )
@@ -283,9 +291,22 @@ class Organizer:
                 traces_val=traces_val,
                 area_val=area_val,
                 snap_threshold=snap_val,
+                validity_val=validity_val,
             )
-            for thematic_val, scale_val, traces_val, area_val, snap_val in zip(
-                thematic_vals, scale_vals, trace_vals, area_vals, snap_vals
+            for (
+                thematic_val,
+                scale_val,
+                traces_val,
+                area_val,
+                snap_val,
+                validity_val,
+            ) in zip(
+                thematic_vals,
+                scale_vals,
+                trace_vals,
+                area_vals,
+                snap_vals,
+                validity_vals,
             )
         ]
 

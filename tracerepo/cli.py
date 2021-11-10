@@ -5,7 +5,7 @@ Command line api for tracerepo.
 import logging
 from pathlib import Path
 from shutil import rmtree
-from typing import List, Sequence
+from typing import List, Optional, Sequence
 
 import typer
 from json5 import loads
@@ -84,12 +84,14 @@ def report_validation_table(invalids: Sequence[utils.TraceTuple]) -> Table:
     table.add_column("Traces", header_style="bold", style="bold green")
     table.add_column("Area", header_style="bold", style="bold green")
     table.add_column("Snap Threshold", header_style="bold", style="bold blue")
+    table.add_column("Current Validity", header_style="bold", style="bold blue")
 
     for trace_tuple in invalids:
         table.add_row(
             trace_tuple.traces_path.name,
             trace_tuple.area_path.name,
             str(trace_tuple.snap_threshold),
+            trace_tuple.validity,
         )
     return table
 
@@ -103,7 +105,14 @@ def validate(
     traces_filter: List[str] = DATA_FILTER,
     scale_filter: List[str] = DATA_FILTER,
     report: bool = typer.Option(False),
-    report_directory: Path = typer.Option(rules.PathNames.REPORTS.value),
+    # report_directory: Optional[Path] = typer.Option(rules.PathNames.REPORTS.value),
+    report_directory: Optional[Path] = typer.Option(
+        None,
+        help=(
+            "Defaults to directory in tracerepository_path "
+            f"with name: {rules.PathNames.REPORTS.value}."
+        ),
+    ),
     metadata_json: Path = typer.Option(
         rules.PathNames.METADATA.value, exists=True, dir_okay=False
     ),
@@ -214,6 +223,11 @@ def validate(
             # == rules.ValidationResults.CRITICAL:
 
             if not pandera_report.empty:
+                report_directory = (
+                    tracerepository_path / Path(rules.PathNames.REPORTS.value)
+                    if report_directory is None
+                    else report_directory
+                )
                 str_report = utils.report_pandera_errors(
                     pandera_report=pandera_report,
                     report_directory=report_directory,
@@ -376,7 +390,6 @@ def export_data(
         )
 
     # Compile from trace tuples into paths
-    # TODO: Could just return TraceTuples again as they are just paths...
     dest_trace_tuples = spatial.convert_trace_tuples(
         trace_tuples, export_destination=export_destination_dir, driver=driver
     )
