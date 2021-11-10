@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.3.post24.dev0+2e3396c"
+version = "0.0.3.post27.dev0+ef03ed6"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
