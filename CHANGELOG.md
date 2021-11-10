@@ -10,10 +10,12 @@
 
 #### Fixes
 
+-   implement support for py 3.7
+
 -   (cli): report validation targets with table
 
 Full set of changes:
-[`v0.0.3...ef03ed6`](https://github.com/nialov/tracerepo/compare/v0.0.3...ef03ed6)
+[`v0.0.3...93d5f00`](https://github.com/nialov/tracerepo/compare/v0.0.3...93d5f00)
 
 ## v0.0.3 (2021-09-20)
 
