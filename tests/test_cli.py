@@ -96,7 +96,7 @@ def test_cli_validate_exec(
         ],
     )
 
-    reports_path = Path(rules.PathNames.REPORTS.value)
+    reports_path = Path(tmp_path) / Path(rules.PathNames.REPORTS.value)
     if not pandera_valid:
         assert reports_path.exists()
         assert reports_path.is_dir()

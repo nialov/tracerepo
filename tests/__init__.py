@@ -783,7 +783,6 @@ def test_report_validation_table_params():
     """
     Params for test_report_validation_table.
     """
-
     return [
         [
             utils.TraceTuple(
