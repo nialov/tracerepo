@@ -65,6 +65,7 @@ License
 
 Copyright © 2021, Nikolas Ovaskainen.
 
+
 .. |Documentation Status| image:: https://readthedocs.org/projects/tracerepo/badge/?version=latest
    :target: https://tracerepo.readthedocs.io/en/latest/?badge=latest
 .. |PyPI Status| image:: https://img.shields.io/pypi/v/tracerepo.svg
