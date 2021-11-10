@@ -3,11 +3,10 @@ Organize trace data.
 """
 
 from dataclasses import dataclass
-from functools import cached_property
 from itertools import compress
 from pathlib import Path
 from shutil import move
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 import pandas as pd
 
@@ -23,6 +22,8 @@ class Organizer:
 
     database: pd.DataFrame
     tracerepository_path: Path
+
+    _columns: Optional[Dict[str, List[Any]]] = None
 
     def __post_init__(self):
         """
@@ -69,7 +70,7 @@ class Organizer:
             )
         return move_descriptions
 
-    @cached_property
+    @property
     def columns(self) -> Dict[str, List[Any]]:
         """
         Get database columns and index as Python typed values.
@@ -77,14 +78,16 @@ class Organizer:
         Accesible as a dict with column names as keys. Includes the area name
         values that were originally the dataframe index.
         """
-        cols: Dict[str, List[Any]] = dict()
-        for column in rules.ColumnNames:
-            cols[column.value] = utils.dataframe_column_to_python(
-                dataframe=self.database,
-                column=column.value,
-                python_type=rules.ColumnNames.column_type()[column],
-            )
-        return cols
+        if self._columns is None:
+            cols: Dict[str, List[Any]] = dict()
+            for column in rules.ColumnNames:
+                cols[column.value] = utils.dataframe_column_to_python(
+                    dataframe=self.database,
+                    column=column.value,
+                    python_type=rules.ColumnNames.column_type()[column],
+                )
+            self._columns = cols
+        return self._columns
 
     def check(self):
         """
@@ -341,4 +344,4 @@ class Organizer:
             self.database = database
 
             # Reset columns cached property
-            del self.__dict__["columns"]
+            self._columns = None
