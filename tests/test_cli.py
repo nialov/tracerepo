@@ -291,6 +291,7 @@ def test_all_cli(ready_tracerepository: Path):
     """
     metadata_json_path = ready_tracerepository / Path(rules.PathNames.METADATA.value)
     database_csv_path = ready_tracerepository / Path(rules.DATABASE_CSV)
+    reports_path = ready_tracerepository / Path(rules.PathNames.REPORTS.value)
 
     assert (metadata_json_path).exists()
     assert (database_csv_path).exists()
@@ -334,7 +335,6 @@ def test_all_cli(ready_tracerepository: Path):
     # Make sure pandera error was caught
     assert "Reported" in validate_result.stdout
     assert "html" in validate_result.stdout
-    reports_path = Path(rules.PathNames.REPORTS.value)
     assert reports_path.exists()
     assert len(list(reports_path.glob("*.html"))) > 0
 
