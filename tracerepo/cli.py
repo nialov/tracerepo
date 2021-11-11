@@ -11,12 +11,13 @@ import typer
 from json5 import loads
 from nialog.logger import setup_module_logging
 from rich.console import Console
-from rich.table import Table
+from rich.text import Text
 
 from tracerepo import repo, rules, spatial, utils
 from tracerepo.organize import Organizer
 
 app = typer.Typer()
+console = Console()
 
 DATABASE_OPTION = typer.Option(
     rules.DATABASE_CSV,
@@ -76,26 +77,6 @@ def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:
     return rules.Metadata(**loaded_metadata, filepath=metadata_json_path)
 
 
-def report_validation_table(invalids: Sequence[utils.TraceTuple]) -> Table:
-    """
-    Generate a rich Table from invalids.
-    """
-    table = Table(title="Selected Validation Targets")
-    table.add_column("Traces", header_style="bold", style="bold green")
-    table.add_column("Area", header_style="bold", style="bold green")
-    table.add_column("Snap Threshold", header_style="bold", style="bold blue")
-    table.add_column("Current Validity", header_style="bold", style="bold blue")
-
-    for trace_tuple in invalids:
-        table.add_row(
-            trace_tuple.traces_path.name,
-            trace_tuple.area_path.name,
-            str(trace_tuple.snap_threshold),
-            trace_tuple.validity,
-        )
-    return table
-
-
 @app.command()
 def validate(
     tracerepository_path: Path = TRACEREPOSITORY_PATH_OPTION,
@@ -109,12 +90,17 @@ def validate(
     report_directory: Optional[Path] = typer.Option(
         None,
         help=(
-            "Defaults to directory in tracerepository_path "
+            "Defaults to file in tracerepository_path directory "
             f"with name: {rules.PathNames.REPORTS.value}."
         ),
     ),
-    metadata_json: Path = typer.Option(
-        rules.PathNames.METADATA.value, exists=True, dir_okay=False
+    metadata_json: Optional[Path] = typer.Option(
+        None,
+        help=(
+            "Defaults to file in tracerepository_path directory "
+            f"with name: {rules.PathNames.METADATA.value}."
+        ),
+        # rules.PathNames.METADATA.value, exists=True, dir_okay=False
     ),
 ):
     """
@@ -130,8 +116,15 @@ def validate(
         database=repo.read_database_csv(path=database),
     )
 
+    # Resolve metadata_json_path
+    metadata_json_path = (
+        metadata_json
+        if metadata_json is not None
+        else tracerepository_path / rules.PathNames.METADATA.value
+    )
+
     # Load metadata of traces column restrictions
-    metadata = load_metadata_from_json(metadata_json_path=metadata_json)
+    metadata = load_metadata_from_json(metadata_json_path=metadata_json_path)
 
     # Query for invalid traces
     invalids = organizer.query(
@@ -153,7 +146,7 @@ def validate(
 
     # Report which data are validated
     if report:
-        console.print(report_validation_table(unique_invalids_only))
+        console.print(utils.create_initial_validation_table(unique_invalids_only))
 
     # Validate the invalids
     update_tuples = spatial.validate_invalids(invalids=unique_invalids_only)
@@ -163,6 +156,13 @@ def validate(
 
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
+
+    if report:
+        console.print(
+            utils.create_validation_results_table(
+                invalids=invalids, update_tuples=update_tuples
+            )
+        )
 
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
@@ -199,41 +199,18 @@ def validate(
                 exc_info=True,
             )
 
-        if report:
-            # UpdateTuple(area_name='finland_em_lineaments_1_500000_area',
-            # update_values={<ColumnNames.VALIDITY: 'validity'>: 'unfit'},
-            # traces_path=PosixPath('tracerepository_data/finland/traces/500000/
-            # finland_em_lineaments_1_500000_traces.geojson'),
-            # error=False)
-            typer.echo("")
-            typer.secho(
-                f"Validation results for area: { update_tuple.area_name }",
-                fg=typer.colors.BRIGHT_WHITE,
+        if not pandera_report.empty and report:
+            report_directory = (
+                tracerepository_path / Path(rules.PathNames.REPORTS.value)
+                if report_directory is None
+                else report_directory
             )
-            typer.secho(
-                f"(Traces: {update_tuple.traces_path.name})", fg=typer.colors.CYAN
+            str_report = utils.report_pandera_errors(
+                pandera_report=pandera_report,
+                report_directory=report_directory,
+                area_name=update_tuple.area_name,
             )
-
-            validation_result = update_tuple.update_values[rules.ColumnNames.VALIDITY]
-            typer.secho(
-                f"Validation result: {validation_result}",
-                fg=rules.ValidationResults.color_dict()[validation_result],
-            )
-            # if update_tuple.update_values[rules.ColumnNames.VALIDITY.value]
-            # == rules.ValidationResults.CRITICAL:
-
-            if not pandera_report.empty:
-                report_directory = (
-                    tracerepository_path / Path(rules.PathNames.REPORTS.value)
-                    if report_directory is None
-                    else report_directory
-                )
-                str_report = utils.report_pandera_errors(
-                    pandera_report=pandera_report,
-                    report_directory=report_directory,
-                    area_name=update_tuple.area_name,
-                )
-                typer.echo(str_report)
+            console.print(str_report)
 
     if database_error or write_error:
 
@@ -306,7 +283,7 @@ def organize(
     move_descriptions = organizer.organize(simulate=simulate)
 
     if report:
-        typer.echo("\n".join(move_descriptions))
+        console.print(Text("\n".join(move_descriptions), style="yellow"))
 
     if not simulate:
         organizer.check()
@@ -433,4 +410,8 @@ def export(
         overwrite=overwrite,
     )
 
-    typer.echo(f"Saved datasets to {export_destination} with driver {driver}.")
+    text = Text(
+        f"Saved datasets to {export_destination} with driver {driver}.", style="green"
+    )
+
+    console.print(text)

@@ -94,7 +94,7 @@ def validate(
     return validated, ValidationResults.VALID
 
 
-def unique_invalids(invalids: Sequence[utils.TraceTuple]) -> Sequence[utils.TraceTuple]:
+def unique_invalids(invalids: List[utils.TraceTuple]) -> List[utils.TraceTuple]:
     """
     Return invalids that are unique by traces_path.
     """
@@ -264,6 +264,7 @@ def rename_trace_tuple_paths(
         traces_path=rename_path(trace_tuple.traces_path, export_destination, driver),
         area_path=rename_path(trace_tuple.area_path, export_destination, driver),
         snap_threshold=trace_tuple.snap_threshold,
+        validity=trace_tuple.validity,
     )
 
 
@@ -299,6 +300,7 @@ def convert_trace_tuples(
     >>> trace_tuple = TraceTuple(
     ...     traces_path=Path("data/loviisa/traces/20m/traces.geojson"),
     ...     area_path=Path("data/loviisa/traces/20m/area.geojson"),
+    ...     validity=rules.ValidationResults.VALID.value,
     ... )
     >>> converted = convert_trace_tuples([trace_tuple], "exported", "GPKG")[0]
     >>> pprint(list(converted.traces_path.parents))

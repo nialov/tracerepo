@@ -63,11 +63,12 @@ class Organizer:
             )
             if not simulate:
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                move(filepath, destination)
-            move_descriptions.append(
-                f"Moving {filepath} to {destination}."
-                + (" --SIMULATION--" if simulate else "")
+                move(str(filepath.absolute().expanduser()), destination)
+            move_description = f"Moving {filepath} to {destination}." + (
+                " --SIMULATION--" if simulate else ""
             )
+            assert isinstance(move_description, str)
+            move_descriptions.append(move_description)
         return move_descriptions
 
     @property

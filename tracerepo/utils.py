@@ -13,6 +13,8 @@ import geopandas as gpd
 import pandas as pd
 import pandera as pa
 from fractopo import general
+from rich.table import Table
+from rich.text import Text
 
 from tracerepo import rules, trace_schema
 
@@ -28,8 +30,8 @@ class TraceTuple(NamedTuple):
 
     traces_path: Path
     area_path: Path
+    validity: str
     snap_threshold: float = 0.001
-    validity: Optional[str] = None
 
 
 @dataclass
@@ -414,3 +416,76 @@ def pandera_reporting(
         }
         return update_values, pandera_report
     return dict(), pandera_report
+
+
+def create_initial_validation_table(
+    invalids: List[TraceTuple], validity_changes: Optional[List[Text]] = None
+) -> Table:
+    """
+    Generate a rich Table from invalids.
+    """
+    if validity_changes is not None:
+        assert len(validity_changes) == len(invalids)
+        title = "Validation Results"
+    else:
+        title = "Validation Targets"
+    table = Table(title=title)
+    table.add_column("Traces", header_style="bold")
+    table.add_column("Area", header_style="bold")
+    table.add_column("Snap Threshold", header_style="bold", style="bold blue")
+    # table.add_column("Validity", header_style="bold", style="bold blue")
+    table.add_column("Validity")
+
+    for idx, trace_tuple in enumerate(invalids):
+        validity = (
+            enrich_color_validity_value(trace_tuple.validity)
+            if validity_changes is None
+            else validity_changes[idx]
+        )
+        table.add_row(
+            trace_tuple.traces_path.name,
+            trace_tuple.area_path.name,
+            str(trace_tuple.snap_threshold),
+            validity,
+        )
+    return table
+
+
+def enrich_color_validity_value(validity_value: str) -> Text:
+    """
+    Wrap validity value with approppriate color.
+    """
+    try:
+        color = rules.ValidationResults.color_dict()[validity_value]
+    except KeyError:
+        logging.error(
+            "validity_value was not found in rules.ValidationResults.color_dict()",
+            extra=dict(validity_value=validity_value),
+            exc_info=True,
+        )
+        color = "blue"
+    return Text(text=validity_value, style=color)
+
+
+def create_validation_results_table(
+    invalids: List[TraceTuple], update_tuples: List[UpdateTuple]
+) -> Table:
+    """
+    Create table for validation results.
+    """
+    new_validities = [
+        update_tuple.update_values[rules.ColumnNames.VALIDITY]
+        for update_tuple in update_tuples
+    ]
+    old_validities = [invalid.validity for invalid in invalids]
+    validity_changes = [
+        Text.assemble(
+            enrich_color_validity_value(old), " -> ", enrich_color_validity_value(new)
+        )
+        for old, new in zip(old_validities, new_validities)
+    ]
+
+    table = create_initial_validation_table(
+        invalids=invalids, validity_changes=validity_changes
+    )
+    return table
