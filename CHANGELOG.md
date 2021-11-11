@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (2021-11-10)
+## v0.0.4 (2021-11-11)
 
 #### New Features
 
@@ -15,7 +15,7 @@
 -   (cli): report validation targets with table
 
 Full set of changes:
-[`v0.0.3...c07eeeb`](https://github.com/nialov/tracerepo/compare/v0.0.3...c07eeeb)
+[`v0.0.3...v0.0.4`](https://github.com/nialov/tracerepo/compare/v0.0.3...v0.0.4)
 
 ## v0.0.3 (2021-09-20)
 
