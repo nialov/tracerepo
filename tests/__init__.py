@@ -1,6 +1,7 @@
 """
 Parameters for tests.
 """
+import re
 from functools import lru_cache
 from pathlib import Path
 from traceback import print_tb
@@ -319,7 +320,9 @@ def name_regex(geom_type: Optional[rules.ColumnNames]):
     """
     Compile regex strat.
     """
-    return from_regex(rules.filename_regex(geom_type=geom_type), fullmatch=True)
+    return from_regex(
+        re.compile(rules.filename_regex(geom_type=geom_type)), fullmatch=True
+    )
 
 
 def click_error_print(result: Result):
@@ -400,6 +403,7 @@ def test_convert_trace_tuples_params():
                         f"{rules.PathNames.DATA.value}"
                         "/loviisa/area/20m/hello_area.geojson"
                     ),
+                    validity=rules.ValidationResults.VALID.value,
                 )
             ],
             "newdata",
@@ -434,6 +438,7 @@ def test_validate_invalids_params():
                         "tests/sample_data/critical_validation/"
                         "getaberget_20m_6_1_area.geojson"
                     ),
+                    validity=rules.ValidationResults.CRITICAL.value,
                 )
             ],
             False,
@@ -449,6 +454,7 @@ def test_validate_invalids_params():
                         "tests/sample_data/critical_validation/"
                         "getaberget_20m_6_1_area.geojson"
                     ),
+                    validity=rules.ValidationResults.CRITICAL.value,
                 )
             ],
             True,
@@ -684,9 +690,21 @@ def test_sort_update_tuples_to_match_invalids_params():
                 ),
             ],
             [
-                utils.TraceTuple(traces_path=Path(), area_path=Path("name_1.file")),
-                utils.TraceTuple(traces_path=Path(), area_path=Path("name_2.file")),
-                utils.TraceTuple(traces_path=Path(), area_path=Path("name_3.file")),
+                utils.TraceTuple(
+                    traces_path=Path(),
+                    area_path=Path("name_1.file"),
+                    validity=rules.ValidationResults.INVALID.value,
+                ),
+                utils.TraceTuple(
+                    traces_path=Path(),
+                    area_path=Path("name_2.file"),
+                    validity=rules.ValidationResults.INVALID.value,
+                ),
+                utils.TraceTuple(
+                    traces_path=Path(),
+                    area_path=Path("name_3.file"),
+                    validity=rules.ValidationResults.INVALID.value,
+                ),
             ],
         ),
     ]
@@ -779,7 +797,7 @@ def metadata_loaded() -> rules.Metadata:
 
 
 @lru_cache(maxsize=None)
-def test_report_validation_table_params():
+def test_create_initial_validation_table_params():
     """
     Params for test_report_validation_table.
     """
@@ -789,6 +807,7 @@ def test_report_validation_table_params():
                 traces_path=Path("traces.gpkg"),
                 area_path=Path("area.gpkg"),
                 snap_threshold=0.001,
+                validity=rules.ValidationResults.VALID.value,
             )
         ],
     ]
