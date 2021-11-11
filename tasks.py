@@ -182,7 +182,7 @@ def pre_commit(c, only_run=False, only_install=False):
 @task(pre=[prepush], post=[pre_commit])
 def tag(c, tag="", annotation=""):
     """
-    Make new tag and update version strings accordingly
+    Make new tag and update version strings accordingly.
     """
     if len(tag) == 0:
         raise ValueError("Tag string must be specified with '--tag=*'.")
