@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.4.post11.dev0+286eaa7"
+version = "0.0.4.post12.dev0+41fb93b"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
@@ -36,7 +36,7 @@ pandas = "*"
 pandera = "*"
 typer = "^0.3.2"
 rich = "^10.7.0"
-fractopo = "~0.1.0"
+fractopo = "^0.2.0"
 pyproj = "~3.1"
 
 # Extras

@@ -447,7 +447,7 @@ test = ["pytest (>=3)", "pytest-cov", "boto3 (>=1.2.4)", "mock"]
 
 [[package]]
 name = "fractopo"
-version = "0.1.4"
+version = "0.2.1"
 description = "Fracture Network Analysis"
 category = "main"
 optional = false
@@ -463,10 +463,12 @@ pandas = ">=1.3,<1.4"
 powerlaw = "*"
 pygeos = "0.10.1"
 python-ternary = "*"
+rich = ">=10.7.0,<11.0.0"
 scikit-learn = "*"
 scipy = "*"
 seaborn = "*"
 shapely = ">=1.7,<1.8"
+typer = ">=0.3.2,<0.4.0"
 
 [package.extras]
 format-lint = ["black-nb", "black", "blackdoc", "blacken-docs", "isort", "pylint", "rstcheck", "sphinx"]
@@ -2080,7 +2082,7 @@ typecheck = ["mypy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.1"
-content-hash = "eab5d39b8df7a13a513c2657416ce55c93505d175e587176359342c8c45b6292"
+content-hash = "4fa5eea131a3308ed770539a411920b42d0da2f04bca61ff786464757c6f927b"
 
 [metadata.files]
 alabaster = [
@@ -2369,8 +2371,8 @@ fiona = [
     {file = "Fiona-1.8.20.tar.gz", hash = "sha256:a70502d2857b82f749c09cb0dea3726787747933a2a1599b5ab787d74e3c143b"},
 ]
 fractopo = [
-    {file = "fractopo-0.1.4-py3-none-any.whl", hash = "sha256:4706b2df8d098deea5f49b148c09e487477f9083a178489430291960947a73fd"},
-    {file = "fractopo-0.1.4.tar.gz", hash = "sha256:e6be789cd26df5f916b7ebffe305885b51a9434d55976cc23020f448cc2b305b"},
+    {file = "fractopo-0.2.1-py3-none-any.whl", hash = "sha256:d45b0b4ff4129e2b2cd5a16a7d3431ecefdf3d422f47a01dbe4cd93e7eebb41c"},
+    {file = "fractopo-0.2.1.tar.gz", hash = "sha256:ac877269a83fc93ad0159174c32c957078a0a416494ffbb779745d3ecbb431a0"},
 ]
 geopandas = [
     {file = "geopandas-0.9.0-py2.py3-none-any.whl", hash = "sha256:79f6e557ba0dba76eec44f8351b1c6b42a17c38f5f08fef347e98fe4dae563c7"},
