@@ -34,7 +34,7 @@ def test_cli_app_help(subcommand: str):
     tests.click_error_print(result=result)
 
 
-@settings(max_examples=2, deadline=10000)
+@settings(max_examples=2, deadline=None)
 @given(
     database=tests.database_schema_strategy(),
 )
