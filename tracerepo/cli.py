@@ -146,7 +146,7 @@ def validate(
 
     # Report which data are validated
     if report:
-        console.print(utils.create_initial_validation_table(unique_invalids_only))
+        console.print(utils.create_validation_table(unique_invalids_only))
 
     # Validate the invalids
     update_tuples = spatial.validate_invalids(invalids=unique_invalids_only)
@@ -156,13 +156,6 @@ def validate(
 
     assert len(update_tuples) == len(unique_invalids_only)
     # Iterate over results
-
-    if report:
-        console.print(
-            utils.create_validation_results_table(
-                invalids=invalids, update_tuples=update_tuples
-            )
-        )
 
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
 
@@ -211,6 +204,14 @@ def validate(
                 area_name=update_tuple.area_name,
             )
             console.print(str_report)
+
+    # Report validation results with a rich.table.Table
+    if report:
+        console.print(
+            utils.create_validation_results_table(
+                invalids=unique_invalids_only, update_tuples=update_tuples
+            )
+        )
 
     if database_error or write_error:
 

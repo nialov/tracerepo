@@ -418,7 +418,7 @@ def pandera_reporting(
     return dict(), pandera_report
 
 
-def create_initial_validation_table(
+def create_validation_table(
     invalids: List[TraceTuple], validity_changes: Optional[List[Text]] = None
 ) -> Table:
     """
@@ -473,11 +473,13 @@ def create_validation_results_table(
     """
     Create table for validation results.
     """
+    assert len(invalids) == len(update_tuples)
     new_validities = [
         update_tuple.update_values[rules.ColumnNames.VALIDITY]
         for update_tuple in update_tuples
     ]
     old_validities = [invalid.validity for invalid in invalids]
+
     validity_changes = [
         Text.assemble(
             enrich_color_validity_value(old), " -> ", enrich_color_validity_value(new)
@@ -485,7 +487,7 @@ def create_validation_results_table(
         for old, new in zip(old_validities, new_validities)
     ]
 
-    table = create_initial_validation_table(
+    table = create_validation_table(
         invalids=invalids, validity_changes=validity_changes
     )
     return table
