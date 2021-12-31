@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (2021-12-31)
+## v0.0.5 (2021-12-31)
 
 #### Fixes
 
@@ -9,7 +9,7 @@
 -   (cli): fix validation result reporting
 
 Full set of changes:
-[`v0.0.4...d5a4957`](https://github.com/nialov/tracerepo/compare/v0.0.4...d5a4957)
+[`v0.0.4...v0.0.5`](https://github.com/nialov/tracerepo/compare/v0.0.4...v0.0.5)
 
 ## v0.0.4 (2021-11-11)
 
