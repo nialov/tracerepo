@@ -17,6 +17,7 @@ def write_database_csv(path: Path, database: pd.DataFrame):
         path_or_buf=path,
         sep=rules.DATABASE_CSV_SEP,
         index=True,
+        index_label=rules.ColumnNames.AREA.value,
     )
 
 
