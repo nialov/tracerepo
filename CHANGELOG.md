@@ -1,9 +1,15 @@
 # Changelog
 
-## Unreleased (2021-12-03)
+## Unreleased (2021-12-31)
+
+#### Fixes
+
+-   (repo): fix csv writing
+
+-   (cli): fix validation result reporting
 
 Full set of changes:
-[`v0.0.4...41fb93b`](https://github.com/nialov/tracerepo/compare/v0.0.4...41fb93b)
+[`v0.0.4...d5a4957`](https://github.com/nialov/tracerepo/compare/v0.0.4...d5a4957)
 
 ## v0.0.4 (2021-11-11)
 
