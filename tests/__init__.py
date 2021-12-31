@@ -797,7 +797,7 @@ def metadata_loaded() -> rules.Metadata:
 
 
 @lru_cache(maxsize=None)
-def test_create_initial_validation_table_params():
+def test_create_validation_table_params():
     """
     Params for test_report_validation_table.
     """

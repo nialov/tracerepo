@@ -70,6 +70,7 @@ def test_cli_validate_exec(
     assert metadata_json.exists() and metadata_json.is_file()
     area_gdf: gpd.GeoDataFrame = tests.kb11_area
     tmp_path = tmp_path_factory.mktemp(basename="test_cli_validate_exec", numbered=True)
+    assert len(list(tmp_path.glob("*"))) == 0
 
     # Make default directories
     repo.scaffold(tmp_path)
@@ -84,6 +85,12 @@ def test_cli_validate_exec(
     if database_csv_path.exists():
         database_csv_path.unlink()
     repo.write_database_csv(path=database_csv_path, database=organizer.database)
+
+    # Test if all column headers are in csv
+    database_text = database_csv_path.read_text()
+    database_first_line = database_text.splitlines()[0]
+    for column_enum in rules.ColumnNames:
+        assert column_enum.value in database_first_line.split(",")
 
     result = runner.invoke(
         app=app,
@@ -100,6 +107,7 @@ def test_cli_validate_exec(
         assert reports_path.exists()
         assert reports_path.is_dir()
         assert len(list(reports_path.glob("*.html"))) > 0
+        # TODO: Inconsistent results here
         assert "html" in result.output
 
     tests.click_error_print(result)
@@ -336,7 +344,7 @@ def test_all_cli(ready_tracerepository: Path):
     assert reports_path.exists()
     assert len(list(reports_path.glob("*.html"))) > 0
 
-    # Test that there we no changes to database
+    # Test that there were no changes to database
     csv_text_after = database_csv_path.read_text()
     assert csv_text_after == csv_text_before
     assert rules.ValidationResults.VALID.value in csv_text_after
@@ -353,7 +361,7 @@ def test_all_cli(ready_tracerepository: Path):
         ],
     )
 
-    # Find export directory
+    # Find export directory and check contents
     found = []
     for directory in ready_tracerepository.glob(f"{utils.EXPORT_DIR_PREFIX}*"):
         found.append(directory)

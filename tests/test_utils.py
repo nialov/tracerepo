@@ -101,13 +101,11 @@ def test_pandera_reporting(update_tuple, empty_dict, empty_df, update_values):
     assert update_values == pandera_update_values
 
 
-@pytest.mark.parametrize(
-    "invalids", tests.test_create_initial_validation_table_params()
-)
-def test_create_initial_validation_table(invalids):
+@pytest.mark.parametrize("invalids", tests.test_create_validation_table_params())
+def test_create_validation_table(invalids):
     """
-    Test create_initial_validation_table.
+    Test create_validation_table.
     """
-    result = utils.create_initial_validation_table(invalids)
+    result = utils.create_validation_table(invalids)
     Console().print(result)
     assert isinstance(result, Table)
