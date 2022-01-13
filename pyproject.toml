@@ -36,7 +36,7 @@ pandas = "*"
 pandera = "*"
 typer = "^0.3.2"
 rich = "^10.7.0"
-fractopo = "^0.2.0"
+fractopo = "^0.2.4"
 pyproj = "~3.1"
 
 # Extras
