@@ -5,6 +5,7 @@ with pkgs;
 pkgs.mkShell rec {
   buildInputs = [
     poetry
+    python37
     python38
     python39
     pre-commit
@@ -21,12 +22,13 @@ pkgs.mkShell rec {
   SSL_CERT_FILE = "${cacert}/etc/ssl/certs/ca-bundle.crt";
   CURL_CA_BUNDLE= "${cacert}/etc/ssl/certs/ca-bundle.crt";
   # Required to fully use the python environments
+  PYTHON37PATH = "${python37}/lib/python3.7/site-packages";
   PYTHON38PATH = "${python38}/lib/python3.8/site-packages";
   # PYTHONPATH is overridden with contents from e.g. poetry */site-package.
   # We do not want them to be in PYTHONPATH.
   # Therefore, in ./.envrc PYTHONPATH is set to the _PYTHONPATH defined below
   # and also in shellHooks (direnv does not load shellHook exports, always).
-  _PYTHONPATH = "${PYTHON38PATH}:${python39}/lib/python3.9/site-packages";
+  _PYTHONPATH = "${PYTHON37PATH}:${PYTHON38PATH}:${python39}/lib/python3.9/site-packages";
 
   shellHook = ''
     [[ -a .pre-commit-config.yaml ]] && \
