@@ -81,7 +81,7 @@ def dataframe_column_to_python(
     ]
     if len(python_list) != len(python_list_checked):
         raise TypeError(
-            f"Expected database to contain types convertable to Python {python_type}."
+            f"Expected database to contain types convertible to Python {python_type}."
         )
 
     return python_list_checked
@@ -253,7 +253,7 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def write_geojson(gdf: gpd.GeoDataFrame, path: Path):
     """
-    Write geodata as GeoJSON with 1 space delimition.
+    Write geodata as GeoJSON with 1 space delimitation.
     """
     as_json = gdf.to_json(indent=1)
     path.write_text(as_json)

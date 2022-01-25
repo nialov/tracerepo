@@ -1,13 +1,13 @@
 # Changelog
 
-## Unreleased (2022-01-13)
+## Unreleased (2022-01-25)
 
 Full set of changes:
-[`v0.0.5...be70112`](https://github.com/nialov/tracerepo/compare/v0.0.5...be70112)
+[`v0.0.5...fb2d130`](https://github.com/nialov/tracerepo/compare/v0.0.5...fb2d130)
 
 ## v0.0.5 (2021-12-31)
 
-#### Fixes
+### Fixes
 
 -   (repo): fix csv writing
 
@@ -18,13 +18,13 @@ Full set of changes:
 
 ## v0.0.4 (2021-11-11)
 
-#### New Features
+### New Features
 
 -   (cli): add validity reporting in initial table
 
 -   (cli): add nialog logging
 
-#### Fixes
+### Fixes
 
 -   implement support for py 3.7
 
@@ -35,7 +35,7 @@ Full set of changes:
 
 ## v0.0.3 (2021-09-20)
 
-#### Fixes
+### Fixes
 
 -   typecheck fixes
 
@@ -49,7 +49,7 @@ Full set of changes:
 
 ## v0.0.1 (2021-09-18)
 
-#### New Features
+### New Features
 
 -   (cli): do not require command execution in cwd
 
@@ -73,7 +73,7 @@ Full set of changes:
 
 -   print export folder
 
-#### Fixes
+### Fixes
 
 -   (cli): continue flexible cmd execution folder
 

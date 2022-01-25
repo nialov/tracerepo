@@ -24,7 +24,7 @@ def default_non_required_kwargs(
     required: bool = False, coerce: bool = True, nullable: bool = True
 ) -> Dict[str, bool]:
     """
-    Get default non required, coercable and nullable column kwargs.
+    Get default non required, coercible and nullable column kwargs.
     """
     return dict(required=required, coerce=coerce, nullable=nullable)
 

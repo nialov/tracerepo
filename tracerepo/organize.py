@@ -76,7 +76,7 @@ class Organizer:
         """
         Get database columns and index as Python typed values.
 
-        Accesible as a dict with column names as keys. Includes the area name
+        Accessible as a dict with column names as keys. Includes the area name
         values that were originally the dataframe index.
         """
         if self._columns is None:
