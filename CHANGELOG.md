@@ -3,7 +3,7 @@
 ## Unreleased (2022-01-25)
 
 Full set of changes:
-[`v0.0.5...fb2d130`](https://github.com/nialov/tracerepo/compare/v0.0.5...fb2d130)
+[`v0.0.5...3e07c15`](https://github.com/nialov/tracerepo/compare/v0.0.5...3e07c15)
 
 ## v0.0.5 (2021-12-31)
 
