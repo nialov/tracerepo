@@ -1,9 +1,11 @@
 # Changelog
 
-## Unreleased (2022-01-31)
+## v0.0.6 (2022-01-31)
+
+Update dependency requirements.
 
 Full set of changes:
-[`v0.0.5...ab16a02`](https://github.com/nialov/tracerepo/compare/v0.0.5...ab16a02)
+[`v0.0.5...v0.0.6`](https://github.com/nialov/tracerepo/compare/v0.0.5...v0.0.6)
 
 ## v0.0.5 (2021-12-31)
 
