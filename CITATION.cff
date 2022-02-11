@@ -5,8 +5,8 @@ authors:
 - family-names: Ovaskainen
   given-names: Nikolas
 title: tracerepo
-version: "0.0.6"
-date-released: "2022-01-31"
+version: "0.0.6.post6.dev0+3decb21"
+date-released: "2022-02-11"
 keywords:
   - python
   - data
@@ -14,6 +14,8 @@ contact:
   - email: "nikolasovaskainen@gmail.com"
 url: "https://github.com/nialov/tracerepo"
 repository-code: "https://github.com/nialov/tracerepo"
+
+
 
 
 

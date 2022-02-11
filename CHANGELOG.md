@@ -1,8 +1,15 @@
 # Changelog
 
-## v0.0.6 (2022-01-31)
+## Unreleased (2022-02-11)
 
-Update dependency requirements.
+### Fixes
+
+-   (tracerepo): fix column type issue
+
+Full set of changes:
+[`v0.0.6...3decb21`](https://github.com/nialov/tracerepo/compare/v0.0.6...3decb21)
+
+## v0.0.6 (2022-01-31)
 
 Full set of changes:
 [`v0.0.5...v0.0.6`](https://github.com/nialov/tracerepo/compare/v0.0.5...v0.0.6)
