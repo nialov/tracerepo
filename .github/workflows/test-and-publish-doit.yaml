@@ -69,14 +69,13 @@ jobs:
           pip install nox doit toml pre-commit
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Cache .nox and .doit.db
+      - name: Cache .nox
         uses: actions/cache@v2
         with:
           # We can cache .doit.db and it will be significant as
           # most doit util tasks are run here in the same github actions job
           path: |
             .nox
-            .doit.db
           key: "\
             ${{ runner.os }}-\
             ${{ env.pythonLocation }}-\
@@ -86,7 +85,7 @@ jobs:
             "
       - name: Run commands
         # These could be better parallelized with a matrix
-        # but as some tasks are dependant on others it is
+        # but as some tasks are dependent on others it is
         # (probably) more efficient to run all here
         # (move efficient for github.com at least)
         run: |
