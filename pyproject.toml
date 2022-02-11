@@ -34,9 +34,10 @@ tracerepo = "tracerepo.cli:app"
 python = "^3.7.1"
 pandas = "*"
 pandera = "*"
-typer = "^0.4.0"
-rich = "^11.0.0"
-fractopo = "^0.2.5"
+# fractopo already locks dependencies of typer and rich
+typer = "*"
+rich = "*"
+fractopo = "^0.3.0"
 pyproj = "~3.1"
 
 # Extras
