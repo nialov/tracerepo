@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.6.post6.dev0+3decb21"
+version = "0.0.7"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
@@ -171,4 +171,5 @@ ignore_missing_imports = true
 [tool.pyright]
 
 reportPrivateImportUsage = false
+
 

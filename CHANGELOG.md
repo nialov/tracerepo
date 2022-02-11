@@ -1,13 +1,16 @@
 # Changelog
 
-## Unreleased (2022-02-11)
+## v0.0.7 (2022-02-11)
+
+Updated `fractopo` to `v.0.3.0` for `tracerepo`.
 
 ### Fixes
 
--   (tracerepo): fix column type issue
+-   (tracerepo): Refactored column code to handle `tuples` which
+    `fractopo` now uses for validated trace data.
 
 Full set of changes:
-[`v0.0.6...3decb21`](https://github.com/nialov/tracerepo/compare/v0.0.6...3decb21)
+[`v0.0.6...v0.0.7`](https://github.com/nialov/tracerepo/compare/v0.0.6...v0.0.7)
 
 ## v0.0.6 (2022-01-31)
 
