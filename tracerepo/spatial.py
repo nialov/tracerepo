@@ -28,7 +28,7 @@ DRIVER_EXTENSIONS = {"ESRI Shapefile": ".shp", "GPKG": ".gpkg"}
 
 
 def check_for_validator_error(
-    errors: List[str], validators: Tuple[ANY_VALIDATOR, ...] = ALL_VALIDATORS
+    errors: Tuple[str, ...], validators: Tuple[ANY_VALIDATOR, ...] = ALL_VALIDATORS
 ) -> bool:
     """
     Check if validator errors are in list of validation errors.
@@ -69,12 +69,12 @@ def validate(
     # Get the error column values
     validated_error_column_values = validated[validation.ERROR_COLUMN].values
 
-    # Convert to list and make sure the error values are lists themselves
-    validated_error_lists: List[List[str]] = [
-        errors for errors in validated_error_column_values if isinstance(errors, list)
+    # Convert to list and make sure the error values are tuples (as of fractopo v0.3.0)
+    validated_error_lists: List[Tuple[str, ...]] = [
+        errors for errors in validated_error_column_values if isinstance(errors, tuple)
     ]
 
-    # Make sure all were lists
+    # Make sure all were tuples
     assert len(validated_error_column_values) == len(validated_error_lists)
 
     # Check for major errors that require user fix

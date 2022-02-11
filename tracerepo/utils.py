@@ -232,9 +232,9 @@ def query_result_tuple(
     )
 
 
-def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def convert_sequence_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Convert list type columns to string.
+    Convert sequence (list/tuple) type columns to string.
     """
     gdf = gdf.copy()
     if gdf.empty:
@@ -242,12 +242,10 @@ def convert_list_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     for column in gdf.columns.values:
         column_data = gdf[column]
         assert isinstance(column_data, pd.Series)
-        if isinstance(column_data.values[0], list):
-            logging.info(f"Converting {column} from list to str.")
+        first_val = column_data.values[0]
+        if isinstance(first_val, (list, tuple)):
+            logging.info(f"Converting {column} from {type(first_val)} to str.")
             gdf[column] = [str(tuple(item)) for item in column_data.values]
-            # column_data = gdf[column]
-            # assert isinstance(column_data, pd.Series)
-            # gdf[column] = column_data.astype(str)
     return gdf
 
 
@@ -269,7 +267,7 @@ def write_geodata(gdf: gpd.GeoDataFrame, path: Path, driver: str = GEOJSON_DRIVE
         # Handle empty GeoDataFrames
         path.write_text(gdf.to_json())
     else:
-        gdf = convert_list_columns(gdf)
+        gdf = convert_sequence_columns(gdf)
 
         gdf.to_file(path, driver=driver)
 
