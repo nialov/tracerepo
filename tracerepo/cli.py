@@ -142,6 +142,8 @@ def validate(
     # Only validate a single trace dataset once
     # Means you might have to validate for each area dataset
     # that uses the traces.
+    # However only the area boundary validation is required for
+    # the rest of the areas.
     unique_invalids_only = spatial.unique_invalids(invalids=invalids)
 
     # Report which data are validated
