@@ -33,7 +33,15 @@ DOCS_REQUIREMENTS_PATH = Path("docs_src/requirements.txt")
 NOTEBOOKS_PATH = DOCS_SRC_PATH / "notebooks"
 COVERAGE_SVG_PATH = DOCS_SRC_PATH / Path("imgs/coverage.svg")
 README_PATH = Path("README.rst")
-DOCS_FILES = [*list(DOCS_SRC_PATH.rglob("*.rst")), README_PATH]
+DOCS_FILES = [
+    *[
+        path
+        for path in DOCS_SRC_PATH.rglob("*.rst")
+        # Filter out sphinx-gallery files
+        if "auto_examples" not in str(path)
+    ],
+    README_PATH,
+]
 
 ## Build
 DEV_REQUIREMENTS_PATH = Path("requirements.txt")
@@ -94,6 +102,8 @@ def task_requirements():
 def task_pre_commit():
     """
     Verify that pre-commit is installed, install its hooks and run them.
+
+    pre-commit is the main method for formatting documentation and code.
     """
     return {
         ACTIONS: [
@@ -108,25 +118,6 @@ def task_pre_commit():
             PRE_COMMIT_CONFIG_PATH,
             DODO_PATH,
         ],
-    }
-
-
-def task_format():
-    """
-    Format everything.
-    """
-    command = "nox --session format"
-    return {
-        FILE_DEP: [
-            *PYTHON_ALL_FILES,
-            *NOTEBOOKS,
-            *DOCS_FILES,
-            DEV_REQUIREMENTS_PATH,
-            NOXFILE_PATH,
-            DODO_PATH,
-        ],
-        ACTIONS: [command],
-        TASK_DEP: [resolve_task_name(task_pre_commit)],
     }
 
 
@@ -145,7 +136,7 @@ def task_lint():
             DODO_PATH,
         ],
         ACTIONS: [command],
-        TASK_DEP: [resolve_task_name(task_pre_commit), resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit)],
     }
 
 
@@ -157,19 +148,18 @@ def task_update_version():
     return {
         FILE_DEP: [
             *PYTHON_SRC_FILES,
-            PYPROJECT_PATH,
             POETRY_LOCK_PATH,
             NOXFILE_PATH,
             DODO_PATH,
         ],
-        TASK_DEP: [resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit)],
         ACTIONS: [command],
     }
 
 
 def task_ci_test():
     """
-    Test suite for continous integration testing.
+    Test suite for continuous integration testing.
 
     Installs with pip, tests with pytest and checks coverage with coverage.
     """
@@ -184,7 +174,7 @@ def task_ci_test():
                 DEV_REQUIREMENTS_PATH,
                 DODO_PATH,
             ],
-            TASK_DEP: [resolve_task_name(task_format)],
+            TASK_DEP: [resolve_task_name(task_pre_commit)],
             ACTIONS: [command],
             **(
                 {TARGETS: [COVERAGE_SVG_PATH]}
@@ -209,7 +199,7 @@ def task_docs():
             DODO_PATH,
         ],
         TASK_DEP: [
-            resolve_task_name(task_format),
+            resolve_task_name(task_pre_commit),
             resolve_task_name(task_lint),
             resolve_task_name(task_update_version),
         ],
@@ -230,7 +220,7 @@ def task_notebooks():
             NOXFILE_PATH,
             DODO_PATH,
         ],
-        TASK_DEP: [resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit)],
         ACTIONS: [command],
     }
 
@@ -238,18 +228,13 @@ def task_notebooks():
 def task_build():
     """
     Build package with poetry.
+
+    Runs always without dependencies or targets.
     """
     command = "nox --session build"
     return {
         ACTIONS: [command],
-        FILE_DEP: [
-            *PYTHON_SRC_FILES,
-            PYPROJECT_PATH,
-            POETRY_LOCK_PATH,
-            NOXFILE_PATH,
-            DODO_PATH,
-        ],
-        TASK_DEP: [resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit), resolve_task_name(task_ci_test)],
     }
 
 
@@ -267,7 +252,7 @@ def task_typecheck():
             NOXFILE_PATH,
             DODO_PATH,
         ],
-        TASK_DEP: [resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit)],
     }
 
 
@@ -289,9 +274,9 @@ def task_performance_profile():
     }
 
 
-def task_citation():
+def update_citation():
     """
-    Sync and validate CITATION.cff.
+    Sync CITATION.cff.
     """
     citation_text = CITATION_CFF_PATH.read_text(UTF8)
     citation_lines = citation_text.splitlines()
@@ -308,9 +293,15 @@ def task_citation():
     new_lines.append("\n")
     CITATION_CFF_PATH.write_text("\n".join(new_lines), encoding=UTF8)
 
+
+def task_citation():
+    """
+    Sync and validate CITATION.cff.
+    """
+    # Command used to validate CITATION.cff
     command = "nox --session validate_citation_cff"
     return {
-        ACTIONS: [command],
+        ACTIONS: [update_citation, command],
         FILE_DEP: [
             *PYTHON_SRC_FILES,
             POETRY_LOCK_PATH,
@@ -324,6 +315,8 @@ def task_citation():
 def task_changelog():
     """
     Generate changelog.
+
+    Currently only ran when task_tag is called.
     """
     command = "nox --session changelog"
     return {
@@ -351,7 +344,7 @@ def task_codespell():
             NOXFILE_PATH,
             DODO_PATH,
         ],
-        TASK_DEP: [resolve_task_name(task_format)],
+        TASK_DEP: [resolve_task_name(task_pre_commit)],
     }
 
 
@@ -381,8 +374,8 @@ def use_tag(tag: str):
             # Report to user
             if line != substituted:
                 print(
-                    f"Replacing version string:\n{line}\nin"
-                    f" {path} with:\n{substituted}\n"
+                    f"Replacing version string:\n{line}\n"
+                    f"in {path} with:\n{substituted}\n"
                 )
                 new_lines.append(substituted)
             else:
@@ -421,7 +414,6 @@ def task_tag(tag: str):
     # Create changelog with 'tag' as latest version
     create_changelog = "nox --session changelog -- %(tag)s"
     return {
-        # NAME: "create changelog for tag and update version strings",
         ACTIONS: [create_changelog, use_tag],
     }
 
@@ -430,7 +422,7 @@ def task_tag(tag: str):
 DOIT_CONFIG = {
     "default_tasks": [
         resolve_task_name(task_requirements),
-        resolve_task_name(task_format),
+        resolve_task_name(task_pre_commit),
         resolve_task_name(task_lint),
         resolve_task_name(task_update_version),
         resolve_task_name(task_ci_test),
@@ -438,7 +430,6 @@ DOIT_CONFIG = {
         resolve_task_name(task_notebooks),
         resolve_task_name(task_build),
         resolve_task_name(task_citation),
-        resolve_task_name(task_changelog),
         resolve_task_name(task_codespell),
     ]
 }
