@@ -3,7 +3,7 @@ repos:
   # Check commit messages on commit
   - repo: https://github.com/commitizen-tools/commitizen
     # Specify tag
-    rev: v2.21.0
+    rev: v2.21.2
     hooks:
       - id: commitizen
         stages: [commit-msg]
