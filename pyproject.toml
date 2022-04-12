@@ -56,6 +56,7 @@ sphinx-autobuild = {version = "*", optional = true}
 # Linting
 pylint = {version = "*", optional = true}
 rstcheck = {version = "*", optional = true}
+markupsafe = {version = "2.0.1", optional = true}
 
 # Typecheck
 mypy = {version = "*", optional = true}
@@ -64,6 +65,8 @@ json5 = "^0.9.6"
 nialog = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
+# TODO: copier could be installed outside the poetry environment
+copier = "*"
 doit = "*"
 ipython = "^7.0"
 jupyterlab = "*"
@@ -87,6 +90,7 @@ lint = [
     "pylint",
     "rstcheck",
     "sphinx",
+    "markupsafe",
 ]
 typecheck = ["mypy"]
 
@@ -116,7 +120,7 @@ testpaths =[
     "tests",
     "tracerepo",
     ]
-addopts = "--doctest-modules --pdbcls=IPython.terminal.debugger:Pdb"
+addopts = "--doctest-modules"
 doctest_optionflags =[
     "NUMBER",
     "NORMALIZE_WHITESPACE",
