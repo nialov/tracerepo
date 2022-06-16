@@ -117,17 +117,17 @@ class ValidationResults(Enum):
 
 def name_column_kwargs(
     geom_type: Optional[ColumnNames],
-    allow_duplicates=True,
+    unique=False,
 ) -> Dict[str, Any]:
     """
     Get kwargs for a string/name column.
     """
     return dict(
-        pandas_dtype=pa.String,
+        dtype=pa.String,
         checks=[
             pa.Check.str_matches(filename_regex(geom_type=geom_type)),
         ],
-        allow_duplicates=allow_duplicates,
+        unique=unique,
     )
 
 
@@ -136,7 +136,7 @@ def enum_column_kwargs(enum_class: Type[Enum]) -> Dict[str, Any]:
     Get kwargs for an enum column.
     """
     return dict(
-        pandas_dtype=pa.String,
+        dtype=pa.String,
         checks=pa.Check.isin([member.value for member in enum_class]),
     )
 
@@ -176,23 +176,19 @@ def database_schema() -> pa.DataFrameSchema:
     """
     schema = pa.DataFrameSchema(
         # Index is the area name
-        index=pa.Index(
-            **name_column_kwargs(allow_duplicates=False, geom_type=ColumnNames.AREA)
-        ),
+        index=pa.Index(**name_column_kwargs(unique=True, geom_type=ColumnNames.AREA)),
         coerce=True,
         # Columns
         columns={
             # traces, thematic and scale columns are strings
             ColumnNames.TRACES.value: pa.Column(
-                **name_column_kwargs(
-                    allow_duplicates=True, geom_type=ColumnNames.TRACES
-                )
+                **name_column_kwargs(unique=False, geom_type=ColumnNames.TRACES)
             ),
             ColumnNames.THEMATIC.value: pa.Column(
-                **name_column_kwargs(allow_duplicates=True, geom_type=None)
+                **name_column_kwargs(unique=False, geom_type=None)
             ),
             ColumnNames.SCALE.value: pa.Column(
-                **name_column_kwargs(allow_duplicates=True, geom_type=None)
+                **name_column_kwargs(unique=False, geom_type=None)
             ),
             # area-shape must be one of the enum values
             ColumnNames.AREA_SHAPE.value: pa.Column(

@@ -115,7 +115,7 @@ def traces_schema(metadata: rules.Metadata):
                     name=f"{LINEAMENT_ID_COLUMN} check.",
                 )
             ],
-            allow_duplicates=False,
+            unique=True,
         ),
     }
     return pa.DataFrameSchema(
