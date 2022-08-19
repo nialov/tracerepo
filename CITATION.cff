@@ -5,7 +5,7 @@ authors:
 - family-names: Ovaskainen
   given-names: Nikolas
 title: tracerepo
-version: "0.0.7"
+version: "0.0.7.post29.dev0+cb19785"
 date-released: "2022-08-19"
 keywords:
   - python
