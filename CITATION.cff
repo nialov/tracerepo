@@ -6,7 +6,7 @@ authors:
   given-names: Nikolas
 title: tracerepo
 version: "0.0.7"
-date-released: "2022-02-11"
+date-released: "2022-08-19"
 keywords:
   - python
   - data
@@ -14,4 +14,3 @@ contact:
   - email: "nikolasovaskainen@gmail.com"
 url: "https://github.com/nialov/tracerepo"
 repository-code: "https://github.com/nialov/tracerepo"
-

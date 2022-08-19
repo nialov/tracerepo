@@ -5,7 +5,7 @@
             "Mag":2,
             "LiDAR":1
     },
-        "separator":"+" 
+        "separator":"+"
     },
     "operators": [
         "Markovaara-Koivisto M.",
@@ -25,7 +25,7 @@
             "1:200 000": 2,
             "Infinity": 3
     },
-        "separator":"/" 
+        "separator":"/"
     },
     "certainty": [
         "1_Geoph_OR_LiDAR",
