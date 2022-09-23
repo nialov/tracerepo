@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tracerepo"
-version = "0.0.7.post29.dev0+cb19785"
+version = "0.0.7.post31.dev0+508c351"
 description = "Fracture & lineament data management."
 authors = ["nialov <nikolasovaskainen@gmail.com>"]
 readme = "README.rst"
@@ -30,7 +30,7 @@ pandera = "*"
 # fractopo already locks dependencies of typer and rich
 typer = "*"
 rich = "*"
-fractopo = "^0.3.0"
+fractopo = "^0.4.0"
 pyproj = "~3.1"
 
 # Extras
