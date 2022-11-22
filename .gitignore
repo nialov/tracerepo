@@ -167,3 +167,4 @@ tests/sample_data/tracerepository/data-exported-ESRI-Shapefile
 # direnv rc. it is created by nix develop
 .envrc
 .envrc
+.fractopo_cache
