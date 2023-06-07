@@ -66,9 +66,13 @@
           # how to install python dependencies with poetry. Lastly, it
           # generates an '.envrc' file for use with 'direnv' which I recommend
           # using for easy usage of the development shell
-          shellHook = ''
-            [[ -a .pre-commit-config.yaml ]] && \
-              echo "Installing pre-commit hooks"; pre-commit install
+          shellHook = let
+            installPrecommit = ''
+              export PRE_COMMIT_HOME=$(pwd)/.pre-commit-cache
+              [[ -a .pre-commit-config.yaml ]] && \
+                echo "Installing pre-commit hooks"; pre-commit install '';
+          in ''
+            ${installPrecommit}
             ${pkgs.pastel}/bin/pastel paint -n green "
             Run poetry install to install environment from poetry.lock
             "
