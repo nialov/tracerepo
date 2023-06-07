@@ -168,3 +168,4 @@ tests/sample_data/tracerepository/data-exported-ESRI-Shapefile
 .envrc
 .envrc
 .fractopo_cache
+/.pre-commit-cache/
