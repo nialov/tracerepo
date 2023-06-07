@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Sequence, Tuple, Type, Union
 
 import geopandas as gpd
+import numpy as np
 from fractopo.general import is_empty_area, read_geofile
 from fractopo.tval.trace_validation import Validation
 from fractopo.tval.trace_validators import (
@@ -157,16 +158,13 @@ def validate_invalids(invalids: Sequence[utils.TraceTuple]) -> List[utils.Update
         # Collect all tasks as they complete
         # Will not be in same order submitted!?
         for future in as_completed(futures):
-
             # If validation critically fails for a dataset
             # we can still proceed with other validations
             try:
-
                 # Get result from Future
                 # This will throw an error (if it happened in process)
                 update_tuple = future.result()
             except Exception:
-
                 # Catch and log critical failures
                 logging.error(
                     f"Validation exception with {futures[future]}.",
@@ -335,7 +333,6 @@ def save_converted_paths(
     Save transformed geodata files to new paths.
     """
     for src_trace_tuple, dest_trace_tuple in zip(src_trace_tuples, dest_trace_tuples):
-
         for original_path, convert_path in zip(
             (src_trace_tuple.traces_path, src_trace_tuple.area_path),
             (dest_trace_tuple.traces_path, dest_trace_tuple.area_path),
@@ -368,6 +365,10 @@ def convert_filetype(original_path: Path, convert_path: Path, driver: str):
     # Save with new extension and type
     logging.info(f"Saving to {convert_path} with driver {driver}.")
     try:
+        if driver == "ESRI Shapefile":
+            # TODO: Shapefile does not support datetime64[ns]
+            for column in gdf.select_dtypes(np.datetime64):
+                gdf[column] = gdf[column].astype(str)
         gdf.to_file(convert_path, driver=driver)
     except Exception:
         logging.error(
