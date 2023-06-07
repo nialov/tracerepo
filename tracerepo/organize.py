@@ -110,7 +110,6 @@ class Organizer:
             self.columns[rules.ColumnNames.THEMATIC.value],
             self.columns[rules.ColumnNames.SCALE.value],
         ):
-
             for value in (thematic, scale):
                 all_dirs = utils.remove_from_dict_if_in(
                     key=value, dict_to_check=all_dirs
@@ -325,7 +324,6 @@ class Organizer:
 
         # Iterate over keys in update_values dict
         for key in update_values:
-
             # Get the current values
             column_values = self.columns[key.value]
 

@@ -160,7 +160,6 @@ def validate(
     # Iterate over results
 
     for update_tuple, invalid in zip(update_tuples, unique_invalids_only):
-
         # Validate and gather pandera reporting
         pandera_update_values, pandera_report = utils.pandera_reporting(
             update_tuple=update_tuple,
@@ -182,7 +181,6 @@ def validate(
             repo.write_database_csv(path=database, database=organizer.database)
 
         except Exception:
-
             # Error in updating or writing database.csv
             database_error = True
 
@@ -216,7 +214,6 @@ def validate(
         )
 
     if database_error or write_error:
-
         # Exit with error code 1 (not successful)
         raise typer.Exit(code=1)
 
@@ -252,7 +249,6 @@ def format_repo_geojson(tracerepository_path: Path, database: Path):
     # Iterate over all area trace tuples
 
     for trace_tuple in trace_tuples:
-
         for path in (trace_tuple.traces_path, trace_tuple.area_path):
             if path in formatted_paths:
                 continue
@@ -359,7 +355,6 @@ def export_data(
     destination_exists = export_destination_path.exists()
 
     if destination_exists and overwrite:
-
         logging.info(f"Removing directory ({export_destination_path}) recursively.")
         rmtree(export_destination_path)
 
