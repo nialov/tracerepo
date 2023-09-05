@@ -84,7 +84,7 @@
       # Use flake-utils to declare the development shell for each system nix
       # supports e.g. x86_64-linux and x86_64-darwin (but no guarantees are
       # given that it works except for x86_64-linux, which I use).
-    in flake-utils.lib.eachDefaultSystem (system:
+    in flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         # pkgs = nixpkgs.legacyPackages."${system}";
         pkgs = import nixpkgs {
@@ -98,7 +98,7 @@
         };
       in {
         devShells.default = mkshell pkgs;
-        checks = {
+        checks = pkgs.lib.recursiveUpdate {
           test-poetry-wrapped =
             let poetry-wrapped = poetry-wrapped-generate pkgs;
             in pkgs.runCommand "test-poetry-wrapped" { } ''
@@ -107,10 +107,12 @@
               ${poetry-wrapped}/bin/poetry check
               mkdir $out
             '';
-        };
+        } self.packages."${system}";
         packages = {
 
           inherit (pkgs.python3Packages) tracerepo;
+          inherit (pkgs)
+            poetry-with-c-tooling sync-git-tag-with-poetry poetry-run;
 
         };
       }) // {
