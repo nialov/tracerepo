@@ -89,11 +89,7 @@
         # pkgs = nixpkgs.legacyPackages."${system}";
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [
-            inputs.fractopo.overlays.default
-            self.overlays.default
-            inputs.nix-extra.overlays.default
-          ];
+          overlays = [ self.overlays.default ];
 
         };
       in {
@@ -117,14 +113,17 @@
         };
       }) // {
 
-        overlays.default = final: prev: {
-          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-            (python-final: _: {
-              "tracerepo" = python-final.callPackage ./default.nix { };
-            })
-          ];
-
-        };
+        overlays.default = inputs.nixpkgs.lib.composeManyExtensions [
+          inputs.fractopo.overlays.default
+          inputs.nix-extra.overlays.default
+          (final: prev: {
+            pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+              (python-final: _: {
+                "tracerepo" = python-final.callPackage ./default.nix { };
+              })
+            ];
+          })
+        ];
 
       };
 }
