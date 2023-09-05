@@ -1,7 +1,7 @@
-{ buildPythonPackage, lib, pytestCheckHook, pytest, matplotlib, fractopo
-, pytest-regressions, hypothesis, poetry-core, sphinxHook, pandoc
-, sphinx-autodoc-typehints, sphinx-rtd-theme, sphinx-gallery, nbsphinx, notebook
-, ipython, coverage, filter, pandera
+{ buildPythonPackage, lib, pytest, matplotlib, fractopo, pytest-regressions
+, hypothesis, poetry-core, sphinxHook, pandoc, sphinx-autodoc-typehints
+, sphinx-rtd-theme, sphinx-gallery, nbsphinx, notebook, ipython, coverage
+, filter, pandera, json5
 
 }:
 
@@ -49,7 +49,7 @@ buildPythonPackage {
   sphinxRoot = "docs_src";
   outputs = [ "out" "doc" ];
 
-  propagatedBuildInputs = [ fractopo pandera ];
+  propagatedBuildInputs = [ fractopo pandera json5 ];
 
   checkInputs = [ pytest pytest-regressions hypothesis coverage ];
 

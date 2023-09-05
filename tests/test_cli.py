@@ -15,7 +15,7 @@ from typer.testing import CliRunner
 
 import tests
 from tracerepo import repo, rules, spatial, utils
-from tracerepo.cli import app, export_data, format_repo_geojson
+from tracerepo.cli import app, export_data, format_repo_geojson, load_metadata_from_json
 
 runner = CliRunner()
 
@@ -370,3 +370,17 @@ def test_all_cli(ready_tracerepository: Path):
             # Verify contents
             assert len(list(directory.rglob("*.shp"))) > 0
     assert len(found) > 0
+
+
+@pytest.mark.parametrize(
+    "metadata_json_path",
+    [
+        tests.METADATA_JSON_PATH,
+    ],
+)
+def test_load_metadata_from_json(metadata_json_path: Path):
+    """
+    Test load_metadata_from_json.
+    """
+    result = load_metadata_from_json(metadata_json_path=metadata_json_path)
+    assert isinstance(result, rules.Metadata)
