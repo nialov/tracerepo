@@ -13,6 +13,7 @@ dev/
 tests/sample_data/tmp/
 *.pickle
 *.rej
+/result*
 
 
 # We do not want to include requirements.txt

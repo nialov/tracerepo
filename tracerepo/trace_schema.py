@@ -31,7 +31,7 @@ def default_non_required_kwargs(
 
 def prioritized_values_check(
     named_priorities: Dict[str, int], separator: str, name: str
-) -> pa.checks.Check:
+) -> pa.Check:
     """
     Construct check for e.g. data source and scale columns.
 
@@ -58,12 +58,12 @@ def traces_schema(metadata: rules.Metadata):
         DIP_COLUMN: pa.Column(
             pa.Float,
             **default_non_required_kwargs(),
-            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=90.0)],
+            checks=[pa.Check.in_range(min_value=0.0, max_value=90.0)],
         ),
         DIP_DIR_COLUMN: pa.Column(
             pa.Float,
             **default_non_required_kwargs(),
-            checks=[pa.checks.Check.in_range(min_value=0.0, max_value=360.0)],
+            checks=[pa.Check.in_range(min_value=0.0, max_value=360.0)],
         ),
         DATA_SOURCE_COLUMN: pa.Column(
             pa.String,

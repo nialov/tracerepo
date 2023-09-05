@@ -2,6 +2,7 @@
 Tests for traces_schema.py.
 """
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pandera as pa
 import pytest
@@ -21,7 +22,6 @@ def test_traces_schema(gdf: gpd.GeoDataFrame, will_fail: bool, geom_test: bool):
 
     if not geom_test:
         schema.remove_columns(["geometry"])
-
     try:
         validated = schema.validate(gdf)
     except Exception:

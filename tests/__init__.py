@@ -15,16 +15,11 @@ from click.testing import Result
 from fractopo.general import read_geofile
 from hypothesis.strategies import composite, from_regex, integers, lists, sampled_from
 from json5 import loads
-
-# Setup nialog logging
-from nialog.logger import setup_module_logging
 from shapely.geometry import LineString, MultiLineString, Point
 
 from tracerepo import rules, trace_schema, utils
 from tracerepo.organize import Organizer
 from tracerepo.utils import TraceTuple
-
-setup_module_logging()
 
 READY_TRACEREPOSITORY_PATH = Path("tests/sample_data/tracerepository/")
 METADATA_JSON_PATH = READY_TRACEREPOSITORY_PATH / rules.PathNames.METADATA.value
@@ -129,7 +124,7 @@ def df_with_row(
 
     srs = pd.Series(data=row.values(), index=row.keys(), name=area_name)
 
-    df = df.append(srs)
+    df = pd.concat([df, srs.to_frame().T])
 
     traces_path = (
         Path(rules.PathNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
@@ -587,7 +582,9 @@ data_source_gdf_bad_param = make_example_param(
     will_fail=True,
 )
 date_gdf_good_param = make_example_param(
-    column=trace_schema.DATE_COLUMN, values=date_good_examples, will_fail=False
+    column=trace_schema.DATE_COLUMN,
+    values=np.array(date_good_examples, dtype=np.datetime64),
+    will_fail=False,
 )
 date_gdf_bad_param = make_example_param(
     column=trace_schema.DATE_COLUMN, values=date_bad_examples, will_fail=True

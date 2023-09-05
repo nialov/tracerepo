@@ -9,7 +9,6 @@ from typing import List, Optional, Sequence
 
 import typer
 from json5 import loads
-from nialog.logger import setup_module_logging
 from rich.console import Console
 from rich.text import Text
 
@@ -40,27 +39,25 @@ def logging_level(level: str):
     return f"Set logging level to {level}."
 
 
-@app.callback()
-def app_callback(
-    verbose: bool = typer.Option(False, help=logging_level("INFO")),
-    debug: bool = typer.Option(False, help=logging_level("DEBUG")),
-):
-    """
-    Use tracerepo to manage and validate fracture & lineament trace data.
-    """
-    logging_level_int = logging.WARNING
-    # logging.basicConfig(level=logging.WARNING, force=True)
-    if verbose:
-        # logging.basicConfig(level=logging.INFO, force=True)
-        logging_level_int = logging.INFO
-    if debug:
-        # logging.basicConfig(level=logging.DEBUG, force=True)
-        logging_level_int = logging.DEBUG
-    setup_module_logging(logging_level_int=logging_level_int)
-    logging.info(
-        "Logging verbosity set and nialog initialized.",
-        extra=dict(logging_level_int=logging_level_int, verbose=verbose, debug=debug),
-    )
+# @app.callback()
+# def app_callback(
+#     verbose: bool = typer.Option(False, help=logging_level("INFO")),
+#     debug: bool = typer.Option(False, help=logging_level("DEBUG")),
+# ):
+#     """
+#     Use tracerepo to manage and validate fracture & lineament trace data.
+#     """
+#     logging_level_int = logging.WARNING
+#     # logging.basicConfig(level=logging.WARNING, force=True)
+#     if verbose:
+#         # logging.basicConfig(level=logging.INFO, force=True)
+#         logging_level_int = logging.INFO
+#     if debug:
+#         # logging.basicConfig(level=logging.DEBUG, force=True)
+#         logging_level_int = logging.DEBUG
+#     logging.info(
+#         "Logging verbosity set."
+#     )
 
 
 def load_metadata_from_json(metadata_json_path: Path) -> rules.Metadata:

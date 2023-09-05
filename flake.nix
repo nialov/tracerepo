@@ -2,11 +2,13 @@
   description = "nix declared development environment";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
+    fractopo.url = "github:nialov/fractopo/refactor-use-nix-build-tools";
+    nixpkgs.follows = "fractopo/nixpkgs";
+    nix-extra.follows = "fractopo/nix-extra";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, ... }@inputs:
     let
       # Create function to generate the poetry-included shell with single
       # input: pkgs
@@ -83,7 +85,17 @@
       # supports e.g. x86_64-linux and x86_64-darwin (but no guarantees are
       # given that it works except for x86_64-linux, which I use).
     in flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = nixpkgs.legacyPackages."${system}";
+      let
+        # pkgs = nixpkgs.legacyPackages."${system}";
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            inputs.fractopo.overlays.default
+            self.overlays.default
+            inputs.nix-extra.overlays.default
+          ];
+
+        };
       in {
         devShells.default = mkshell pkgs;
         checks = {
@@ -96,5 +108,21 @@
               mkdir $out
             '';
         };
-      });
+        packages = {
+
+          inherit (pkgs.python3Packages) tracerepo;
+
+        };
+      }) // {
+
+        overlays.default = final: prev: {
+          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+            (python-final: _: {
+              "tracerepo" = python-final.callPackage ./default.nix { };
+            })
+          ];
+
+        };
+
+      };
 }

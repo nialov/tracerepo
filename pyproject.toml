@@ -32,6 +32,8 @@ typer = "*"
 rich = "*"
 fractopo = ">=0.5.0"
 pyproj = "~3.1"
+pydantic = "^1.8.2"
+json5 = "^0.9.6"
 
 # Extras
 # Coverage
@@ -53,9 +55,6 @@ markupsafe = {version = "2.0.1", optional = true}
 
 # Typecheck
 mypy = {version = "*", optional = true}
-pydantic = "^1.8.2"
-json5 = "^0.9.6"
-nialog = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 # TODO: copier could be installed outside the poetry environment
@@ -88,7 +87,7 @@ lint = [
 typecheck = ["mypy"]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
