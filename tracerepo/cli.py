@@ -199,6 +199,7 @@ def validate(
                 pandera_report=pandera_report,
                 report_directory=report_directory,
                 area_name=update_tuple.area_name,
+                traces_name=update_tuple.traces_path.stem,
             )
             console.print(str_report)
 

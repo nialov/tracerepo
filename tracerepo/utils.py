@@ -349,17 +349,20 @@ def filename_friendly_datetime_string() -> str:
 
 
 def report_pandera_errors(
-    pandera_report: pd.DataFrame, report_directory: Path, area_name: str
+    pandera_report: pd.DataFrame,
+    report_directory: Path,
+    area_name: str,
+    traces_name: str,
 ) -> str:
     """
     Report pandera errors as html files saved to a reports directory.
     """
     report_directory.mkdir(exist_ok=True)
     current_time = filename_friendly_datetime_string()
-    report_name = f"{area_name}_report_{current_time}.html"
+    report_name = f"{area_name}_{traces_name}_report_{current_time}.html"
     report_path = report_directory / report_name
     pandera_report.to_html(report_path)
-    return f"Reported {area_name} traces pandera errors to {report_path}."
+    return f"Reported pandera errors to {report_path}."
 
 
 def otherwise_valid(update_tuple: UpdateTuple) -> bool:

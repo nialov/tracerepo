@@ -341,6 +341,9 @@ def test_all_cli(ready_tracerepository: Path):
 
     # Make sure pandera error was caught
     assert "Reported" in validate_result.stdout
+    assert "kb" in validate_result.stdout
+    assert "traces" in validate_result.stdout
+    assert "area" in validate_result.stdout
     assert "html" in validate_result.stdout
     assert reports_path.exists()
     assert len(list(reports_path.glob("*.html"))) > 0
