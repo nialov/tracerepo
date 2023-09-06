@@ -176,7 +176,7 @@ def database_schema() -> pa.DataFrameSchema:
     """
     schema = pa.DataFrameSchema(
         # Index is the area name
-        index=pa.Index(**name_column_kwargs(unique=True, geom_type=ColumnNames.AREA)),
+        index=pa.Index(**name_column_kwargs(unique=False, geom_type=ColumnNames.AREA)),
         coerce=True,
         # Columns
         columns={

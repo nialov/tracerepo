@@ -124,7 +124,10 @@ def df_with_row(
 
     srs = pd.Series(data=row.values(), index=row.keys(), name=area_name)
 
-    df = pd.concat([df, srs.to_frame().T])
+    concat_dfs = [srs.to_frame().T]
+    if df is not None:
+        concat_dfs.append(df)
+    df = pd.concat(concat_dfs)
 
     traces_path = (
         Path(rules.PathNames.UNORGANIZED.value) / f"{traces_name}.{rules.FILETYPE}"
