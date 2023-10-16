@@ -167,27 +167,11 @@ def validate(
         # be marked as unfit
         if len(pandera_update_values) > 0:
             update_tuple.update_values = pandera_update_values
-        try:
-            # Update Organizer database.csv
-            organizer.update(
-                area_name=invalid.area_path.stem,
-                update_values=update_tuple.update_values,
-            )
-
-            # Write the database.csv
-            repo.write_database_csv(path=database, database=organizer.database)
-
-        except Exception:
-            # Error in updating or writing database.csv
-            database_error = True
-
-            # Log exception
-            logging.error(
-                f"Error when updating or writing Organizer database.csv.\n"
-                f"update_tuple: {update_tuple}\n"
-                f"invalid: {invalid}\n",
-                exc_info=True,
-            )
+        # Update Organizer database.csv
+        organizer.update(
+            area_name=invalid.area_path.stem,
+            update_values=update_tuple.update_values,
+        )
 
         if not pandera_report.empty and report:
             report_directory = (
@@ -202,6 +186,20 @@ def validate(
                 traces_name=update_tuple.traces_path.stem,
             )
             console.print(str_report)
+    try:
+        # Write the database.csv
+        repo.write_database_csv(path=database, database=organizer.database)
+
+    except Exception:
+        # Error in updating or writing database.csv
+        database_error = True
+
+        # Log exception
+        logging.error(
+            "Error when updating or writing Organizer database.csv. "
+            f"{dict(database=organizer.database, path=database)}",
+            exc_info=True,
+        )
 
     # Report validation results with a rich.table.Table
     if report:
