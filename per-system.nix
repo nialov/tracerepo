@@ -54,6 +54,7 @@
 
         };
         packages = { inherit (pkgs) tracerepo; };
+        legacyPackages = pkgs;
       };
 
   })
