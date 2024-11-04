@@ -14,6 +14,7 @@ tests/sample_data/tmp/
 *.pickle
 *.rej
 /result*
+/.pre-commit-config.yaml
 
 
 # We do not want to include requirements.txt

@@ -1,6 +1,7 @@
 """
 Parameters for tests.
 """
+
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -182,13 +183,20 @@ def set_up_repo_with_invalids_organized(
         organizer.columns[rules.ColumnNames.TRACES.value],
         organizer.columns[rules.ColumnNames.AREA.value],
     ):
-        save_path = (
-            lambda name: tracerepository_path
-            / Path(rules.PathNames.UNORGANIZED.value)
-            / f"{name}.{rules.FILETYPE}"
-        )
-        trace_path = save_path(name=trace_name)
-        area_path = save_path(name=area_name)
+
+        def _save_path(name: str) -> Path:
+            return tracerepository_path.joinpath(
+                Path(rules.PathNames.UNORGANIZED.value), f"{name}.{rules.FILETYPE}"
+            )
+
+        # save_path = partial(Path.joinpath, tracerepository_path, Path(rules.PathNames.UNORGANIZED.value), f"{name}.{rules.FILETYPE}")
+        # save_path = (
+        #     lambda name: tracerepository_path
+        #     / Path(rules.PathNames.UNORGANIZED.value)
+        #     / f"{name}.{rules.FILETYPE}"
+        # )
+        trace_path = _save_path(name=trace_name)
+        area_path = _save_path(name=area_name)
         for path, gdf in zip((trace_path, area_path), (trace_gdf, area_gdf)):
             if not path.exists():
                 gdf.to_file(path, driver="GeoJSON")
@@ -531,9 +539,9 @@ def make_example_geodataframe(column: str, values, geometries: Optional[Any] = N
     """
     gdf = gpd.GeoDataFrame(
         {
-            "geometry": empty_linestrings(len(values))
-            if geometries is None
-            else geometries,
+            "geometry": (
+                empty_linestrings(len(values)) if geometries is None else geometries
+            ),
             column: values,
         }
     )

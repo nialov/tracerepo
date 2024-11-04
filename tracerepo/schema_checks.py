@@ -1,6 +1,7 @@
 """
 Trace schema checks used in validation.
 """
+
 import re
 from typing import Any, Dict, Tuple
 

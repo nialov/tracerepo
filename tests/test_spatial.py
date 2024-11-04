@@ -1,6 +1,7 @@
 """
 Tests for spatial.py.
 """
+
 from pathlib import Path
 from typing import List
 

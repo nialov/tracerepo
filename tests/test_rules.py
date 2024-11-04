@@ -1,6 +1,7 @@
 """
 Tests for rules.py.
 """
+
 from contextlib import nullcontext
 
 import pandas as pd

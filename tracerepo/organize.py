@@ -15,7 +15,6 @@ from tracerepo import rules, utils
 
 @dataclass
 class Organizer:
-
     """
     Organize trace data files with Organizer.
     """

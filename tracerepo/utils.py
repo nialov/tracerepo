@@ -1,6 +1,7 @@
 """
 General utilities.
 """
+
 import json
 import logging
 from contextlib import suppress
@@ -23,7 +24,6 @@ EXPORT_DIR_PREFIX = "data-exported-"
 
 
 class TraceTuple(NamedTuple):
-
     """
     Named tuple of traces and area paths and snap_threshold.
     """
@@ -36,7 +36,6 @@ class TraceTuple(NamedTuple):
 
 @dataclass
 class UpdateTuple:
-
     """
     Tuple with information of validity for trace-area-pair.
     """

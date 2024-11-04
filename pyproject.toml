@@ -24,7 +24,7 @@ include = ["CHANGELOG.md"]
 tracerepo = "tracerepo.cli:app"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.9,<3.12"
 pandas = "*"
 pandera = "*"
 # fractopo already locks dependencies of typer and rich
@@ -35,31 +35,7 @@ pyproj = ">=3.1"
 pydantic = ">=1.8.2"
 json5 = ">=0.9.6"
 
-# Extras
-# Coverage
-coverage = {version = "^5.0", optional = true}
-coverage-badge = {version = "*", optional = true}
-
-# Docs
-sphinx = {version = "*", optional = true}
-sphinx-rtd-theme = {version = "*", optional = true}
-nbsphinx = {version = "*", optional = true}
-sphinx-gallery = {version = "*", optional = true}
-sphinx-autodoc-typehints = {version = "*", optional = true}
-sphinx-autobuild = {version = "*", optional = true}
-
-# Linting
-pylint = {version = "*", optional = true}
-rstcheck = {version = "*", optional = true}
-markupsafe = {version = "2.0.1", optional = true}
-
-# Typecheck
-mypy = {version = "*", optional = true}
-
 [tool.poetry.dev-dependencies]
-# TODO: copier could be installed outside the poetry environment
-copier = "*"
-doit = "*"
 ipython = "*"
 jupyterlab = "*"
 nox = "*"
@@ -68,44 +44,9 @@ pytest = "*"
 toml = "*"
 hypothesis = "*"
 
-[tool.poetry.extras]
-coverage = ["coverage", "coverage-badge"]
-docs = [
-    "sphinx",
-    "sphinx-rtd-theme",
-    "nbsphinx",
-    "sphinx-gallery",
-    "sphinx-autodoc-typehints",
-    "sphinx-autobuild"
-]
-lint = [
-    "pylint",
-    "rstcheck",
-    "sphinx",
-    "markupsafe",
-]
-typecheck = ["mypy"]
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-
-[tool.poetry-dynamic-versioning.substitution]
-files = [
-    "*.py",
-    "*/__init__.py",
-    "*/__version__.py",
-    "*/_version.py",
-    "./CITATION.cff",
-]
-patterns = [
-    "(^__version__\\s*=\\s*['\"])[^'\"]*(['\"])",
-    "(^version:\\s*['\"])[^'\"]*(['\"])",
-]
 
 [tool.pytest.ini_options]
 testpaths =[

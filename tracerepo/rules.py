@@ -1,6 +1,7 @@
 """
 trace-repository rules.
 """
+
 from __future__ import annotations
 
 from enum import Enum, unique
@@ -18,7 +19,6 @@ DATABASE_CSV_SEP = ","
 
 @unique
 class ColumnNames(Enum):
-
     """
     Column names for database.csv.
     """
@@ -51,7 +51,6 @@ class ColumnNames(Enum):
 
 @unique
 class AreaShapes(Enum):
-
     """
     area-shape options in database.csv.
     """
@@ -62,7 +61,6 @@ class AreaShapes(Enum):
 
 @unique
 class PathNames(Enum):
-
     """
     Path names.
     """
@@ -78,7 +76,6 @@ class PathNames(Enum):
 
 @unique
 class Geometry(Enum):
-
     """
     Folder names.
     """
@@ -90,7 +87,6 @@ class Geometry(Enum):
 
 @unique
 class ValidationResults(Enum):
-
     """
     Validation result description enums.
     """
@@ -221,7 +217,6 @@ def database_schema() -> pa.DataFrameSchema:
 
 
 class OrderedMeta(BaseModel):
-
     """
     Metadata construct for e.g. data_source and scale.
     """
@@ -231,7 +226,6 @@ class OrderedMeta(BaseModel):
 
 
 class Metadata(BaseModel):
-
     """
     Metadata schema from json file for trace metadata validation.
     """

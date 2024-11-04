@@ -1,6 +1,7 @@
 """
 Tests for schema checks.
 """
+
 import numpy as np
 import pytest
 
