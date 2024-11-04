@@ -24,7 +24,7 @@ include = ["CHANGELOG.md"]
 tracerepo = "tracerepo.cli:app"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.9,<3.13"
 pandas = "*"
 pandera = "*"
 # fractopo already locks dependencies of typer and rich
