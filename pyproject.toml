@@ -38,7 +38,6 @@ json5 = ">=0.9.6"
 [tool.poetry.dev-dependencies]
 ipython = "*"
 jupyterlab = "*"
-nox = "*"
 pre-commit = "*"
 pytest = "*"
 toml = "*"
